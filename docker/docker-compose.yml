@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  redis:
+    image: redis:5.0.6
+    ports:
+      - 6379:6379
+
+  db:
+    image: postgres:12.2
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: yogiyo
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+volumes:
+  postgres-data:
