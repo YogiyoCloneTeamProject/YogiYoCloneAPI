@@ -5,5 +5,5 @@ from tests.models import Test
 
 class TestSerializer(ModelSerializer):
     class Meta:
-        fields = ('name', 'age')
+        fields = ('id', 'name', 'age')
         model = Test
