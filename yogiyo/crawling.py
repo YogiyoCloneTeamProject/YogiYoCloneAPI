@@ -3,23 +3,43 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
+from restaurants.models import Restaurant
+
 
 class Crawling:
 
     def bs(self, driver):
         """BeutifulSoup 로직 작성"""
+        rs_data = []
         html = driver.page_source
 
         soup = BeautifulSoup(html, 'html.parser')
-        print(soup)
-        # rest_name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
-        # print(rest_name)
+        # print(soup)
+        rest_name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
+        rest_star = soup.find('span', class_='stars star-point ng-binding').text.strip().replace('\n', '')
+        print(rest_star)
+
+        restaurant = Restaurant(
+            name=rest_name,
+            star=rest_star,
+            notification='g',
+            opening_hours='s',
+            tel_number='s',
+            address='s',
+            min_order='s',
+            payment_method='s',
+            business_name='z',
+            company_registration_number='df',
+            origin_information='sfdsf'
+
+        )
+        rs_data.append(restaurant)
 
     def selenium_js(self, driver):
         """JS 페이지 이동 로직"""
         y_position = 10000000
         scroll_cnt = 0
-        for i in range(1000):
+        for i in range(1):
 
             # 60개 크롤링 할 때 마다 scroll_cnt 증가
             if i % 60 == 0:
@@ -47,7 +67,7 @@ class Crawling:
             driver.execute_script('window.history.back();')  # 뒤로가기
 
     def crawl(self):
-        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
+        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
         driver.implicitly_wait(3)
         url = 'https://www.yogiyo.co.kr/mobile/#/'
         driver.get(url)
