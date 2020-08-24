@@ -9,20 +9,26 @@ class Crawling:
     def bs(self, driver):
         """BeutifulSoup 로직 작성"""
         html = driver.page_source
-
         soup = BeautifulSoup(html, 'html.parser')
-        print(soup)
-        # rest_name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
-        # print(rest_name)
+
+    def click_restaurant(self, driver, i):
+        time.sleep(3)
+        driver.execute_script(
+            f"""
+            r_list = document.getElementsByClassName("item clearfix");
+            r_list[{i}].click();
+            """
+        )
+        time.sleep(1)
 
     def selenium_js(self, driver):
         """JS 페이지 이동 로직"""
-        y_position = 10000000
+        y_position = 100000000
         scroll_cnt = 0
         for i in range(1000):
 
             # 60개 크롤링 할 때 마다 scroll_cnt 증가
-            if i % 60 == 0:
+            if i != 0 and i % 60 == 0:
                 scroll_cnt += 1
             if 9 < scroll_cnt:
                 break
@@ -32,19 +38,14 @@ class Crawling:
                 time.sleep(1)
                 driver.execute_script(f'window.scrollTo(0, {y_position});')
 
-            time.sleep(3)
-            driver.execute_script(
-                f"""
-                r_list = document.getElementsByClassName("item clearfix");
-                // console.log(r_list.length);  // 첫 로딩 60개
-                r_list[{i}].click();
-                """
-            )
-            time.sleep(1)
+            # 음식점 페이지로 이동
+            self.click_restaurant(driver, i)
 
+            # 뷰티풀수프 크롤링
             self.bs(driver)
 
-            driver.execute_script('window.history.back();')  # 뒤로가기
+            # 뒤로가기
+            driver.execute_script('window.history.back();')
 
     def crawl(self):
         driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
