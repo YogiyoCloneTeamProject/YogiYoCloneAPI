@@ -6,7 +6,7 @@ class Restaurant(models.Model):
     star = models.FloatField()
     notification = models.TextField()
     opening_hours = models.CharField(max_length=20)
-    tel_number = models.CharField(max_length=20)
+    tel_number = models.CharField(max_length=40)
     address = models.CharField(max_length=50)
     min_order = models.PositiveIntegerField()
     payment_method = models.CharField(max_length=50)
