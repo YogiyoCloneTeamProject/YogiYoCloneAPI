@@ -1,5 +1,4 @@
 import time
-
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -9,9 +8,6 @@ class Crawling:
     driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
     driver.implicitly_wait(3)
 
-    # driver 필요 여부 확인
-    # driver.get('https://www.mangoplate.com/search/%EC%84%B1%EC%88%98%EB%8F%99')
-
     results = []
     # 식당 상세페이지 url get
     url = 'https://www.yogiyo.co.kr/mobile/#/'
@@ -20,8 +16,6 @@ class Crawling:
                       '/83.0.4103.106 Safari/537.36 '
     }
     driver.get(url)
-    # driver.execute_script("alert('자바스크립트 코드 적용!!');")
-    # driver.execute_script(
 
     time.sleep(5)
     driver.execute_script('document.getElementsByClassName("btn btn-default ico-pick")[0].click();')
@@ -34,14 +28,9 @@ class Crawling:
             """
         )
         time.sleep(1)
-        # 크롤링
-        driver.execute_script(
-            f"""
-            window.history.back();
-            """
-        )
+        # 크롤링 로직?
+        driver.execute_script('window.history.back();')  # 뒤로가기
 
-    # driver.get('https://www.mangoplate.com/search/%EC%84%B1%EC%88%98%EB%8F%99')
     # html = requests.get(url, headers=headers).text
 
     # for val in driver.find_elements_by_xpath(
