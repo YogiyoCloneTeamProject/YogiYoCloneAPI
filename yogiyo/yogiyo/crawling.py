@@ -10,32 +10,6 @@ class Crawling:
 
     def bs(self, driver):
         """BeutifulSoup 로직 작성"""
-        rs_data = []
-        html = driver.page_source
-
-        soup = BeautifulSoup(html, 'html.parser')
-
-        name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
-        star = soup.find('span', class_='stars star-point ng-binding').text.strip().replace('*', '')
-        notification = soup.find('div', class_='info-text ng-binding').text.strip()
-        opening_hours = soup.find('span', class_='tc ng-binding').text.strip()
-        print(opening_hours, 'ㅗㅑㅗㅑㅗㅑㅚㅏㅗ')
-
-        restaurant = Restaurant(
-            name=name,
-            star=star,
-            notification=notification,
-            opening_hours='s',
-            tel_number='s',
-            address='s',
-            min_order='s',
-            payment_method='s',
-            business_name='z',
-            company_registration_number='df',
-            origin_information='sfdsf'
-
-        )
-        rs_data.append(restaurant)
 
     def selenium_js(self, driver):
         """JS 페이지 이동 로직"""
@@ -83,13 +57,14 @@ class Crawling:
 class CrawlingBS:
     driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
     driver.implicitly_wait(3)
-    url = 'https://www.yogiyo.co.kr/mobile/#/256509/'
+    url = 'https://www.yogiyo.co.kr/mobile/#/260195/'
     driver.get(url)
     time.sleep(1)
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
+
     name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
-    star = soup.find('span', class_='stars star-point ng-binding').text.strip().replace('★', '').replace('\n','')
+    star = soup.find('span', class_='stars star-point ng-binding').text.strip().replace('★', '').replace('\n', '')
     notification = soup.find('div', class_='info-text ng-binding').text.strip()
 
     info_1 = soup.find('div', class_='info-item-title info-icon1').parent
@@ -114,7 +89,7 @@ class CrawlingBS:
         k = k.text.strip()
         v = v.text.strip()
         if k == '최소주문금액':
-            min_order = v.replace('원','')
+            min_order = v.replace('원', '')
         elif k == '결제수단':
             payment_method = v
 
@@ -149,12 +124,18 @@ class CrawlingBS:
     )
     rs_data.append(restaurant)
 
-    Restaurant.objects.bulk_create(rs_data)
+    # Restaurant.objects.bulk_create(rs_data)
+
+    # food menu
+    menu_group = soup.find_all('span', class_='menu-name pull-left ng-binding')
+    for menu_group_div in menu_group:
+        menu_group_div = menu_group_div.text.strip()
+
 
     driver.close()
 
 
 start_crawling = Crawling()
 # start_crawling.crawl()
-crawling = CrawlingBS
+crawling = CrawlingBS()
 crawling
