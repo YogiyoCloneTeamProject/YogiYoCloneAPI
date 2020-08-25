@@ -12,4 +12,16 @@ class Restaurant(models.Model):
     payment_method = models.CharField(max_length=50)
     business_name = models.CharField(max_length=20)
     company_registration_number = models.CharField(max_length=20)
-    origin_information = models.CharField(max_length=255)
+    origin_information = models.TextField()
+
+
+class MenuGroup(models.Model):
+    restaurant = models.ForeignKey('Restaurant', on_delete=models.CASCADE)
+    name = models.CharField(max_length=40)
+
+
+class Menu(models.Model):
+    menu_group = models.ForeignKey('MenuGroup', on_delete=models.CASCADE)
+    name = models.CharField(max_length=40)
+    image = models.ImageField(upload_to='menu_image', null=True, blank=True)
+    caption = models.CharField(max_length=200)

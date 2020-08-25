@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
-from restaurants.models import Restaurant
+from restaurants.models import Restaurant, MenuGroup
 
 
 class Crawling:
@@ -57,7 +57,7 @@ class Crawling:
 class CrawlingBS:
     driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
     driver.implicitly_wait(3)
-    url = 'https://www.yogiyo.co.kr/mobile/#/260195/'
+    url = 'https://www.yogiyo.co.kr/mobile/#/469716/'
     driver.get(url)
     time.sleep(1)
     html = driver.page_source
@@ -89,7 +89,7 @@ class CrawlingBS:
         k = k.text.strip()
         v = v.text.strip()
         if k == '최소주문금액':
-            min_order = v.replace('원', '')
+            min_order = v.replace('원', '').replace(',', '')
         elif k == '결제수단':
             payment_method = v
 
@@ -106,7 +106,7 @@ class CrawlingBS:
 
     info_4 = soup.find('div', class_='info-item-title info-icon4').parent
     origin_information = info_4.find('pre').text
-    rs_data = []
+    restaurant_list = []
 
     restaurant = Restaurant(
         name=name,
@@ -122,20 +122,27 @@ class CrawlingBS:
         origin_information=origin_information
 
     )
-    rs_data.append(restaurant)
-
-    # Restaurant.objects.bulk_create(rs_data)
+    restaurant.save()
 
     # food menu
-    menu_group = soup.find_all('span', class_='menu-name pull-left ng-binding')
-    for menu_group_div in menu_group:
-        menu_group_div = menu_group_div.text.strip()
+    # menu_group_tags = soup.find_all('span', class_='menu-name pull-left ng-binding')
+    menu_parent = soup.find_all('div', class_='panel panel-default ng-scope')
+    menu_group_list = []
+    for menu_group_div in menu_parent:
+        menu_group_name = menu_group_div.find('span', class_='menu-name pull-left ng-binding')
+        if menu_group_name is None or menu_group_name.text.strip() == 'Photo Menu Items' or '요기서결제' in menu_group_name.text:
+            continue
 
+        menu_group_name = menu_group_name.text.strip()
+
+        # 메뉴 그룹 생성
+        menu_group = MenuGroup(restaurant=restaurant, name=menu_group_name)
+        menu_group.save()
+
+        print(menu_group_div)
 
     driver.close()
 
-
-start_crawling = Crawling()
+# start_crawling = Crawling()
 # start_crawling.crawl()
-crawling = CrawlingBS()
-crawling
+# crawling = CrawlingBS()
