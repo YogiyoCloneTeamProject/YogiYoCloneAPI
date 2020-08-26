@@ -2,7 +2,8 @@ import time
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
-
+import requests
+from rest_framework.utils import json
 from restaurants.models import Restaurant, MenuGroup
 
 
@@ -124,22 +125,17 @@ class CrawlingBS:
     )
     restaurant.save()
 
-    # food menu
-    # menu_group_tags = soup.find_all('span', class_='menu-name pull-left ng-binding')
-    menu_parent = soup.find_all('div', class_='panel panel-default ng-scope')
-    menu_group_list = []
-    for menu_group_div in menu_parent:
-        menu_group_name = menu_group_div.find('span', class_='menu-name pull-left ng-binding')
-        if menu_group_name is None or menu_group_name.text.strip() == 'Photo Menu Items' or '요기서결제' in menu_group_name.text:
-            continue
+    # 식당 메뉴/ 옵션 크롤링
+    s = requests.Session()
 
-        menu_group_name = menu_group_name.text.strip()
+    s.headers.update({
+        'x-apikey': 'iphoneap',
+        'x-apisecret': 'fe5183cc3dea12bd0ce299cf110a75a2'
+    })
+    r = s.get(
+        'https://www.yogiyo.co.kr/api/v1/restaurants/256027/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery')
 
-        # 메뉴 그룹 생성
-        menu_group = MenuGroup(restaurant=restaurant, name=menu_group_name)
-        menu_group.save()
-
-        print(menu_group_div)
+    print(json.loads(r.content.decode('utf-8')))
 
     driver.close()
 
