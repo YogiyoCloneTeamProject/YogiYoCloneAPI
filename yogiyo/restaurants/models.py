@@ -25,3 +25,15 @@ class Menu(models.Model):
     name = models.CharField(max_length=40)
     image = models.ImageField(upload_to='menu_image', null=True, blank=True)
     caption = models.CharField(max_length=200)
+    price = models.PositiveIntegerField()
+
+
+class OptionGroup(models.Model):
+    menu = models.ForeignKey('Menu', on_delete=models.CASCADE)
+    name = models.CharField(max_length=30)
+
+
+class Option(models.Model):
+    option_group = models.ForeignKey('OptionGroup', on_delete=models.CASCADE)
+    name = models.CharField(max_length=30)
+    price = models.PositiveIntegerField()
