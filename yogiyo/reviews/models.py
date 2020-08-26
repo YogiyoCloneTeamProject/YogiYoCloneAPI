@@ -17,10 +17,11 @@ class Review(models.Model):
 
 
 class ReviewImage(models.Model):
+    """이미지 3장"""
     review = models.ForeignKey('Review', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='review_image')
 
 
 class ReviewComment(models.Model):
-    review = models.ForeignKey('Review', on_delete=models.CASCADE)
+    review = models.OneToOneField('Review', on_delete=models.CASCADE)
     comments = models.CharField(max_length=300)
