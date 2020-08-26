@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     'tests',
     'restaurants',
+    'users'
 ]
 
 MIDDLEWARE = [
@@ -134,3 +135,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'images')
+
+AUTH_USER_MODEL = 'users.User'
