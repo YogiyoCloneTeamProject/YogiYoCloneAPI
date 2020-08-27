@@ -13,6 +13,9 @@ class Restaurant(models.Model):
     business_name = models.CharField(max_length=20)
     company_registration_number = models.CharField(max_length=20)
     origin_information = models.TextField()
+    image = models.ImageField(upload_to='restaurant_image', null=True, blank=True)
+    delivery_discount = models.PositiveIntegerField(null=True, blank=True)
+    delivery_charge = models.PositiveIntegerField(null=True, blank=True)
 
 
 class MenuGroup(models.Model):
