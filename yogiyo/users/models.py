@@ -41,8 +41,8 @@ class UserManager(BaseUserManager):
 class Profile(models.Model):
     """profile model"""
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-    point = models.PositiveIntegerField()
-    nickname = models.CharField(max_length=20)
+    point = models.PositiveIntegerField(null=True, blank=True)
+    nickname = models.CharField(max_length=20, null=True, blank=True)
 
 
 class User(AbstractUser):
