@@ -19,12 +19,12 @@ class Restaurant(models.Model):
 
 
 class MenuGroup(models.Model):
-    restaurant = models.ForeignKey('Restaurant', on_delete=models.CASCADE)
+    restaurant = models.ForeignKey('Restaurant', on_delete=models.CASCADE, related_name='menu_group')
     name = models.CharField(max_length=40)
 
 
 class Menu(models.Model):
-    menu_group = models.ForeignKey('MenuGroup', on_delete=models.CASCADE)
+    menu_group = models.ForeignKey('MenuGroup', on_delete=models.CASCADE, related_name='menu')
     name = models.CharField(max_length=40)
     image = models.ImageField(upload_to='menu_image', null=True, blank=True)
     caption = models.CharField(max_length=200)
@@ -32,11 +32,11 @@ class Menu(models.Model):
 
 
 class OptionGroup(models.Model):
-    menu = models.ForeignKey('Menu', on_delete=models.CASCADE)
+    menu = models.ForeignKey('Menu', on_delete=models.CASCADE, related_name='option_group')
     name = models.CharField(max_length=30)
 
 
 class Option(models.Model):
-    option_group = models.ForeignKey('OptionGroup', on_delete=models.CASCADE)
+    option_group = models.ForeignKey('OptionGroup', on_delete=models.CASCADE, related_name='option')
     name = models.CharField(max_length=30)
     price = models.PositiveIntegerField()

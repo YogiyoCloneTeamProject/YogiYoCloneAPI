@@ -41,7 +41,7 @@ class MenuGroupSerializer(serializers.ModelSerializer):
 
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):
-    menu_list = MenuGroupSerializer(read_only=True, many=True)
+    menu_group = MenuGroupSerializer(read_only=True, many=True)
     # todo 리뷰 보기
 
     class Meta:
@@ -49,7 +49,7 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'star', 'image', 'notification', 'opening_hours', 'tel_number', 'address', 'min_order',
             'payment_method', 'business_name', 'company_registration_number', 'origin_information', 'delivery_discount',
-            'delivery_charge', 'menu_list')
+            'delivery_charge', 'menu_group')
 
 
 class RestaurantListSerializer(serializers.ModelSerializer):

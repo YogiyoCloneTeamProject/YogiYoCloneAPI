@@ -1,13 +1,13 @@
 from rest_framework import mixins
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.viewsets import GenericViewSet
 
 from restaurants.models import Menu, Restaurant
-from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuListSerializer
+from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer
 
 
 class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     queryset = Menu.objects.all()
-    serializer_class = MenuListSerializer
+    serializer_class = MenuDetailSerializer
 
 
 class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
