@@ -60,3 +60,8 @@ class User(AbstractUser):
             Profile.objects.create(user_id=self.id)
         else:
             super().save(*args, **kwargs)
+
+
+class Bookmark(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE)
