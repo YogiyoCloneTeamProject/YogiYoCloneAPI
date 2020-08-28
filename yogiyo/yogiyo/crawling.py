@@ -14,7 +14,7 @@ class Crawling:
 
     def crawl(self):
         """모든 데이터 크롤링"""
-        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
+        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
         driver.implicitly_wait(3)
         url = 'https://www.yogiyo.co.kr/mobile/#/'
         driver.get(url)
@@ -52,7 +52,7 @@ class Crawling:
 
     def test_crawl(self):
         """테스트 10개만 크롤링"""
-        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
+        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
         driver.implicitly_wait(3)
         page_id_list = [
             340303,
@@ -81,8 +81,7 @@ class Crawling:
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
         name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
-        star = soup.find('span', class_='stars star-point ng-binding').text.strip().replace('★', '').replace('\n',
-                                                                                                             '')
+        star = soup.find('span', class_='stars star-point ng-binding').text.strip().replace('★', '').replace('\n', '')
         notification = soup.find('div', class_='info-text ng-binding').text.strip()
 
         info_1 = soup.find('div', class_='info-item-title info-icon1').parent
@@ -132,9 +131,19 @@ class Crawling:
         info_4 = soup.find('div', class_='info-item-title info-icon4').parent
         origin_information = info_4.find('pre').text
 
+        # 식당 이미지
         restaurant_image = \
-        soup.find('div', class_='restaurant-content').find('div', class_='logo').attrs['style'].split('"')[1]
+            soup.find('div', class_='restaurant-content').find('div', class_='logo').attrs['style'].split('"')[1]
 
+        # 배달할인 요금
+        delivery_discount = soup.find('span', class_='coupon-base ng-binding')
+        if delivery_discount is not None:
+            delivery_discount = delivery_discount.contents[0].split(' ')[1].replace(',', '')[:-1]
+
+        # 배달요금
+        delivery_charge = soup.find('span', class_='list-group-item clearfix text-right ng-binding')
+        if delivery_charge is not None:
+            delivery_charge = delivery_charge.contents[0].strip().split(' ')[1].replace(',', '')[:-1]
         restaurant = Restaurant(
             name=name,
             star=star,
@@ -146,7 +155,9 @@ class Crawling:
             payment_method=payment_method,
             business_name=business_name,
             company_registration_number=company_registration_number,
-            origin_information=origin_information
+            origin_information=origin_information,
+            delivery_discount=delivery_discount,
+            delivery_charge=delivery_charge
         )
         restaurant.save()
         restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
