@@ -22,9 +22,9 @@ class MenuGroup(models.Model):
 
 class Menu(models.Model):
     menu_group = models.ForeignKey('MenuGroup', on_delete=models.CASCADE)
-    name = models.CharField(max_length=40)
+    name = models.CharField(max_length=100)
     image = models.ImageField(upload_to='menu_image', null=True, blank=True)
-    caption = models.CharField(max_length=200)
+    caption = models.CharField(max_length=200, null=True, blank=True)
     price = models.PositiveIntegerField()
 
 

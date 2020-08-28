@@ -4,20 +4,107 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 import requests
 from rest_framework.utils import json
-from restaurants.models import Restaurant, MenuGroup
+from restaurants.models import Restaurant, MenuGroup, Menu, OptionGroup, Option
 
 
 class Crawling:
 
     def bs(self, driver):
         """BeutifulSoup 로직 작성"""
+        driver.implicitly_wait(3)
+        time.sleep(1)
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+        name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
+        star = soup.find('span', class_='stars star-point ng-binding').text.strip().replace('★', '').replace('\n', '')
+        notification = soup.find('div', class_='info-text ng-binding').text.strip()
+
+        info_1 = soup.find('div', class_='info-item-title info-icon1').parent
+        key = info_1.find_all('i')
+        val = info_1.find_all('span')
+        opening_hours = ''
+        tel_number = ''
+        address = ''
+        for k, v in zip(key, val):
+            k = k.text.strip()
+            v = v.text.strip()
+            if k == '영업시간':
+                opening_hours = v
+            elif k == '전화번호':
+                tel_number = v
+            elif k == '주소':
+                address = v
+            # elif k == '부가정보':
+            #     company_registration_number = v
+
+        info_2 = soup.find('div', class_='info-item-title info-icon2').parent
+        key = info_2.find_all('i')
+        val = info_2.find_all('span')
+        min_order = ''
+        payment_method = ''
+        for k, v in zip(key, val):
+            k = k.text.strip()
+            v = v.text.strip()
+            if k == '최소주문금액':
+                min_order = v.replace('원', '').replace(',', '')
+            elif k == '결제수단':
+                payment_method = v
+
+        info_3 = soup.find('div', class_='info-item-title info-icon3').parent
+        key = info_3.find_all('i')
+        val = info_3.find_all('span')
+        business_name = ''
+        company_registration_number = ''
+        for k, v in zip(key, val):
+            k = k.text.strip()
+            v = v.text.strip()
+            if k == '상호명':
+                business_name = v
+            elif k == '사업자등록번호':
+                company_registration_number = v
+
+        info_4 = soup.find('div', class_='info-item-title info-icon4').parent
+        origin_information = info_4.find('pre').text
+
+        restaurant = Restaurant(
+            name=name,
+            star=star,
+            notification=notification,
+            opening_hours=opening_hours,
+            tel_number=tel_number,
+            address=address,
+            min_order=min_order,
+            payment_method=payment_method,
+            business_name=business_name,
+            company_registration_number=company_registration_number,
+            origin_information=origin_information
+        )
+        restaurant.save()
+
+        # 식당 메뉴/ 옵션 크롤링
+        s = requests.Session()
+
+        s.headers.update({
+            'x-apikey': 'iphoneap',
+            'x-apisecret': 'fe5183cc3dea12bd0ce299cf110a75a2'
+        })
+        page_id = str(driver.current_url).split('/')[-2]
+        print(page_id)
+        url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
+        r = s.get(url)
+
+        response_str = r.content.decode('utf-8')
+        menu_results = json.loads(response_str)
+        # print(menu_results)
 
     def selenium_js(self, driver):
         """JS 페이지 이동 로직"""
         y_position = 10000000
-        scroll_cnt = 0
-        for i in range(1):
+        scroll_cnt = -1
 
+        # 레스토랑 반복
+        for i in range(10):
             # 60개 크롤링 할 때 마다 scroll_cnt 증가
             if i % 60 == 0:
                 scroll_cnt += 1
@@ -44,7 +131,7 @@ class Crawling:
             driver.execute_script('window.history.back();')  # 뒤로가기
 
     def crawl(self):
-        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
+        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
         driver.implicitly_wait(3)
         url = 'https://www.yogiyo.co.kr/mobile/#/'
         driver.get(url)
@@ -54,91 +141,139 @@ class Crawling:
         self.selenium_js(driver)
         driver.close()
 
+    def test_crawl(self):
+        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
+        driver.implicitly_wait(3)
+        page_id_list = [
+            340303,
+            445730,
+            398257,
+            229788,
+            256308,
+            229246,
+            415433,
+            330102,
+            61406,
+            322865
+        ]
+        driver.get('https://www.yogiyo.co.kr/mobile/#/340303/')
+        time.sleep(2)
 
-class CrawlingBS:
-    driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
-    driver.implicitly_wait(3)
-    url = 'https://www.yogiyo.co.kr/mobile/#/469716/'
-    driver.get(url)
-    time.sleep(1)
-    html = driver.page_source
-    soup = BeautifulSoup(html, 'html.parser')
+        for page_id in page_id_list:
+            bs_url = f'https://www.yogiyo.co.kr/mobile/#/{page_id}/'
+            api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
+            driver.get(bs_url)
+            time.sleep(3)
+            html = driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+            name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
+            star = soup.find('span', class_='stars star-point ng-binding').text.strip().replace('★', '').replace('\n',
+                                                                                                                 '')
+            notification = soup.find('div', class_='info-text ng-binding').text.strip()
 
-    name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
-    star = soup.find('span', class_='stars star-point ng-binding').text.strip().replace('★', '').replace('\n', '')
-    notification = soup.find('div', class_='info-text ng-binding').text.strip()
+            info_1 = soup.find('div', class_='info-item-title info-icon1').parent
+            key = info_1.find_all('i')
+            val = info_1.find_all('span')
+            opening_hours = ''
+            tel_number = ''
+            address = ''
+            for k, v in zip(key, val):
+                k = k.text.strip()
+                v = v.text.strip()
+                if k == '영업시간':
+                    opening_hours = v
+                elif k == '전화번호':
+                    tel_number = v
+                elif k == '주소':
+                    address = v
+                # elif k == '부가정보':
+                #     company_registration_number = v
 
-    info_1 = soup.find('div', class_='info-item-title info-icon1').parent
-    key = info_1.find_all('i')
-    val = info_1.find_all('span')
-    for k, v in zip(key, val):
-        k = k.text.strip()
-        v = v.text.strip()
-        if k == '영업시간':
-            opening_hours = v
-        elif k == '전화번호':
-            tel_number = v
-        elif k == '주소':
-            address = v
-        # elif k == '부가정보':
-        #     company_registration_number = v
+            info_2 = soup.find('div', class_='info-item-title info-icon2').parent
+            key = info_2.find_all('i')
+            val = info_2.find_all('span')
+            min_order = ''
+            payment_method = ''
+            for k, v in zip(key, val):
+                k = k.text.strip()
+                v = v.text.strip()
+                if k == '최소주문금액':
+                    min_order = v.replace('원', '').replace(',', '')
+                elif k == '결제수단':
+                    payment_method = v
 
-    info_2 = soup.find('div', class_='info-item-title info-icon2').parent
-    key = info_2.find_all('i')
-    val = info_2.find_all('span')
-    for k, v in zip(key, val):
-        k = k.text.strip()
-        v = v.text.strip()
-        if k == '최소주문금액':
-            min_order = v.replace('원', '').replace(',', '')
-        elif k == '결제수단':
-            payment_method = v
+            info_3 = soup.find('div', class_='info-item-title info-icon3').parent
+            key = info_3.find_all('i')
+            val = info_3.find_all('span')
+            business_name = ''
+            company_registration_number = ''
+            for k, v in zip(key, val):
+                k = k.text.strip()
+                v = v.text.strip()
+                if k == '상호명':
+                    business_name = v
+                elif k == '사업자등록번호':
+                    company_registration_number = v
 
-    info_3 = soup.find('div', class_='info-item-title info-icon3').parent
-    key = info_3.find_all('i')
-    val = info_3.find_all('span')
-    for k, v in zip(key, val):
-        k = k.text.strip()
-        v = v.text.strip()
-        if k == '상호명':
-            business_name = v
-        elif k == '사업자등록번호':
-            company_registration_number = v
+            info_4 = soup.find('div', class_='info-item-title info-icon4').parent
+            origin_information = info_4.find('pre').text
 
-    info_4 = soup.find('div', class_='info-item-title info-icon4').parent
-    origin_information = info_4.find('pre').text
-    restaurant_list = []
+            restaurant = Restaurant(
+                name=name,
+                star=star,
+                notification=notification,
+                opening_hours=opening_hours,
+                tel_number=tel_number,
+                address=address,
+                min_order=min_order,
+                payment_method=payment_method,
+                business_name=business_name,
+                company_registration_number=company_registration_number,
+                origin_information=origin_information
+            )
+            restaurant.save()
 
-    restaurant = Restaurant(
-        name=name,
-        star=star,
-        notification=notification,
-        opening_hours=opening_hours,
-        tel_number=tel_number,
-        address=address,
-        min_order=min_order,
-        payment_method=payment_method,
-        business_name=business_name,
-        company_registration_number=company_registration_number,
-        origin_information=origin_information
+            # 식당 메뉴/ 옵션 크롤링
+            s = requests.Session()
+            s.headers.update({
+                'x-apikey': 'iphoneap',
+                'x-apisecret': 'fe5183cc3dea12bd0ce299cf110a75a2'
+            })
+            r = s.get(api_url)
+            response_str = r.content.decode('utf-8')
+            menu_results = json.loads(response_str)
+            self.menu_parsing(menu_results, restaurant)
 
-    )
-    restaurant.save()
+        driver.close()
 
-    # 식당 메뉴/ 옵션 크롤링
-    s = requests.Session()
+    def menu_parsing(self, menu_results, restaurant):
+        menu_results = menu_results[2:]
+        for menu_group_dict in menu_results:
+            menu_group_name = menu_group_dict['name']
+            menu_group = MenuGroup(
+                restaurant=restaurant,
+                name=menu_group_name,
+            )
+            menu_group.save()
 
-    s.headers.update({
-        'x-apikey': 'iphoneap',
-        'x-apisecret': 'fe5183cc3dea12bd0ce299cf110a75a2'
-    })
-    r = s.get(
-        'https://www.yogiyo.co.kr/api/v1/restaurants/256027/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery')
+            for menu_dict in menu_group_dict['items']:
+                menu_name = menu_dict['name']
+                menu_price = int(menu_dict['price'])
+                menu_img = menu_dict.get('image')
+                menu_caption = menu_dict.get('description')
+                print('1', menu_name, '1')
+                print('1', menu_caption, '1')
+                menu = Menu(name=menu_name, menu_group=menu_group, price=menu_price, image=menu_img,
+                            caption=menu_caption)
+                menu.save()
+                print('저장')
+                for option_group_dict in menu_dict['subchoices']:
+                    option_group_name = option_group_dict['name']
+                    option_group = OptionGroup(menu=menu, name=option_group_name)
+                    option_group.save()
 
-    print(json.loads(r.content.decode('utf-8')))
-
-    driver.close()
-
-# start_crawling = Crawling()
-# start_crawling.crawl()
-# crawling = CrawlingBS()
+                    for option_dict in option_group_dict['subchoices']:
+                        option_name = option_dict['name']
+                        option_price = option_dict['price']
+                        option = Option(option_group=option_group, name=option_name, price=option_price)
+                        option.save()
