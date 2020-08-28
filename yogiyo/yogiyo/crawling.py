@@ -134,7 +134,7 @@ class Crawling:
             driver.execute_script('window.history.back();')  # 뒤로가기
 
     def crawl(self):
-        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
+        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
         driver.implicitly_wait(3)
         url = 'https://www.yogiyo.co.kr/mobile/#/'
         driver.get(url)
@@ -145,7 +145,7 @@ class Crawling:
         driver.close()
 
     def test_crawl(self):
-        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
+        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
         driver.implicitly_wait(3)
         page_id_list = [
             340303,
@@ -221,6 +221,9 @@ class Crawling:
             info_4 = soup.find('div', class_='info-item-title info-icon4').parent
             origin_information = info_4.find('pre').text
 
+            restaurant_image = \
+            soup.find('div', class_='restaurant-content').find('div', class_='logo').attrs['style'].split('"')[1]
+
             restaurant = Restaurant(
                 name=name,
                 star=star,
@@ -235,6 +238,7 @@ class Crawling:
                 origin_information=origin_information
             )
             restaurant.save()
+            restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
 
             # 식당 메뉴/ 옵션 크롤링
             s = requests.Session()
