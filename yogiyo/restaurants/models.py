@@ -23,10 +23,16 @@ class MenuGroup(models.Model):
     name = models.CharField(max_length=40)
 
 
+def menu_img_path(instance, filename):
+    filename = filename.split('?')[0]
+    print(filename)
+    return f'menu_img/{filename}'
+
+
 class Menu(models.Model):
     menu_group = models.ForeignKey('MenuGroup', on_delete=models.CASCADE, related_name='menu')
     name = models.CharField(max_length=40)
-    image = models.ImageField(upload_to='menu_image', null=True, blank=True)
+    image = models.ImageField(upload_to='menu_image', null=True, blank=True, max_length=400)
     caption = models.CharField(max_length=200)
     price = models.PositiveIntegerField()
 
