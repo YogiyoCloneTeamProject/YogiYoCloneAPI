@@ -44,7 +44,7 @@ class Crawling:
                 r_list[{i}].click();
                 """
             )
-            time.sleep(1)
+            time.sleep(2)
             self.crawl_page(driver)
             driver.execute_script('window.history.back();')  # 뒤로가기
 
@@ -52,7 +52,7 @@ class Crawling:
 
     def test_crawl(self):
         """테스트 10개만 크롤링"""
-        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
+        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
         driver.implicitly_wait(3)
         page_id_list = [
             340303,
@@ -72,7 +72,7 @@ class Crawling:
         for page_id in page_id_list:
             bs_url = f'https://www.yogiyo.co.kr/mobile/#/{page_id}/'
             driver.get(bs_url)
-            time.sleep(3)
+            time.sleep(2)
             self.crawl_page(driver)
         driver.close()
 
