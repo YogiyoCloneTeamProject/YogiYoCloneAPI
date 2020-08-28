@@ -39,10 +39,10 @@ class Menu(models.Model):
 
 class OptionGroup(models.Model):
     menu = models.ForeignKey('Menu', on_delete=models.CASCADE, related_name='option_group')
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=60)
 
 
 class Option(models.Model):
     option_group = models.ForeignKey('OptionGroup', on_delete=models.CASCADE, related_name='option')
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=60)
     price = models.PositiveIntegerField()

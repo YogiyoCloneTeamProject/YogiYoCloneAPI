@@ -63,7 +63,7 @@ class Crawling:
             229246,
             415433,
             330102,
-            61406,
+            320025,
             322865
         ]
         driver.get('https://www.yogiyo.co.kr/mobile/#/340303/')
