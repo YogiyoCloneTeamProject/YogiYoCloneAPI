@@ -1,9 +1,12 @@
+import tempfile
 import time
+
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
-import requests
+from django.core import files
 from rest_framework.utils import json
+from selenium import webdriver
+
 from restaurants.models import Restaurant, MenuGroup, Menu, OptionGroup, Option
 
 
@@ -261,12 +264,10 @@ class Crawling:
                 menu_price = int(menu_dict['price'])
                 menu_img = menu_dict.get('image')
                 menu_caption = menu_dict.get('description')
-                print('1', menu_name, '1')
-                print('1', menu_caption, '1')
-                menu = Menu(name=menu_name, menu_group=menu_group, price=menu_price, image=menu_img,
-                            caption=menu_caption)
+                menu = Menu(name=menu_name, menu_group=menu_group, price=menu_price, caption=menu_caption)
                 menu.save()
-                print('저장')
+                if menu_img is not None:
+                    menu.image.save(*self.save_img(menu_img))
                 for option_group_dict in menu_dict['subchoices']:
                     option_group_name = option_group_dict['name']
                     option_group = OptionGroup(menu=menu, name=option_group_name)
@@ -277,3 +278,34 @@ class Crawling:
                         option_price = option_dict['price']
                         option = Option(option_group=option_group, name=option_name, price=option_price)
                         option.save()
+
+    def save_img(self, image_url):
+
+        # Steam the image from the url
+        request = requests.get(image_url, stream=True)
+
+        # Was the request OK?
+        if request.status_code != requests.codes.ok:
+            return
+
+        # Get the filename from the url, used for saving later
+        file_name = image_url.split('/')[-1].split('?')[0]
+
+        # Create a temporary file
+        lf = tempfile.NamedTemporaryFile()
+
+        # Read the streamed image in sections
+        for block in request.iter_content(1024 * 8):
+
+            # If no more file then stop
+            if not block:
+                break
+
+            # Write image block to temporary file
+            lf.write(block)
+
+        # Create the model you want to save the image to
+
+        # Save the temporary image to the model#
+        # This saves the model so be sure that is it valid
+        return file_name, files.File(lf)
