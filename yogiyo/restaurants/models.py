@@ -20,6 +20,12 @@ class MenuGroup(models.Model):
     name = models.CharField(max_length=40)
 
 
+def menu_img_path(instance, filename):
+    filename = filename.split('?')[0]
+    print(filename)
+    return f'menu_img/{filename}'
+
+
 class Menu(models.Model):
     menu_group = models.ForeignKey('MenuGroup', on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
