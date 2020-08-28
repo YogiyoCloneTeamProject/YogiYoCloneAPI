@@ -77,7 +77,7 @@ class Crawling:
         driver.close()
 
     def crawl_page(self, driver):
-        """페이지 크롤링"""
+        """driver의 현재 페이지 크롤링"""
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
         name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
@@ -165,6 +165,7 @@ class Crawling:
         self.menu_parsing(menu_results, restaurant)
 
     def menu_parsing(self, menu_results, restaurant):
+        """json에서 '메뉴그룹, 메뉴, 옵션그룹, 옵션' 파싱"""
         menu_results = menu_results[2:]
         for menu_group_dict in menu_results:
             menu_group_name = menu_group_dict['name']
@@ -195,7 +196,7 @@ class Crawling:
                         option.save()
 
     def save_img(self, image_url):
-
+        """이미지 저장"""
         # Steam the image from the url
         request = requests.get(image_url, stream=True)
 
