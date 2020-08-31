@@ -40,6 +40,7 @@ class Menu(models.Model):
 class OptionGroup(models.Model):
     menu = models.ForeignKey('Menu', on_delete=models.CASCADE, related_name='option_group')
     name = models.CharField(max_length=60)
+    mandatory = models.BooleanField()
 
 
 class Option(models.Model):
