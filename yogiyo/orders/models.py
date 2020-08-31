@@ -10,16 +10,16 @@ class Order(models.Model):
 
 class OrderMenu(models.Model):
     menu = models.ForeignKey('restaurants.Menu', on_delete=models.CASCADE)
-    order = models.ForeignKey('Order', on_delete=models.CASCADE)
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='order_menu')
     count = models.PositiveIntegerField()
 
 
 class OrderOptionGroup(models.Model):
-    order_menu = models.ForeignKey('OrderMenu', on_delete=models.CASCADE)
+    order_menu = models.ForeignKey('OrderMenu', on_delete=models.CASCADE, related_name='order_option_group')
     name = models.CharField(max_length=40)
 
 
 class OrderOption(models.Model):
-    order_option_group = models.ForeignKey('OrderOptionGroup', on_delete=models.CASCADE)
+    order_option_group = models.ForeignKey('OrderOptionGroup', on_delete=models.CASCADE, related_name='order_option')
     name = models.CharField(max_length=40)
     price = models.PositiveIntegerField()
