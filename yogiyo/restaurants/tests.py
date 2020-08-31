@@ -52,10 +52,32 @@ class RestaurantTestCase(APITestCase):
         self.assertEqual(response_restaurant.delivery_discount, self.restaurant.delivery_discount)
         self.assertEqual(response_restaurant.delivery_charge, self.restaurant.delivery_charge)
 
-    # def test_menu_detail(self):
-        # menu_group = baker.make('restaurants.MenuGroup', _quantity=1, restaurant=self.restaurant)
-        # menu = baker.make('restaurants.Menu', _quantity=1, menu_group=menu_group[0])
-        # option_group = baker.make('restaurants.OptionGroup', _quantity=2, menu=menu[0])
-        # for i in range(len(option_group)):
-        #     option = baker.make('restaurants.Option', _quantity=1, option_group=option_group[i])
-        #     print(option)
+    def test_menu_detail(self):
+        menu_group = baker.make('restaurants.MenuGroup', _quantity=1, restaurant=self.restaurant)
+        menu = baker.make('restaurants.Menu', _quantity=1, menu_group=menu_group[0])
+        menu = menu[0]
+        option_group = baker.make('restaurants.OptionGroup', _quantity=2, menu=menu)
+        option = []
+        for i in range(len(option_group)):
+            option += baker.make('restaurants.Option', _quantity=1, option_group=option_group[i])
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.get(f'/menu/{menu.id}')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        menu_response = Munch(response.data)
+        self.assertEqual(menu_response.id, menu.id)
+        self.assertEqual(menu_response.name, menu.name)
+        # self.assertEqual(menu_response.image, menu.image)
+        self.assertEqual(menu_response.caption, menu.caption)
+        self.assertEqual(menu_response.price, menu.price)
+        for optiongroup_response, optiongroup in zip(menu_response.option_group, option_group):
+            self.assertEqual(optiongroup_response['id'], optiongroup.id)
+            self.assertEqual(optiongroup_response['name'], optiongroup.name)
+            self.assertEqual(optiongroup_response['menu_id'], optiongroup.menu_id)
+
+            for option_res, opt in zip(optiongroup_response['option'], optiongroup.option.all()):
+                self.assertEqual(option_res['id'], opt.id)
+                self.assertEqual(option_res['name'], opt.name)
+                self.assertEqual(option_res['price'], opt.price)
+                self.assertEqual(option_res['option_group_id'], opt.option_group_id)
