@@ -52,7 +52,7 @@ class Crawling:
 
     def test_crawl(self):
         """테스트 10개만 크롤링"""
-        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
+        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
         driver.implicitly_wait(3)
         page_id_list = [
             340303,
@@ -81,7 +81,7 @@ class Crawling:
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
         name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
-        star = soup.find('span', class_='stars star-point ng-binding').text.strip().replace('★', '').replace('\n', '')
+        star = soup.find('span', class_='stars star-point ng-binding').text.replace('★', '').strip().replace('\n', '')
         notification = soup.find('div', class_='info-text ng-binding').text.strip()
 
         info_1 = soup.find('div', class_='info-item-title info-icon1').parent
@@ -197,7 +197,8 @@ class Crawling:
                     menu.image.save(*self.save_img(menu_img))
                 for option_group_dict in menu_dict['subchoices']:
                     option_group_name = option_group_dict['name']
-                    option_group = OptionGroup(menu=menu, name=option_group_name)
+                    option_group_mandatory = option_group_dict['mandatory']
+                    option_group = OptionGroup(menu=menu, name=option_group_name, mandatory=option_group_mandatory)
                     option_group.save()
 
                     for option_dict in option_group_dict['subchoices']:
