@@ -1,6 +1,8 @@
 from rest_framework import serializers
+from rest_framework.fields import empty
 
 from orders.models import Order, OrderOption, OrderOptionGroup, OrderMenu
+from users.models import User
 
 
 class OrderOptionSerializer(serializers.ModelSerializer):
@@ -26,12 +28,29 @@ class OrderMenuSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    """주문 조회"""
     order_menu = OrderMenuSerializer(many=True)
-    """주문 생성"""
 
     class Meta:
         model = Order
         fields = ('id', 'order_menu')
+
+
+class OrderCreateSerializer(serializers.ModelSerializer):
+    """주문 생성"""
+    order_menu = OrderMenuSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = ('id', 'order_menu', 'restaurant')
+
+    def create(self, validated_data):
+        order_menus = validated_data.pop('order_menu')
+        user = User.objects.first()
+        order = Order.objects.create(owner=user, **validated_data)
+        for order_menu in order_menus:
+            OrderMenu.objects.create(order=order, **order_menu)
+        return order
 
 
 class OrderListSerializer(serializers.ModelSerializer):

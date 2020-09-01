@@ -52,7 +52,7 @@ class Crawling:
 
     def test_crawl(self):
         """테스트 10개만 크롤링"""
-        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
+        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
         driver.implicitly_wait(3)
         page_id_list = [
             340303,
