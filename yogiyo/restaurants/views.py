@@ -6,11 +6,13 @@ from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSe
 
 
 class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
+    """menu detail """
     queryset = Menu.objects.all()
     serializer_class = MenuDetailSerializer
 
 
 class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+    """restaurant list, detail"""
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantListSerializer
 
