@@ -47,3 +47,12 @@ class Option(models.Model):
     option_group = models.ForeignKey('OptionGroup', on_delete=models.CASCADE, related_name='option')
     name = models.CharField(max_length=60)
     price = models.PositiveIntegerField()
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=50)
+
+
+class Category_Restaurant(models.Model):
+    category = models.ForeignKey('Category', on_delete=models.CASCADE)
+    restaurant = models.ForeignKey('Restaurant', on_delete=models.CASCADE)
