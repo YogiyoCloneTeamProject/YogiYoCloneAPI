@@ -52,7 +52,7 @@ class Crawling:
 
     def test_crawl(self):
         """테스트 10개만 크롤링"""
-        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
+        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
         driver.implicitly_wait(3)
         page_id_list = [
             340303,
@@ -75,6 +75,23 @@ class Crawling:
             time.sleep(2)
             self.crawl_page(driver)
         driver.close()
+
+    def save_to_json(self, s, page_id):
+        restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/'
+        restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
+        review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
+
+        r = s.get(restaurant_api_url)
+        response_str = r.content.decode('utf-8')
+        restaurant_results = json.loads(response_str)
+
+        r = s.get(restaurant_info_api_url)
+        response_str = r.content.decode('utf-8')
+        restaurant_info_results = json.loads(response_str)
+
+        r = s.get(review_api_url)
+        response_str = r.content.decode('utf-8')
+        review_results = json.loads(response_str)
 
     def crawl_page(self, driver):
         """driver의 현재 페이지 크롤링"""
@@ -169,11 +186,12 @@ class Crawling:
             'x-apisecret': 'fe5183cc3dea12bd0ce299cf110a75a2'
         })
         page_id = driver.current_url.split('/')[-2]
-        api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
-        r = s.get(api_url)
+        menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
+        r = s.get(menu_api_url)
         response_str = r.content.decode('utf-8')
         menu_results = json.loads(response_str)
-        self.menu_parsing(menu_results, restaurant)
+        print()
+        # self.menu_parsing(menu_results, restaurant)
 
     def menu_parsing(self, menu_results, restaurant):
         """json에서 '메뉴그룹, 메뉴, 옵션그룹, 옵션' 파싱"""
@@ -237,3 +255,7 @@ class Crawling:
         # Save the temporary image to the model#
         # This saves the model so be sure that is it valid
         return file_name, files.File(lf)
+
+    def to_json(self, yogiyo_crawling_results):
+        with open('yogiyo.json', 'w', encoding='utf-8') as file:
+            json.dump(yogiyo_crawling_results, file, ensure_ascii=False, indent='\t')
