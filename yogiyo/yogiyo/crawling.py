@@ -75,7 +75,7 @@ class Crawling:
         menu_results = self.get_response_json_data(menu_api_url)
 
         restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
-        self.review_parsing(review_results, restaurant)
+        # self.review_parsing(review_results, restaurant)
         self.menu_parsing(menu_results, restaurant)
 
     def restaurant_parsing(self, restaurant_results, restaurant_info_results):
