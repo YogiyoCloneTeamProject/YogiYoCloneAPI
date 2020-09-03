@@ -8,52 +8,38 @@ from rest_framework.utils import json
 from selenium import webdriver
 
 from restaurants.models import Restaurant, MenuGroup, Menu, OptionGroup, Option
+from reviews.models import Review, ReviewImage
+
+lat = 37.545133
+lng = 127.057129
 
 
 class Crawling:
 
-    def crawl(self):
-        """모든 데이터 크롤링"""
-        driver = webdriver.Chrome('/Users/happy/Downloads/chromedriver')
-        driver.implicitly_wait(3)
-        url = 'https://www.yogiyo.co.kr/mobile/#/'
-        driver.get(url)
+    def __init__(self) -> None:
+        self.s = requests.Session()
+        self.s.headers.update({
+            'x-apikey': 'iphoneap',
+            'x-apisecret': 'fe5183cc3dea12bd0ce299cf110a75a2'
+        })
 
-        time.sleep(7)
-        driver.execute_script('document.getElementsByClassName("btn btn-default ico-pick")[0].click();')
+    def get_response_json_data(self, url):
+        """API URL -> JSON -> 딕셔너리"""
+        r = self.s.get(url)
+        response_str = r.content.decode('utf-8')
+        return json.loads(response_str)
 
-        scroll_cnt = -1
-        # 레스토랑 반복
-        for i in range(10):
-            # 60개 크롤링 할 때 마다 scroll_cnt 증가
-            if i % 60 == 0:
-                scroll_cnt += 1
-            if 9 < scroll_cnt:
-                break
+    def real_crawl(self):
+        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=200&lat={37.545133}&lng={127.057129}&order=rank&page=0&search='
+        restaurant_list_results = self.get_response_json_data(restaurant_list_url)
 
-            # scroll_cnt 만큼 스크롤
-            for j in range(scroll_cnt):
-                time.sleep(1)
-                driver.execute_script(f'window.scrollTo(0, {100000000});')
-
-            time.sleep(3)
-            driver.execute_script(
-                f"""
-                r_list = document.getElementsByClassName("item clearfix");
-                // console.log(r_list.length);  // 첫 로딩 60개
-                r_list[{i}].click();
-                """
-            )
-            time.sleep(2)
-            self.crawl_page(driver)
-            driver.execute_script('window.history.back();')  # 뒤로가기
-
-        driver.close()
+        page_id_list = [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
+        # self.save_crawling_data_to_json(page_id_list)
+        for page_id in page_id_list:
+            self.api_parsing(page_id)
 
     def test_crawl(self):
         """테스트 10개만 크롤링"""
-        driver = webdriver.Chrome('/Users/joy/Downloads/chromedriver')
-        driver.implicitly_wait(3)
         page_id_list = [
             340303,
             445730,
@@ -66,136 +52,39 @@ class Crawling:
             320025,
             322865
         ]
-        driver.get('https://www.yogiyo.co.kr/mobile/#/340303/')
-        time.sleep(2)
-
         for page_id in page_id_list:
-            bs_url = f'https://www.yogiyo.co.kr/mobile/#/{page_id}/'
-            driver.get(bs_url)
-            time.sleep(2)
-            self.crawl_page(driver)
-        driver.close()
+            self.api_parsing(page_id)
 
-    def save_to_json(self, s, page_id):
-        restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/'
+    def api_parsing(self, page_id):
+        restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat={lat}&lng={lng}'
         restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
         review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
 
-        r = s.get(restaurant_api_url)
-        response_str = r.content.decode('utf-8')
-        restaurant_results = json.loads(response_str)
+        restaurant_results = self.get_response_json_data(restaurant_api_url)
+        restaurant_info_results = self.get_response_json_data(restaurant_info_api_url)
+        review_results = self.get_response_json_data(review_api_url)
 
-        r = s.get(restaurant_info_api_url)
-        response_str = r.content.decode('utf-8')
-        restaurant_info_results = json.loads(response_str)
-
-        r = s.get(review_api_url)
-        response_str = r.content.decode('utf-8')
-        review_results = json.loads(response_str)
-
-    def crawl_page(self, driver):
-        """driver의 현재 페이지 크롤링"""
-        html = driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-        name = soup.find('div', class_='restaurant-title').text.strip().replace('\n', '')
-        star = soup.find('span', class_='stars star-point ng-binding').text.replace('★', '').strip().replace('\n', '')
-        notification = soup.find('div', class_='info-text ng-binding').text.strip()
-
-        info_1 = soup.find('div', class_='info-item-title info-icon1').parent
-        key = info_1.find_all('i')
-        val = info_1.find_all('span')
-        opening_hours = ''
-        tel_number = ''
-        address = ''
-        for k, v in zip(key, val):
-            k = k.text.strip()
-            v = v.text.strip()
-            if k == '영업시간':
-                opening_hours = v
-            elif k == '전화번호':
-                tel_number = v
-            elif k == '주소':
-                address = v
-            # elif k == '부가정보':
-            #     company_registration_number = v
-
-        info_2 = soup.find('div', class_='info-item-title info-icon2').parent
-        key = info_2.find_all('i')
-        val = info_2.find_all('span')
-        min_order = ''
-        payment_method = ''
-        for k, v in zip(key, val):
-            k = k.text.strip()
-            v = v.text.strip()
-            if k == '최소주문금액':
-                min_order = v.replace('원', '').replace(',', '')
-            elif k == '결제수단':
-                payment_method = v
-
-        info_3 = soup.find('div', class_='info-item-title info-icon3').parent
-        key = info_3.find_all('i')
-        val = info_3.find_all('span')
-        business_name = ''
-        company_registration_number = ''
-        for k, v in zip(key, val):
-            k = k.text.strip()
-            v = v.text.strip()
-            if k == '상호명':
-                business_name = v
-            elif k == '사업자등록번호':
-                company_registration_number = v
-
-        info_4 = soup.find('div', class_='info-item-title info-icon4').parent
-        origin_information = info_4.find('pre').text
-
-        # 식당 이미지
-        restaurant_image = \
-            soup.find('div', class_='restaurant-content').find('div', class_='logo').attrs['style'].split('"')[1]
-
-        # 배달할인 요금
-        delivery_discount = soup.find('span', class_='coupon-base ng-binding')
-        if delivery_discount is not None:
-            delivery_discount = delivery_discount.contents[0].split(' ')[1].replace(',', '')[:-1]
-
-        # 배달요금
-        delivery_charge = soup.find('span', class_='list-group-item clearfix text-right ng-binding')
-        if delivery_charge is not None:
-            delivery_charge = delivery_charge.contents[0].strip().split(' ')[1].replace(',', '')[:-1]
-        restaurant = Restaurant(
-            name=name,
-            star=star,
-            notification=notification,
-            opening_hours=opening_hours,
-            tel_number=tel_number,
-            address=address,
-            min_order=min_order,
-            payment_method=payment_method,
-            business_name=business_name,
-            company_registration_number=company_registration_number,
-            origin_information=origin_information,
-            delivery_discount=delivery_discount,
-            delivery_charge=delivery_charge
-        )
-        restaurant.save()
-        restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
-
-        # 식당 메뉴/ 옵션 크롤링
-        s = requests.Session()
-        s.headers.update({
-            'x-apikey': 'iphoneap',
-            'x-apisecret': 'fe5183cc3dea12bd0ce299cf110a75a2'
-        })
-        page_id = driver.current_url.split('/')[-2]
-        menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
-        r = s.get(menu_api_url)
-        response_str = r.content.decode('utf-8')
-        menu_results = json.loads(response_str)
-        print()
-        # self.menu_parsing(menu_results, restaurant)
+    def review_parsing(self, review_results, restaurant):
+        for review_dict in review_results:
+            review = Review(
+                # owner=user,
+                restaurant=restaurant,
+                # order=,
+                rating=review_dict['rating'],
+                taste=review_dict['rating_taste'],
+                delivery=review_dict['rating_delivery'],
+                amount=review_dict['rating_quantity'],
+                caption=review_dict['comment'],
+            )
+            review.save()
+            for img in review_dict['review_images']:
+                review_image = ReviewImage(review=review)
+                review_image.image.save(*self.save_img('https://www.yogiyo.co.kr' + img))
 
     def menu_parsing(self, menu_results, restaurant):
         """json에서 '메뉴그룹, 메뉴, 옵션그룹, 옵션' 파싱"""
-        menu_results = menu_results[2:]
+        # todo 포토 메뉴 파싱 필요
+        menu_results = menu_results[2:]  # todo 포토 메뉴, 탑텐, 인기메뉴 스킵
         for menu_group_dict in menu_results:
             menu_group_name = menu_group_dict['name']
             menu_group = MenuGroup(
@@ -256,6 +145,23 @@ class Crawling:
         # This saves the model so be sure that is it valid
         return file_name, files.File(lf)
 
-    def to_json(self, yogiyo_crawling_results):
-        with open('yogiyo.json', 'w', encoding='utf-8') as file:
-            json.dump(yogiyo_crawling_results, file, ensure_ascii=False, indent='\t')
+    def save_crawling_data_to_json(self, page_id_list):
+        crawl_data = []
+        for page_id in page_id_list:
+            restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat={lat}&lng={lng}'
+            restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
+            review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
+            menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
+
+            restaurant_data = {
+                'restaurant_results': self.get_response_json_data(restaurant_api_url),
+                'restaurant_info_results': self.get_response_json_data(restaurant_info_api_url),
+                'review_results': self.get_response_json_data(review_api_url),
+                'menu_results': self.get_response_json_data(menu_api_url),
+            }
+            crawl_data.append(restaurant_data)
+        self.to_json(crawl_data)
+
+    def to_json(self, crawl_data):
+        with open('yogiyo_crawl.json', 'w', encoding='utf-8') as file:
+            json.dump(crawl_data, file, ensure_ascii=False, indent='\t')
