@@ -30,20 +30,21 @@ class Crawling:
         return json.loads(response_str)
 
     def get_page_id_list(self):
+        """레스토랑 id 리스트"""
         restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=200&lat={lat}&lng={lng}&order=rank&page=0&search='
         restaurant_list_results = self.get_response_json_data(restaurant_list_url)
-
-        page_id_list = [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
-        return page_id_list
+        return [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
 
     def real_crawl(self):
+        """실제 크롤링"""
         page_id_list = self.get_page_id_list()
         for page_id in page_id_list:
             self.api_parsing(page_id)
 
     def json_crawl(self):
+        """JSON 파일로 저장"""
         page_id_list = self.get_page_id_list()
-        self.save_crawling_data_to_json(page_id_list)
+        self.dict_to_json_file(page_id_list)
 
     def test_crawl(self):
         """테스트 10개만 크롤링"""
@@ -216,7 +217,7 @@ class Crawling:
         # This saves the model so be sure that is it valid
         return file_name, files.File(lf)
 
-    def save_crawling_data_to_json(self, page_id_list):
+    def dict_to_json_file(self, page_id_list):
         crawl_data = []
         for page_id in page_id_list:
             restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat={lat}&lng={lng}'
