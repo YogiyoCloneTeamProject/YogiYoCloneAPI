@@ -104,7 +104,8 @@ class Crawling:
         categories = restaurant_results['categories']
 
         # bottom - info
-        notification = restaurant_info_results['introduction_by_owner']['introduction_text']
+        notification = restaurant_info_results['introduction_by_owner'].get('introduction_text') \
+            if restaurant_info_results.get('introduction_by_owner') else ''
         opening_hours = restaurant_info_results['opening_time_description']
         tel_number = restaurant_info_results['phone']
         address = restaurant_info_results['address']
@@ -132,8 +133,11 @@ class Crawling:
             categories=categories
         )
         restaurant.save()
-        restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
-        restaurant.back_image.save(*self.save_img(restaurant_back_image))
+        if restaurant_image:
+            restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
+        print('-', restaurant_back_image)
+        if restaurant_back_image:
+            restaurant.back_image.save(*self.save_img(restaurant_back_image))
         return restaurant
 
     def review_parsing(self, review_results, restaurant):
