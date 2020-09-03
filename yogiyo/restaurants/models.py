@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 
 
 class Restaurant(models.Model):
@@ -9,13 +10,18 @@ class Restaurant(models.Model):
     tel_number = models.CharField(max_length=40)
     address = models.CharField(max_length=50)
     min_order = models.PositiveIntegerField()
-    payment_method = models.CharField(max_length=50)
+    payment_methods = ArrayField(models.CharField(max_length=30))
     business_name = models.CharField(max_length=20)
     company_registration_number = models.CharField(max_length=20)
     origin_information = models.TextField()
     image = models.ImageField(upload_to='restaurant_image', null=True, blank=True)
     delivery_discount = models.PositiveIntegerField(null=True, blank=True)
     delivery_charge = models.PositiveIntegerField(null=True, blank=True)
+    delivery_time = models.CharField(max_length=30)
+    back_image = models.ImageField(upload_to='restaurant_back_image', null=True, blank=True)
+    lat = models.FloatField()
+    lng = models.FloatField()
+    categories = ArrayField(models.CharField(max_length=20))
 
 
 class MenuGroup(models.Model):

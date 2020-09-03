@@ -76,22 +76,91 @@ class Crawling:
             self.crawl_page(driver)
         driver.close()
 
-    def save_to_json(self, s, page_id):
-        restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/'
+    def save_to_json(self):
+        s = requests.Session()
+        s.headers.update({
+            'x-apikey': 'iphoneap',
+            'x-apisecret': 'fe5183cc3dea12bd0ce299cf110a75a2'
+        })
+        page_id = 246778
+        # restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/'
+        restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat=37.5927516288178&lng=126.906298987485'
         restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
         review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
 
-        r = s.get(restaurant_api_url)
-        response_str = r.content.decode('utf-8')
+        r1 = s.get(restaurant_api_url)
+        response_str = r1.content.decode('utf-8')
         restaurant_results = json.loads(response_str)
-
-        r = s.get(restaurant_info_api_url)
-        response_str = r.content.decode('utf-8')
+        r2 = s.get(restaurant_info_api_url)
+        response_str = r2.content.decode('utf-8')
         restaurant_info_results = json.loads(response_str)
+
+        self.restaurant_api(restaurant_results, restaurant_info_results)
 
         r = s.get(review_api_url)
         response_str = r.content.decode('utf-8')
         review_results = json.loads(response_str)
+        self.review_api(review_results)
+
+    def restaurant_api(self, restaurant_results, restaurant_info_results):
+        # top - info
+        name = restaurant_results['name']
+        star = restaurant_results['review_avg']
+        min_order = restaurant_results['min_order_amount']
+        methods = []
+        for method in restaurant_results['payment_methods']:
+            if method == "creditcard":
+                methods.append("신용카드")
+                methods.append("현금")
+            elif method == "online":
+                methods.append("요기서결제")
+
+        payment_methods = methods
+        discount = restaurant_results.get('discounts')
+        if discount is not None:
+            discount = discount['additional']['delivery']['amount']
+        delivery_charge = restaurant_results.get('delivery_fee')
+        delivery_time = restaurant_results['estimated_delivery_time']
+        lat = restaurant_results['lat']
+        lng = restaurant_results['lng']
+        restaurant_image = restaurant_results['logo_url']
+        restaurant_back_image = restaurant_results['background_url']
+        categories = restaurant_results['categories']
+
+        # bottom - info
+        notification = restaurant_info_results['introduction_by_owner']['introduction_text']
+        opening_hours = restaurant_info_results['opening_time_description']
+        tel_number = restaurant_info_results['phone']
+        address = restaurant_info_results['address']
+        business_name = restaurant_info_results['crmdata']['company_name']
+        company_registration_number = restaurant_info_results['crmdata']['company_number']
+        origin_information = restaurant_info_results['country_origin']
+
+        restaurant = Restaurant(
+            name=name,
+            star=star,
+            notification=notification,
+            opening_hours=opening_hours,
+            tel_number=tel_number,
+            address=address,
+            min_order=min_order,
+            payment_methods=payment_methods,
+            business_name=business_name,
+            company_registration_number=company_registration_number,
+            origin_information=origin_information,
+            delivery_discount=discount,
+            delivery_charge=delivery_charge,
+            delivery_time=delivery_time,
+            lat=lat,
+            lng=lng,
+            categories=categories
+        )
+        restaurant.save()
+        restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
+        restaurant.back_image.save(*self.save_img(restaurant_back_image))
+
+    def review_api(self, review_results):
+        pass
 
     def crawl_page(self, driver):
         """driver의 현재 페이지 크롤링"""
