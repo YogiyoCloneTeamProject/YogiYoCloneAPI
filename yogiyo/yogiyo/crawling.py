@@ -31,7 +31,7 @@ class Crawling:
 
     def get_page_id_list(self):
         """레스토랑 id 리스트"""
-        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=200&lat={lat}&lng={lng}&order=rank&page=0&search='
+        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=90000&lat={lat}&lng={lng}&order=rank&page=0&search='
         restaurant_list_results = self.get_response_json_data(restaurant_list_url)
         return [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
 
