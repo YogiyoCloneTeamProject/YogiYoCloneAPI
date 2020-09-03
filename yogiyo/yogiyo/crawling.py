@@ -29,14 +29,21 @@ class Crawling:
         response_str = r.content.decode('utf-8')
         return json.loads(response_str)
 
-    def real_crawl(self):
-        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=200&lat={37.545133}&lng={127.057129}&order=rank&page=0&search='
+    def get_page_id_list(self):
+        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=200&lat={lat}&lng={lng}&order=rank&page=0&search='
         restaurant_list_results = self.get_response_json_data(restaurant_list_url)
 
         page_id_list = [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
-        # self.save_crawling_data_to_json(page_id_list)
+        return page_id_list
+
+    def real_crawl(self):
+        page_id_list = self.get_page_id_list()
         for page_id in page_id_list:
             self.api_parsing(page_id)
+
+    def json_crawl(self):
+        page_id_list = self.get_page_id_list()
+        self.save_crawling_data_to_json(page_id_list)
 
     def test_crawl(self):
         """테스트 10개만 크롤링"""
@@ -59,13 +66,16 @@ class Crawling:
         restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat={lat}&lng={lng}'
         restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
         review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
+        menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
 
         restaurant_results = self.get_response_json_data(restaurant_api_url)
         restaurant_info_results = self.get_response_json_data(restaurant_info_api_url)
         review_results = self.get_response_json_data(review_api_url)
+        menu_results = self.get_response_json_data(menu_api_url)
 
         restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
         self.review_parsing(review_results, restaurant)
+        self.menu_parsing(menu_results, restaurant)
 
     def restaurant_parsing(self, restaurant_results, restaurant_info_results):
         # top - info
@@ -123,6 +133,7 @@ class Crawling:
         restaurant.save()
         restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
         restaurant.back_image.save(*self.save_img(restaurant_back_image))
+        return restaurant
 
     def review_parsing(self, review_results, restaurant):
         for review_dict in review_results:
@@ -220,8 +231,6 @@ class Crawling:
                 'menu_results': self.get_response_json_data(menu_api_url),
             }
             crawl_data.append(restaurant_data)
-        self.to_json(crawl_data)
 
-    def to_json(self, crawl_data):
         with open('yogiyo_crawl.json', 'w', encoding='utf-8') as file:
             json.dump(crawl_data, file, ensure_ascii=False, indent='\t')
