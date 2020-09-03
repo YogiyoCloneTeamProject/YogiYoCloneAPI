@@ -64,6 +64,66 @@ class Crawling:
         restaurant_info_results = self.get_response_json_data(restaurant_info_api_url)
         review_results = self.get_response_json_data(review_api_url)
 
+        restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
+        self.review_parsing(review_results, restaurant)
+
+    def restaurant_parsing(self, restaurant_results, restaurant_info_results):
+        # top - info
+        name = restaurant_results['name']
+        star = restaurant_results['review_avg']
+        min_order = restaurant_results['min_order_amount']
+        methods = []
+        for method in restaurant_results['payment_methods']:
+            if method == "creditcard":
+                methods.append("신용카드")
+                methods.append("현금")
+            elif method == "online":
+                methods.append("요기서결제")
+
+        payment_methods = methods
+        discount = restaurant_results.get('discounts')
+        if discount is not None:
+            discount = discount['additional']['delivery']['amount']
+        delivery_charge = restaurant_results.get('delivery_fee')
+        delivery_time = restaurant_results['estimated_delivery_time']
+        lat = restaurant_results['lat']
+        lng = restaurant_results['lng']
+        restaurant_image = restaurant_results['logo_url']
+        restaurant_back_image = restaurant_results['background_url']
+        categories = restaurant_results['categories']
+
+        # bottom - info
+        notification = restaurant_info_results['introduction_by_owner']['introduction_text']
+        opening_hours = restaurant_info_results['opening_time_description']
+        tel_number = restaurant_info_results['phone']
+        address = restaurant_info_results['address']
+        business_name = restaurant_info_results['crmdata']['company_name']
+        company_registration_number = restaurant_info_results['crmdata']['company_number']
+        origin_information = restaurant_info_results['country_origin']
+
+        restaurant = Restaurant(
+            name=name,
+            star=star,
+            notification=notification,
+            opening_hours=opening_hours,
+            tel_number=tel_number,
+            address=address,
+            min_order=min_order,
+            payment_methods=payment_methods,
+            business_name=business_name,
+            company_registration_number=company_registration_number,
+            origin_information=origin_information,
+            delivery_discount=discount,
+            delivery_charge=delivery_charge,
+            delivery_time=delivery_time,
+            lat=lat,
+            lng=lng,
+            categories=categories
+        )
+        restaurant.save()
+        restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
+        restaurant.back_image.save(*self.save_img(restaurant_back_image))
+
     def review_parsing(self, review_results, restaurant):
         for review_dict in review_results:
             review = Review(
