@@ -13,6 +13,7 @@ class OrderMenu(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='order_menu')
     name = models.CharField(max_length=255)
     count = models.PositiveIntegerField()
+    price = models.PositiveIntegerField()
 
 
 class OrderOptionGroup(models.Model):

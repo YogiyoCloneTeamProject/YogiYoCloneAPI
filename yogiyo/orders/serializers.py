@@ -26,7 +26,7 @@ class OrderMenuSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderMenu
-        fields = ('id', 'menu', 'name', 'count', 'order_option_group',)
+        fields = ('id', 'menu', 'name', 'price', 'count', 'order_option_group',)
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -47,7 +47,23 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'order_menu', 'restaurant')
 
     def validate(self, attrs):
-        print(attrs)
+        order_menus = attrs['order_menu']
+        for order_menu in order_menus:
+            """req: 메뉴 이름, 가격 / model : 메뉴 이름, 가격 비교 """
+            menu = Menu.objects.get(id=order_menu['menu'].id)
+            if order_menu['name'] != menu.name or order_menu['price'] != menu.price:
+                raise ValidationError
+
+            for order_option_group, order_option_group_obj in zip(order_menu['order_option_group'],
+                                                                  menu.option_group.all()):
+                """req : 오더 옵션 그룹 이름, mandatory / model : 오더옵션그룹 이름, mandatory 비교 """
+                if order_option_group['name'] != order_option_group_obj.name:
+                    raise ValidationError
+
+                for order_option, order_option_obj in zip(order_option_group['order_option'],
+                                                          order_option_group_obj.option.all()):
+                    if order_option['name'] != order_option_obj.name or order_option['price'] != order_option_obj.price:
+                        raise ValidationError
 
         return super().validate(attrs)
 

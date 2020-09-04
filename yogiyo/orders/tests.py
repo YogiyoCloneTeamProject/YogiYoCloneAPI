@@ -27,6 +27,7 @@ class OrderCreateTestCase(APITestCase):
                     "menu": 1,
                     "name": self.menu.name,
                     "count": 1,
+                    "price": self.menu.price,
                     "order_option_group": [
                         {
                             "name": option_groups[0].name,
@@ -34,11 +35,11 @@ class OrderCreateTestCase(APITestCase):
                             "order_option": [
                                 {
                                     "name": options[0].name,
-                                    "price": "3000"
+                                    "price": options[0].price
                                 },
                                 {
                                     "name": options[1].name,
-                                    "price": "3000"
+                                    "price": options[1].price
                                 }
                             ]
                         },
@@ -55,6 +56,3 @@ class OrderCreateTestCase(APITestCase):
         res = response.data
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, res)
         # print(res)
-
-
-
