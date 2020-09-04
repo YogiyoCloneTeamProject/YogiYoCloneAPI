@@ -28,7 +28,7 @@ class Crawling:
 
     def get_page_id_list(self):
         """레스토랑 id 리스트"""
-        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=1000&lat={lat}&lng={lng}&order=rank&page=0&search='
+        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=50&lat={lat}&lng={lng}&order=rank&page=0&search='
         restaurant_list_results = self.get_response_json_data(restaurant_list_url)
         return [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
 
@@ -174,7 +174,7 @@ class Crawling:
                 menu = Menu(name=menu_name, menu_group=menu_group, price=menu_price, caption=menu_caption)
                 menu.save()
                 if menu_img is not None:
-                    menu.image.save(*self.save_img(menu_img))
+                    menu.image.save(*self.save_img(menu_img))  # todo None 리턴??
                 for option_group_dict in menu_dict['subchoices']:
                     option_group_name = option_group_dict['name']
                     option_group_mandatory = option_group_dict['mandatory']
@@ -236,3 +236,17 @@ class Crawling:
 
         with open('yogiyo_crawl.json', 'w', encoding='utf-8') as file:
             json.dump(crawl_data, file, ensure_ascii=False, indent='\t')
+
+    def json_parsing(self):
+        """json 파일에서 파싱"""
+        with open('yogiyo_crawl.json', 'r', encoding='utf-8') as file:
+            json_data = json.load(file)
+        for restaurant_data in json_data:
+            restaurant_results = restaurant_data['restaurant_results']
+            restaurant_info_results = restaurant_data['restaurant_info_results']
+            review_results = restaurant_data['review_results']
+            menu_results = restaurant_data['menu_results']
+
+            restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
+            # self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
+            self.menu_parsing(menu_results, restaurant)
