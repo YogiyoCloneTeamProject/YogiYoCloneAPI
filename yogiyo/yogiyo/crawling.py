@@ -1,11 +1,8 @@
 import tempfile
-import time
 
 import requests
-from bs4 import BeautifulSoup
 from django.core import files
 from rest_framework.utils import json
-from selenium import webdriver
 
 from restaurants.models import Restaurant, MenuGroup, Menu, OptionGroup, Option
 from reviews.models import Review, ReviewImage
@@ -31,7 +28,7 @@ class Crawling:
 
     def get_page_id_list(self):
         """레스토랑 id 리스트"""
-        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=90000&lat={lat}&lng={lng}&order=rank&page=0&search='
+        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=1000&lat={lat}&lng={lng}&order=rank&page=0&search='
         restaurant_list_results = self.get_response_json_data(restaurant_list_url)
         return [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
 
@@ -75,7 +72,7 @@ class Crawling:
         menu_results = self.get_response_json_data(menu_api_url)
 
         restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
-        # self.review_parsing(review_results, restaurant)
+        # self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
         self.menu_parsing(menu_results, restaurant)
 
     def restaurant_parsing(self, restaurant_results, restaurant_info_results):
@@ -135,12 +132,12 @@ class Crawling:
         restaurant.save()
         if restaurant_image:
             restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
-        print('-', restaurant_back_image)
         if restaurant_back_image:
             restaurant.back_image.save(*self.save_img(restaurant_back_image))
         return restaurant
 
     def review_parsing(self, review_results, restaurant):
+        # todo 리뷰 파싱 완성
         for review_dict in review_results:
             review = Review(
                 # owner=user,
