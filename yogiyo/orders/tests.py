@@ -7,66 +7,52 @@ class OrderCreateTestCase(APITestCase):
     """주문 생성"""
 
     def setUp(self) -> None:
+        self.restaurant = baker.make('restaurants.Restaurant')
+        menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant, name='햄버거')
+        self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거')
+        option_groups = []
+        option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='움료추가', menu=self.menu)
+        option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='패티추가', menu=self.menu)
+        # option = []
+        # for i in range(len(option_groups)):
+        #     option += baker.make('restaurants.Option', _quantity=1, option_group=option_groups[i], name=f'option{i}')
+
+        options = baker.make('restaurants.Option', _quantity=2, option_group=option_groups[0])
+
         self.url = f'/orders'
         self.data = {
-            "restaurant": 1,
+            "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu_id": "23",
-                    "name": "불고기버거세트",
-                    "count": "1",
+                    "menu": 1,
+                    "name": self.menu.name,
+                    "count": 1,
+                    "price": self.menu.price,
                     "order_option_group": [
                         {
-                            "name": "패티 추가",
+                            "name": option_groups[0].name,
                             "mandatory": "true",
                             "order_option": [
                                 {
-                                    "name": "소고기 패티",
-                                    "price": "3000"
+                                    "name": options[0].name,
+                                    "price": options[0].price
                                 },
                                 {
-                                    "name": "불고기 패티",
-                                    "price": "3000"
+                                    "name": options[1].name,
+                                    "price": options[1].price
                                 }
                             ]
                         },
-                        # {
-                        #     "name": "치즈 추가",
-                        #     "option": {
-                        #         "name": "모짜렐라치즈",
-                        #         "price": "3000"
-                        #     }
-                        # }
                     ]
                 },
-                # {
-                #     "menu_id": "24",
-                #     "name": "치즈버거세트",
-                #     "count": "1",
-                #     "option_group": []
-                # },
-                # {
-                #     "menu_id": "25",
-                #     "name": "1994버거세트",
-                #     "count": "1",
-                #     "option_group": []
-                # }
             ]
         }
         self.user = baker.make('users.User')
-        self.user = baker.make('users.User')
-        baker.make('users.Profile', user=self.user)
 
     def test_should_create(self):
         """생성-성공"""
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=self.data)
         res = response.data
-
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, res)
-        self.assertEqual(res['content'], self.data['content'])
-
-        owner = res.get('owner')
-        self.assertIsNotNone(owner)
-        self.assertIsNotNone(owner.get('id'))
-        self.assertIsNotNone(owner.get('nickname'))
+        # print(res)
