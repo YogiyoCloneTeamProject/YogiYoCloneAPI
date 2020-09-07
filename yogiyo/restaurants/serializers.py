@@ -14,7 +14,7 @@ class OptionGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OptionGroup
-        fields = ('id', 'name', 'menu_id', 'option')
+        fields = ('id', 'name', 'menu_id','mandatory', 'option')
 
 
 class MenuDetailSerializer(serializers.ModelSerializer):
