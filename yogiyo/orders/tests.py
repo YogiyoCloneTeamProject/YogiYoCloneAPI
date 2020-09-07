@@ -11,13 +11,16 @@ class OrderCreateTestCase(APITestCase):
         menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant, name='햄버거')
         self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거')
         option_groups = []
-        option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='움료추가', menu=self.menu)
-        option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='패티추가', menu=self.menu)
+        option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='움료추가', mandatory=False,
+                                    menu=self.menu)
+        option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='패티추가', mandatory=True,
+                                    menu=self.menu)
         # option = []
         # for i in range(len(option_groups)):
         #     option += baker.make('restaurants.Option', _quantity=1, option_group=option_groups[i], name=f'option{i}')
 
         options = baker.make('restaurants.Option', _quantity=2, option_group=option_groups[0])
+        options2 = baker.make('restaurants.Option', _quantity=2, option_group=option_groups[1])
 
         self.url = f'/orders'
         self.data = {
@@ -31,7 +34,7 @@ class OrderCreateTestCase(APITestCase):
                     "order_option_group": [
                         {
                             "name": option_groups[0].name,
-                            "mandatory": "true",
+                            "mandatory": False,
                             "order_option": [
                                 {
                                     "name": options[0].name,
@@ -41,6 +44,20 @@ class OrderCreateTestCase(APITestCase):
                                     "name": options[1].name,
                                     "price": options[1].price
                                 }
+                            ]
+                        },
+                        {
+                            "name": option_groups[1].name,
+                            "mandatory": True,
+                            "order_option": [
+                                {
+                                    "name": options2[0].name,
+                                    "price": options2[0].price
+                                },
+                                # {
+                                #     "name": options2[1].name,
+                                #     "price": options2[1].price
+                                # }
                             ]
                         },
                     ]
