@@ -11,13 +11,15 @@ class Order(models.Model):
 class OrderMenu(models.Model):
     menu = models.ForeignKey('restaurants.Menu', on_delete=models.CASCADE)
     order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='order_menu')
+    name = models.CharField(max_length=255)
     count = models.PositiveIntegerField()
+    price = models.PositiveIntegerField()
 
 
 class OrderOptionGroup(models.Model):
     order_menu = models.ForeignKey('OrderMenu', on_delete=models.CASCADE, related_name='order_option_group')
     name = models.CharField(max_length=255)
-    # mandatory = models.BooleanField()  # todo mandatory = 필수 or 선택
+    mandatory = models.BooleanField(default=False)  # todo mandatory = 필수 or 선택
 
 
 class OrderOption(models.Model):
