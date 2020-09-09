@@ -54,10 +54,10 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
         for menu_group in menu_groups:
             res += menu_group.menu.all()
 
-        # image필드가 있는 메뉴만 추가
+        # is_photomenu가 트루면 추가
         res2 = []
         for menu in res:
-            if menu.image:
+            if menu.is_photomenu:
                 res2.append(menu)
 
         # 모델 -> 딕셔너리
