@@ -81,3 +81,18 @@ class RestaurantTestCase(APITestCase):
                 self.assertEqual(option_res['name'], opt.name)
                 self.assertEqual(option_res['price'], opt.price)
                 self.assertEqual(option_res['option_group_id'], opt.option_group_id)
+
+    def test_category_list(self):
+        """카테고리 별 음식점 리스트 """
+        self.restaurants[0].categories.extend(["중식", "피자"])
+        self.restaurants[0].save()
+        self.restaurants[1].categories.extend(["일식", "중식"])
+        self.restaurants[1].save()
+
+        self.client.force_authenticate(user=self.user)
+
+        category = "중식"
+        response = self.client.get(f'/restaurants?category={category}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        for r in response.data['results']:
+            self.assertTrue(category in r['categories'])
