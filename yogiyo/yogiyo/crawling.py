@@ -162,6 +162,7 @@ class Crawling:
             # 포토메뉴리스트에 메뉴 이름 저장
             if menu_group_dict['slug'] == 'photo_menu_items':
                 photo_menu_items = [item['name'] for item in menu_group_dict['items']]
+                continue
 
             # 탑텐, 인기메뉴, 요기서 결제 시 할인 = 스킵
             if menu_group_dict['slug'] in ('top_items', 'additional_discount_items'):
