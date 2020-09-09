@@ -2,6 +2,8 @@ from model_bakery import baker
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from orders.models import Order
+
 
 class OrderCreateTestCase(APITestCase):
     """주문 생성"""
@@ -10,13 +12,14 @@ class OrderCreateTestCase(APITestCase):
         self.restaurant = baker.make('restaurants.Restaurant')
         menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant, name='햄버거')
         self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거')
+        self.menu2 = baker.make('restaurants.Menu', menu_group=menu_group, name='불고기버')
         option_groups = []
         option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='움료추가', mandatory=False,
                                     menu=self.menu)
         option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='패티추가', mandatory=True,
                                     menu=self.menu)
         # option = []
-        # for i in range(len(option_groups)):
+        # for i in range(len(op거tion_groups)):
         #     option += baker.make('restaurants.Option', _quantity=1, option_group=option_groups[i], name=f'option{i}')
 
         options = baker.make('restaurants.Option', _quantity=2, option_group=option_groups[0])
@@ -65,7 +68,8 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": "현금결제"
+            "payment_method": Order.PaymentMethodChoice.Cash,
+            "total_price": 39000
 
         }
         self.user = baker.make('users.User')
