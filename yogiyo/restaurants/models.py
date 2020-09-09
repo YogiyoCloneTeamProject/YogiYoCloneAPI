@@ -1,10 +1,11 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
-    star = models.FloatField()
+    star = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     notification = models.TextField()
     opening_hours = models.CharField(max_length=255)
     tel_number = models.CharField(max_length=255)
