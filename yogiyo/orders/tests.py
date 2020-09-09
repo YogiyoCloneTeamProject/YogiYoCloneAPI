@@ -62,7 +62,11 @@ class OrderCreateTestCase(APITestCase):
                         },
                     ]
                 },
-            ]
+            ],
+            "address": "중림동",
+            "delivery_requests": "소스 많이 주세요",
+            "payment_method": "현금결제"
+
         }
         self.user = baker.make('users.User')
 
@@ -72,4 +76,4 @@ class OrderCreateTestCase(APITestCase):
         response = self.client.post(self.url, data=self.data)
         res = response.data
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, res)
-        # print(res)
+        print(res)

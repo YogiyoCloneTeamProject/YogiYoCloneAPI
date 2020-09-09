@@ -35,7 +35,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'order_menu')
+        fields = ('id', 'order_menu', 'address', 'delivery_requests', 'payment_method')
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
@@ -44,7 +44,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'order_menu', 'restaurant')
+        fields = ('id', 'order_menu', 'restaurant', 'address', 'delivery_requests', 'payment_method')
 
     def validate(self, attrs):
         """req 데이터와 model 데이터 검증 """
