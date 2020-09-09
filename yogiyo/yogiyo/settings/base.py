@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication'
     ],
     'DEFAULT_PAGINATION_CLASS': 'core.paginations.Pagination',
-    'PAGE_SIZE': 5,
+    'PAGE_SIZE': 10,
     # 'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
