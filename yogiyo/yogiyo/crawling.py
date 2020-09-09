@@ -1,4 +1,5 @@
 import tempfile
+from datetime import datetime
 
 import requests
 from django.core import files
@@ -103,7 +104,9 @@ class Crawling:
         # bottom - info
         notification = restaurant_info_results['introduction_by_owner'].get('introduction_text') \
             if restaurant_info_results.get('introduction_by_owner') else ''
-        opening_hours = restaurant_info_results['opening_time_description']
+        s = restaurant_info_results['opening_time_description'].split(' - ')
+        opening_time = datetime.strptime(s[0], '%H:%M')
+        closing_time = datetime.strptime(s[1], '%H:%M')
         tel_number = restaurant_info_results['phone']
         address = restaurant_info_results['address']
         business_name = restaurant_info_results['crmdata']['company_name']
@@ -114,10 +117,11 @@ class Crawling:
             name=name,
             star=star,
             notification=notification,
-            opening_hours=opening_hours,
+            opening_time=opening_time,
+            closing_time=closing_time,
             tel_number=tel_number,
             address=address,
-            min_order=min_order,
+            min_order_price=min_order,
             payment_methods=payment_methods,
             business_name=business_name,
             company_registration_number=company_registration_number,
