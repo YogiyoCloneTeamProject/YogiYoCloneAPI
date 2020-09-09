@@ -156,10 +156,18 @@ class Crawling:
 
     def menu_parsing(self, menu_results, restaurant):
         """json에서 '메뉴그룹, 메뉴, 옵션그룹, 옵션' 파싱"""
-        # todo 포토 메뉴 파싱 필요
-        menu_results = menu_results[2:]  # todo 포토 메뉴, 탑텐, 인기메뉴 스킵
+        photo_menu_items = []
         for menu_group_dict in menu_results:
             menu_group_name = menu_group_dict['name']
+            # 포토메뉴리스트에 메뉴 이름 저장
+            if menu_group_dict['slug'] == 'photo_menu_items':
+                photo_menu_items = [item['name'] for item in menu_group_dict['items']]
+                continue
+
+            # 탑텐, 인기메뉴, 요기서 결제 시 할인 = 스킵
+            if menu_group_dict['slug'] in ('top_items', 'additional_discount_items'):
+                continue
+
             menu_group = MenuGroup(
                 restaurant=restaurant,
                 name=menu_group_name,
@@ -168,10 +176,13 @@ class Crawling:
 
             for menu_dict in menu_group_dict['items']:
                 menu_name = menu_dict['name']
+                # 메뉴이름이 포토메뉴리스트에 있다면 True
+                menu_is_photomenu = True if menu_name in photo_menu_items else False
                 menu_price = int(menu_dict['price'])
                 menu_img = menu_dict.get('image')
                 menu_caption = menu_dict.get('description')
-                menu = Menu(name=menu_name, menu_group=menu_group, price=menu_price, caption=menu_caption)
+                menu = Menu(name=menu_name, menu_group=menu_group, price=menu_price,
+                            caption=menu_caption, is_photomenu=menu_is_photomenu)
                 menu.save()
                 if menu_img is not None:
                     menu.image.save(*self.save_img(menu_img))  # todo None 리턴??

@@ -41,6 +41,7 @@ class Menu(models.Model):
     image = models.ImageField(upload_to='menu_image', null=True, blank=True, max_length=400)
     caption = models.CharField(max_length=255)
     price = models.PositiveIntegerField()
+    is_photomenu = models.BooleanField(default=False)
 
 
 class OptionGroup(models.Model):
