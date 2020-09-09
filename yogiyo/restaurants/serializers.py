@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from rest_framework import serializers
 
 from restaurants.models import Option, OptionGroup, Menu, MenuGroup, Restaurant
@@ -14,7 +16,7 @@ class OptionGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OptionGroup
-        fields = ('id', 'name', 'menu_id','mandatory', 'option')
+        fields = ('id', 'name', 'menu_id', 'mandatory', 'option')
 
 
 class MenuDetailSerializer(serializers.ModelSerializer):
@@ -37,13 +39,32 @@ class MenuGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MenuGroup
-        fields = ('id', 'name', 'restaurant_id', 'menu')
+        fields = ('name', 'menu')
 
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):
+    # todo 리뷰 보기
     menu_group = MenuGroupSerializer(read_only=True, many=True)
 
-    # todo 리뷰 보기
+    def to_representation(self, instance):
+        menu_groups = instance.menu_group.all()
+        res = []
+        for menu_group in menu_groups:
+            res += menu_group.menu.all()
+
+        res2 = []
+        for menu in res:
+            if menu.image:
+                res2.append(menu)
+        menus = MenuListSerializer(read_only=True, many=True, instance=res2)
+
+        photo_menu = OrderedDict({
+            'name': 'photo_menu',
+            'menu': menus.data
+        })
+        a = super().to_representation(instance)
+        a['menu_group'].insert(0, photo_menu)
+        return a
 
     class Meta:
         model = Restaurant
