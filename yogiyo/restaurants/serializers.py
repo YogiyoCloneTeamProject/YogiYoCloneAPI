@@ -47,21 +47,27 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
     menu_group = MenuGroupSerializer(read_only=True, many=True)
 
     def to_representation(self, instance):
+        """레스토랑의 모든 메뉴 중 image가 있는 메뉴만 photo_menu에 추가"""
+        # 모든 메뉴 가져오기
         menu_groups = instance.menu_group.all()
         res = []
         for menu_group in menu_groups:
             res += menu_group.menu.all()
 
+        # image필드가 있는 메뉴만 추가
         res2 = []
         for menu in res:
             if menu.image:
                 res2.append(menu)
-        menus = MenuListSerializer(read_only=True, many=True, instance=res2)
 
+        # 모델 -> 딕셔너리
+        menus = MenuListSerializer(read_only=True, many=True, instance=res2)
         photo_menu = OrderedDict({
             'name': 'photo_menu',
             'menu': menus.data
         })
+
+        # menu_group에 photo_menu 필드에 추가
         a = super().to_representation(instance)
         a['menu_group'].insert(0, photo_menu)
         return a
