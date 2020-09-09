@@ -37,7 +37,7 @@ class MenuGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MenuGroup
-        fields = ('id', 'name', 'restaurant_id', 'menu')
+        fields = ('name', 'restaurant_id', 'menu')
 
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):
