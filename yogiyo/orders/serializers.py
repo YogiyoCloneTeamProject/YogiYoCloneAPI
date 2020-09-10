@@ -1,6 +1,6 @@
+from django.db import models
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import empty
 
 from orders.models import Order, OrderOption, OrderOptionGroup, OrderMenu
 from restaurants.models import Menu
@@ -44,42 +44,68 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'order_menu', 'restaurant', 'address', 'delivery_requests', 'payment_method')
+        fields = ('id', 'order_menu', 'restaurant', 'address', 'delivery_requests', 'payment_method', 'total_price')
 
     def validate(self, attrs):
         """req 데이터와 model 데이터 검증 """
+        # todo 순서보장?
+        # 음식점 최소가격 확인
+        if attrs['total_price'] < attrs['restaurant'].min_order:
+            raise ValidationError('total price < restaurant min price')
+
+        check_price = 0
+        # req - model 데이터 일치 확인
         order_menus = attrs['order_menu']
         for order_menu in order_menus:
             """req: 메뉴 이름, 가격 / model : 메뉴 이름, 가격 비교 """
-            menu = Menu.objects.get(id=order_menu['menu'].id)
+            try:
+                menu = Menu.objects.get(id=order_menu['menu'].id)
+            except models.ObjectDoesNotExist:
+                raise ValidationError('menu id is wrong!')
+            # req 레스토랑이 메뉴 모델에 레스토랑과 같은지
+            if attrs['restaurant'].id != menu.menu_group.restaurant_id:
+                raise ValidationError('menu - restaurant wrong relation..')
             if order_menu['name'] != menu.name:
                 raise ValidationError('menu.name != model menu.name')
             if order_menu['price'] != menu.price:
                 raise ValidationError('menu.price != model menu.price')
 
-            for order_option_group, order_option_group_obj in zip(order_menu['order_option_group'],
-                                                                  menu.option_group.all()):
-                """req : 오더 옵션 그룹 이름, mandatory / model : 오더옵션그룹 이름, mandatory 비교 """
-                if order_option_group['name'] != order_option_group_obj.name:
+            check_price += order_menu['price']
+
+            """order_option_group"""
+            for order_option_group in order_menu['order_option_group']:
+                try:
+                    is_order_option_group = menu.option_group.get(name=order_option_group['name'])
+                except models.ObjectDoesNotExist:
+                    raise ValidationError('option_group name is wrong!')
+
+                if not is_order_option_group:
                     raise ValidationError('order_option_group.name != model option_group.name')
-                if order_option_group['mandatory'] != order_option_group_obj.mandatory:
+                if order_option_group['mandatory'] != is_order_option_group.mandatory:
                     raise ValidationError('order_option_group.mandatory != model option_group.mandatory')
 
-                """mandatory true -> 옵션그룹에서 옵션이 한개만 왔는지 검증"""
-                if order_option_group['mandatory'] and len(order_option_group['order_option']) != 1:
-                    raise ValidationError('order_option_group is mandatory, but more then 1 option is given')
-                for order_option, order_option_obj in zip(order_option_group['order_option'],
-                                                          order_option_group_obj.option.all()):
-                    if order_option['name'] != order_option_obj.name:
+                """order_option"""
+                for order_option in order_option_group['order_option']:
+                    try:
+                        is_order_option = is_order_option_group.option.get(name=order_option['name'])
+                    except models.ObjectDoesNotExist:
+                        raise ValidationError('option name is wrong!')
+
+                    if not is_order_option:
                         raise ValidationError('order option.name != model option.name')
-                    if order_option['price'] != order_option_obj.price:
+                    if order_option['price'] != is_order_option.price:
                         raise ValidationError('order option.price != model option.price')
 
-        """최소 주문 금액 검증 """  # todo 최소 주문 금액
+                    check_price += order_option['price']
 
-        return super().validate(attrs)
+        # 총 가격 == 메뉴 가격 + 옵션 가격
+        if attrs['total_price'] != check_price:
+            raise ValidationError('total price != check_price')
+
+        return attrs
 
     def create(self, validated_data):
+        # todo create할 때 option_group option menu ordering
         order_menus = validated_data.pop('order_menu')
         user = User.objects.first()
         order = Order.objects.create(owner=user, **validated_data)
