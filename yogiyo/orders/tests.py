@@ -69,7 +69,7 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.Cash,
-            "total_price": 39000
+            "total_price": 8000
 
         }
         self.user = baker.make('users.User')
