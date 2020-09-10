@@ -1,6 +1,6 @@
+from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
 
 
 class CategoryChoice(models.TextChoices):
@@ -23,7 +23,6 @@ class Restaurant(models.Model):
     name = models.CharField(max_length=255)
     star = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     notification = models.TextField()
-    # opening_hours = models.CharField(max_length=255)
     opening_time = models.TimeField()
     closing_time = models.TimeField()
     tel_number = models.CharField(max_length=20)
@@ -40,9 +39,7 @@ class Restaurant(models.Model):
     back_image = models.ImageField(upload_to='restaurant_back_image', null=True, blank=True)
     lat = models.FloatField()
     lng = models.FloatField()
-    # categories = ArrayField(models.CharField(max_length=255))
-    categories = ArrayField(
-        models.CharField(max_length=20, choices=CategoryChoice.choices))
+    categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
 
 
 class MenuGroup(models.Model):

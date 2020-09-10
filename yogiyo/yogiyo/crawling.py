@@ -95,8 +95,8 @@ class Crawling:
             discount = discount['additional']['delivery']['amount']
         delivery_charge = restaurant_results.get('delivery_fee')
         delivery_time = restaurant_results['estimated_delivery_time']
-        lat = restaurant_results['lat']
-        lng = restaurant_results['lng']
+        res_lat = restaurant_results['lat']
+        res_lng = restaurant_results['lng']
         restaurant_image = restaurant_results['logo_url']
         restaurant_back_image = restaurant_results['background_url']
         categories = restaurant_results['categories']
@@ -131,8 +131,8 @@ class Crawling:
             delivery_discount=discount,
             delivery_charge=delivery_charge,
             delivery_time=delivery_time,
-            lat=lat,
-            lng=lng,
+            lat=res_lat,
+            lng=res_lng,
             categories=categories
         )
         restaurant.save()

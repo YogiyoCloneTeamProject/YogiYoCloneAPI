@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from rest_framework import serializers
 
 from restaurants.models import Option, OptionGroup, Menu, MenuGroup, Restaurant

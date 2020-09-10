@@ -1,8 +1,8 @@
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
+
 from restaurants.models import Menu, Restaurant
 from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer
-from rest_framework.exceptions import MethodNotAllowed
 
 
 class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
@@ -26,6 +26,6 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         # query_params -> 카테고리
         if self.action == 'list':
             category = self.request.query_params.get('category', None)
-            if category is not None:
+            if category:
                 queryset = queryset.filter(categories__contains=[category])
         return queryset  # 카테고리 없으면 전체 조회
