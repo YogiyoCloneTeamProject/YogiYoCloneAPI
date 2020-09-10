@@ -100,6 +100,8 @@ class Crawling:
         restaurant_image = restaurant_results['logo_url']
         restaurant_back_image = restaurant_results['background_url']
         categories = restaurant_results['categories']
+        # todo 카테고리 초이스필드 검증
+        # for categories
 
         # bottom - info
         notification = restaurant_info_results['introduction_by_owner'].get('introduction_text') \
