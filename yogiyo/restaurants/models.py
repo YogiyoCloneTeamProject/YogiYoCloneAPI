@@ -1,15 +1,33 @@
-from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import models
+
+
+class CategoryChoice(models.TextChoices):
+    ONE_SERVING = '1인분주문'
+    FRANCHISE = '프랜차이즈'
+    CHICKEN = '치킨'
+    PIZZA = '피자양식'
+    CHINESE = '중식'
+    KOREAN = '한식'
+    JAPANESE = '일식돈까스'
+    JOKBAL = '족발보쌈'
+    MIDNIGHT = '야식'
+    SNACK = '분식'
+    CAFE = '카페디저트'
+    CONVENIENCE = '편의점'
+    TAKEOUT = '테이크아웃'
 
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
-    star = models.FloatField()
+    star = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     notification = models.TextField()
-    opening_hours = models.CharField(max_length=255)
-    tel_number = models.CharField(max_length=255)
+    opening_time = models.TimeField()
+    closing_time = models.TimeField()
+    tel_number = models.CharField(max_length=20)
     address = models.CharField(max_length=255)
-    min_order = models.PositiveIntegerField()
+    min_order_price = models.PositiveIntegerField()
     payment_methods = ArrayField(models.CharField(max_length=255))
     business_name = models.CharField(max_length=255)
     company_registration_number = models.CharField(max_length=255)
@@ -21,7 +39,7 @@ class Restaurant(models.Model):
     back_image = models.ImageField(upload_to='restaurant_back_image', null=True, blank=True)
     lat = models.FloatField()
     lng = models.FloatField()
-    categories = ArrayField(models.CharField(max_length=255))
+    categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
 
 
 class MenuGroup(models.Model):

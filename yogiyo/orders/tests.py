@@ -68,6 +68,42 @@ class OrderCreateTestCase(APITestCase):
             "payment_method": "현금결제"
 
         }
+        self.data = {
+            "restaurant": 2,
+            "order_menu": [
+                {
+                    "menu": 107,
+                    "name": "신메뉴",
+                    "count": 1,
+                    "price": 17900,
+                    "order_option_group": [
+                        {
+                            "name": "사이즈 선택",
+                            "mandatory": True,
+                            "order_option": [
+                                {
+                                    "name": "솔로",
+                                    "price": 0
+                                }
+                            ]
+                        },
+                        {
+                            "name": "고기 선택",
+                            "mandatory": True,
+                            "order_option": [
+                                {
+                                    "name": "섞어（삼겹＋목살）",
+                                    "price": 0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "address": "중림동",
+            "delivery_requests": "소스 많이 주세요",
+            "payment_method": "현금결제"
+        }
         self.user = baker.make('users.User')
 
     def test_should_create(self):
