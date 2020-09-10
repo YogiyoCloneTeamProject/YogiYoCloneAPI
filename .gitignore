@@ -131,4 +131,5 @@ dmypy.json
 images/
 static/
 /static
-.json
+datadump.json
+yogiyo_crawl.json
