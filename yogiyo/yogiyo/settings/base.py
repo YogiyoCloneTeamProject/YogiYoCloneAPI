@@ -21,8 +21,6 @@ environ.Env.read_env(env_file=env_file)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '&-&4c(b@63ysb#uqj(985c=)w_h^w_a@wop!%=ucfhyw*c@6k+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -87,7 +85,7 @@ WSGI_APPLICATION = 'yogiyo.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'HOST': os.environ['DB_HOST'],
         'NAME': os.environ['DB_NAME'],
         'USER': os.environ['DB_USER'],
