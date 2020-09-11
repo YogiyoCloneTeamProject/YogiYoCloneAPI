@@ -1,6 +1,6 @@
+from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import models
 
 
 class CategoryChoice(models.TextChoices):
@@ -40,6 +40,7 @@ class Restaurant(models.Model):
     lat = models.FloatField()
     lng = models.FloatField()
     categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
+    point = models.PointField(null=True, blank=True)
 
 
 class MenuGroup(models.Model):
