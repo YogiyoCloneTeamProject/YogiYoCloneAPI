@@ -2,6 +2,7 @@ import tempfile
 from datetime import datetime
 
 import requests
+from django.contrib.gis.geos import Point
 from django.core import files
 from rest_framework.utils import json
 
@@ -21,31 +22,33 @@ class Crawling:
             'x-apisecret': 'fe5183cc3dea12bd0ce299cf110a75a2'
         })
 
-    def get_response_json_data(self, url):
-        """API URL -> JSON -> 딕셔너리"""
-        r = self.s.get(url)
-        response_str = r.content.decode('utf-8')
-        return json.loads(response_str)
+    def json_parsing(self):
+        """yogiyo_crawl.json 파일에서 파싱헤서 DB에 저장"""
+        with open('yogiyo_crawl.json', 'r', encoding='utf-8') as file:
+            json_data = json.load(file)
+        for restaurant_data in json_data:
+            restaurant_results = restaurant_data['restaurant_results']
+            restaurant_info_results = restaurant_data['restaurant_info_results']
+            review_results = restaurant_data['review_results']
+            menu_results = restaurant_data['menu_results']
 
-    def get_page_id_list(self):
-        """레스토랑 id 리스트"""
-        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=50&lat={lat}&lng={lng}&order=rank&page=0&search='
-        restaurant_list_results = self.get_response_json_data(restaurant_list_url)
-        return [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
+            restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
+            # self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
+            self.menu_parsing(menu_results, restaurant)
 
-    def real_crawl(self):
-        """실제 크롤링"""
+    def web_crawl(self):
+        """웹에서 크롤 -> DB에 저장"""
         page_id_list = self.get_page_id_list()
         for page_id in page_id_list:
             self.api_parsing(page_id)
 
     def json_crawl(self):
-        """JSON 파일로 저장"""
+        """웹에서 크롤 -> yogiyo_crawl.json 파일로 저장"""
         page_id_list = self.get_page_id_list()
         self.dict_to_json_file(page_id_list)
 
     def test_crawl(self):
-        """테스트 10개만 크롤링"""
+        """테스트 10개만 web_crawl"""
         page_id_list = [
             340303,
             445730,
@@ -101,7 +104,6 @@ class Crawling:
         restaurant_back_image = restaurant_results['background_url']
         categories = restaurant_results['categories']
         # todo 카테고리 초이스필드 검증
-        # for categories
 
         # bottom - info
         notification = restaurant_info_results['introduction_by_owner'].get('introduction_text') \
@@ -114,6 +116,7 @@ class Crawling:
         business_name = restaurant_info_results['crmdata']['company_name']
         company_registration_number = restaurant_info_results['crmdata']['company_number']
         origin_information = restaurant_info_results['country_origin']
+        point = Point([res_lng, res_lat])
 
         restaurant = Restaurant(
             name=name,
@@ -133,7 +136,8 @@ class Crawling:
             delivery_time=delivery_time,
             lat=res_lat,
             lng=res_lng,
-            categories=categories
+            categories=categories,
+            point=point
         )
         restaurant.save()
         if restaurant_image:
@@ -254,16 +258,14 @@ class Crawling:
         with open('yogiyo_crawl.json', 'w', encoding='utf-8') as file:
             json.dump(crawl_data, file, ensure_ascii=False, indent='\t')
 
-    def json_parsing(self):
-        """json 파일에서 파싱"""
-        with open('yogiyo_crawl.json', 'r', encoding='utf-8') as file:
-            json_data = json.load(file)
-        for restaurant_data in json_data:
-            restaurant_results = restaurant_data['restaurant_results']
-            restaurant_info_results = restaurant_data['restaurant_info_results']
-            review_results = restaurant_data['review_results']
-            menu_results = restaurant_data['menu_results']
+    def get_response_json_data(self, url):
+        """API URL -> JSON -> 딕셔너리"""
+        r = self.s.get(url)
+        response_str = r.content.decode('utf-8')
+        return json.loads(response_str)
 
-            restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
-            # self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
-            self.menu_parsing(menu_results, restaurant)
+    def get_page_id_list(self):
+        """레스토랑 id 리스트"""
+        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=50&lat={lat}&lng={lng}&order=rank&page=0&search='
+        restaurant_list_results = self.get_response_json_data(restaurant_list_url)
+        return [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
