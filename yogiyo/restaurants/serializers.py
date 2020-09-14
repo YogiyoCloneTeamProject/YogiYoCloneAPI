@@ -54,8 +54,7 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'star', 'image', 'notification', 'opening_time', 'closing_time', 'tel_number', 'address',
             'min_order_price', 'payment_methods', 'business_name', 'company_registration_number', 'origin_information',
-            'delivery_discount', 'delivery_charge', 'delivery_time', 'back_image', 'lat', 'lng', 'photo_menu',
-            'menu_group')
+            'delivery_discount', 'delivery_charge', 'delivery_time', 'back_image', 'photo_menu', 'menu_group')
 
 
 class RestaurantListSerializer(serializers.ModelSerializer):

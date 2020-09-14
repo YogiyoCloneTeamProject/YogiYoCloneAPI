@@ -37,10 +37,8 @@ class Restaurant(models.Model):
     delivery_charge = models.PositiveIntegerField(null=True, blank=True)
     delivery_time = models.CharField(max_length=255)
     back_image = models.ImageField(upload_to='restaurant_back_image', null=True, blank=True)
-    lat = models.FloatField()
-    lng = models.FloatField()
     categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
-    point = models.PointField(null=True, blank=True)
+    point = models.PointField()
 
 
 class MenuGroup(models.Model):

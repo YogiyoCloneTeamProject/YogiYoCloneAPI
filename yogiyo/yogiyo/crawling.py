@@ -104,6 +104,7 @@ class Crawling:
         restaurant_back_image = restaurant_results['background_url']
         categories = restaurant_results['categories']
         # todo 카테고리 초이스필드 검증
+        # for categories
 
         # bottom - info
         notification = restaurant_info_results['introduction_by_owner'].get('introduction_text') \
@@ -116,7 +117,6 @@ class Crawling:
         business_name = restaurant_info_results['crmdata']['company_name']
         company_registration_number = restaurant_info_results['crmdata']['company_number']
         origin_information = restaurant_info_results['country_origin']
-        point = Point([res_lng, res_lat])
 
         restaurant = Restaurant(
             name=name,
@@ -136,8 +136,8 @@ class Crawling:
             delivery_time=delivery_time,
             lat=res_lat,
             lng=res_lng,
-            categories=categories,
-            point=point
+            point=Point(res_lng, res_lat),
+            categories=categories
         )
         restaurant.save()
         if restaurant_image:
