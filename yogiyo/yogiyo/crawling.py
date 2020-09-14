@@ -2,6 +2,7 @@ import tempfile
 from datetime import datetime
 
 import requests
+from django.contrib.gis.geos import Point
 from django.core import files
 from rest_framework.utils import json
 
@@ -133,6 +134,7 @@ class Crawling:
             delivery_time=delivery_time,
             lat=res_lat,
             lng=res_lng,
+            point=Point(res_lng, res_lat),
             categories=categories
         )
         restaurant.save()
