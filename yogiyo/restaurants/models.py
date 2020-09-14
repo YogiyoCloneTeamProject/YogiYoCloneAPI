@@ -39,6 +39,7 @@ class Restaurant(models.Model):
     back_image = models.ImageField(upload_to='restaurant_back_image', null=True, blank=True)
     categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
     point = models.PointField()
+    review_count = models.PositiveIntegerField(default=0)
 
 
 class MenuGroup(models.Model):

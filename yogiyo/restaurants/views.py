@@ -32,10 +32,10 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
                 queryset = queryset.filter(categories__contains=[category])
 
             # query_params -> 위경도
-            lng = self.request.query_params.get('lng', None)
-            lat = self.request.query_params.get('lat', None)
-            # lng = 127.057129
-            # lat = 37.545133
+            # lng = self.request.query_params.get('lng', None)
+            # lat = self.request.query_params.get('lat', None)
+            lng = 127.057129
+            lat = 37.545133
             if lat and lng:
                 queryset = queryset.filter(point__distance_lte=(Point(lng, lat), D(m=500)))
 

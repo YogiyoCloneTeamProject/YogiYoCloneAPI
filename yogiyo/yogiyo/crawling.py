@@ -134,8 +134,6 @@ class Crawling:
             delivery_discount=discount,
             delivery_charge=delivery_charge,
             delivery_time=delivery_time,
-            lat=res_lat,
-            lng=res_lng,
             point=Point(res_lng, res_lat),
             categories=categories
         )
