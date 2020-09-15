@@ -50,7 +50,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         """req 데이터와 model 데이터 검증 """
         # todo 순서보장?
         # 음식점 최소가격 확인
-        if attrs['total_price'] < attrs['restaurant'].min_order:
+        if attrs['total_price'] < attrs['restaurant'].min_order_price:
             raise ValidationError('total price < restaurant min price')
 
         check_price = 0
@@ -107,7 +107,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # todo create할 때 option_group option menu ordering
         order_menus = validated_data.pop('order_menu')
-        user = User.objects.first()
+        user = User.objects.first()  # todo 테스트용 owner 빼기
         order = Order.objects.create(owner=user, **validated_data)
         for order_menu in order_menus:
             order_option_groups = order_menu.pop('order_option_group')

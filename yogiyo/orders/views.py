@@ -3,6 +3,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from orders.models import Order
 from orders.serializers import OrderSerializer, OrderListSerializer, OrderCreateSerializer
+from users.models import User
 
 
 class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
@@ -18,5 +19,5 @@ class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
             return OrderListSerializer
         return super().get_serializer_class()
 
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+    # def perform_create(self, serializer):
+    #     serializer.save(owner=User.objects.first())
