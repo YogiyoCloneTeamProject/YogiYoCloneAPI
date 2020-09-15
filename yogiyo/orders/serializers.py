@@ -50,7 +50,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         """req 데이터와 model 데이터 검증 """
         # todo 순서보장?
         # 음식점 최소가격 확인
-        if attrs['total_price'] < attrs['restaurant'].min_order:
+        if attrs['total_price'] < attrs['restaurant'].min_order_price:
             raise ValidationError('total price < restaurant min price')
 
         check_price = 0
