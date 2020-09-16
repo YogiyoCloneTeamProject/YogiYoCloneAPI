@@ -5,16 +5,18 @@ from rest_framework.test import APITestCase
 
 from orders.models import Order
 
-lat = 37.545133
-lng = 127.057129
-point = Point(lng, lat)
+
+#
+# lat = 37.545133
+# lng = 127.057129
+# point = Point(lng, lat)
 
 
 class OrderCreateTestCase(APITestCase):
     """주문 생성"""
 
     def setUp(self) -> None:
-        self.restaurant = baker.make('restaurants.Restaurant', point=point, min_order_price=10000)
+        self.restaurant = baker.make('restaurants.Restaurant', min_order_price=10000)
         menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant, name='햄버거')
         self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거', price=9000)
         self.menu2 = baker.make('restaurants.Menu', menu_group=menu_group, name='불고기버', price=9000)
@@ -25,15 +27,17 @@ class OrderCreateTestCase(APITestCase):
                                          menu=self.menu)
         self.option_groups_memu2 = baker.make('restaurants.OptionGroup', name='아무거나 추가', mandatory=True,
                                               menu=self.menu2)
-        # option = []
-        # for i in range(len(op거tion_groups)):
-        #     option += baker.make('restaurants.Option', _quantity=1, option_group=option_groups[i], name=f'option{i}')
 
         self.options = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[0], price=1000)
         self.options2 = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[1], price=500)
 
         self.url = f'/orders'
-        self.data = {
+
+        self.user = baker.make('users.User')
+
+    def test_order_create(self):
+        """생성-성공"""
+        data = {
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
@@ -64,10 +68,6 @@ class OrderCreateTestCase(APITestCase):
                                     "name": self.options2[0].name,
                                     "price": self.options2[0].price
                                 },
-                                # {
-                                #     "name": options2[1].name,
-                                #     "price": options2[1].price
-                                # }
                             ]
                         },
                     ]
@@ -77,16 +77,10 @@ class OrderCreateTestCase(APITestCase):
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.Cash,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
-            # +options2[1].price
 
         }
-
-        self.user = baker.make('users.User')
-
-    def test_order_create(self):
-        """생성-성공"""
         self.client.force_authenticate(user=self.user)
-        response = self.client.post(self.url, data=self.data)
+        response = self.client.post(self.url, data=data)
         res = response.data
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, res)
 
@@ -97,8 +91,8 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 5,
-                    "name": self.menu.name,  # here
+                    "menu": 5,# here
+                    "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
                     "order_option_group": [
@@ -146,7 +140,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 1,
+                    "menu": self.menu.id,
                     "name": '피자',  # here
                     "count": 1,
                     "price": self.menu.price,
@@ -188,6 +182,7 @@ class OrderCreateTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         print(response.data)
 
+
     def test_order_create_menu_price(self):
         """req : menu.price -> wrong"""
 
@@ -195,7 +190,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 1,
+                    "menu": self.menu.id,
                     "name": self.menu.name,
                     "count": 1,
                     "price": 3000,  # here!
@@ -235,7 +230,7 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
+        print(response.data, self.menu.id)
 
     def test_order_create_order_option_group_name(self):
         """req : order_option_group.name -> wrong"""
@@ -244,7 +239,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 1,
+                    "menu": self.menu.id,
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
@@ -284,7 +279,7 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
+        print(response.data, self.menu.id)
 
     def test_order_create_order_option_group_mandatory(self):
         """req : order_option_group.mandatory -> wrong"""
@@ -293,7 +288,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 1,
+                    "menu": self.menu.id,
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
@@ -335,14 +330,14 @@ class OrderCreateTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         print(response.data)
 
-    def test_order_create_order_opion_group_mandatory_option_len(self):
+    def test_order_create_order_option_group_mandatory_option_len(self):
         """req : order_option_group.mandatory true -> len(option) != 1"""
 
         data = {
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 1,
+                    "menu": self.menu.id,
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
@@ -395,7 +390,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 1,
+                    "menu": self.menu.id,
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
@@ -444,7 +439,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 1,
+                    "menu": self.menu.id,
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
@@ -468,8 +463,8 @@ class OrderCreateTestCase(APITestCase):
                             "mandatory": True,
                             "order_option": [
                                 {
-                                    "name": self.options2[0].name,  # here!
-                                    "price": 4000
+                                    "name": self.options2[0].name,
+                                    "price": 4000 # here!
                                 },
                             ]
                         },
@@ -493,7 +488,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 1,
+                    "menu": self.menu.id,
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
@@ -518,7 +513,7 @@ class OrderCreateTestCase(APITestCase):
                             "order_option": [
                                 {
                                     "name": self.options2[0].name,
-                                    "price": 4000
+                                    "price": self.options2[0].price
                                 },
                             ]
                         },
@@ -542,7 +537,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 1,
+                    "menu": self.menu.id,
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
@@ -567,7 +562,7 @@ class OrderCreateTestCase(APITestCase):
                             "order_option": [
                                 {
                                     "name": self.options2[0].name,
-                                    "price": 4000
+                                    "price": self.options2[0].price
                                 },
                             ]
                         },
