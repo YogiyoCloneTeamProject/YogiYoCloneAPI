@@ -18,6 +18,3 @@ class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
         if self.action == 'list':
             return OrderListSerializer
         return super().get_serializer_class()
-
-    # def perform_create(self, serializer):
-    #     serializer.save(owner=User.objects.first())
