@@ -63,8 +63,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             except models.ObjectDoesNotExist:
                 raise ValidationError('menu id is wrong!')
             # req 레스토랑이 메뉴 모델에 레스토랑과 같은지
-            if attrs['restaurant'].id != menu.menu_group.restaurant_id:
-                raise ValidationError('menu - restaurant wrong relation..')
             if order_menu['name'] != menu.name:
                 raise ValidationError('menu.name != model menu.name')
             if order_menu['price'] != menu.price:
@@ -77,22 +75,22 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 try:
                     is_order_option_group = menu.option_group.get(name=order_option_group['name'])
                 except models.ObjectDoesNotExist:
-                    raise ValidationError('option_group name is wrong!')
+                    raise ValidationError('This option group is not included in this menu')
 
-                if not is_order_option_group:
-                    raise ValidationError('order_option_group.name != model option_group.name')
                 if order_option_group['mandatory'] != is_order_option_group.mandatory:
                     raise ValidationError('order_option_group.mandatory != model option_group.mandatory')
+                # mandatory = true -> option 1개만!
+                if order_option_group['mandatory']:
+                    if len(order_option_group['order_option']) != 1 :
+                        raise ValidationError('mandatory true -> must len(order option list) == 1  ')
 
                 """order_option"""
                 for order_option in order_option_group['order_option']:
                     try:
                         is_order_option = is_order_option_group.option.get(name=order_option['name'])
                     except models.ObjectDoesNotExist:
-                        raise ValidationError('option name is wrong!')
+                        raise ValidationError('This option is not included in this option group')
 
-                    if not is_order_option:
-                        raise ValidationError('order option.name != model option.name')
                     if order_option['price'] != is_order_option.price:
                         raise ValidationError('order option.price != model option.price')
 
@@ -107,7 +105,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # todo create할 때 option_group option menu ordering
         order_menus = validated_data.pop('order_menu')
-        user = User.objects.first()
+        user = User.objects.first()  # todo 테스트용 owner 빼기
         order = Order.objects.create(owner=user, **validated_data)
         for order_menu in order_menus:
             order_option_groups = order_menu.pop('order_option_group')
