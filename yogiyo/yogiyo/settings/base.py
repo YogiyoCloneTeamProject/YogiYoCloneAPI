@@ -63,7 +63,7 @@ INSTALLED_APPS = [
 ]
 
 # 카카오 소셜 로그인
-SITE_ID = 1
+# SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
