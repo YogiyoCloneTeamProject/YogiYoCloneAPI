@@ -34,10 +34,15 @@ class MenuListSerializer(serializers.ModelSerializer):
 
 class MenuGroupSerializer(serializers.ModelSerializer):
     menu = MenuListSerializer(read_only=True, many=True)
+    # todo oppend 필드 지우기 - 동현님 요청사항
+    oppend = serializers.SerializerMethodField()
 
     class Meta:
         model = MenuGroup
-        fields = ('name', 'menu')
+        fields = ('name', 'menu', 'oppend')
+
+    def get_oppend(self, obj):
+        return False
 
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):
