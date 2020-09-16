@@ -58,10 +58,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         order_menus = attrs['order_menu']
         for order_menu in order_menus:
             """req: 메뉴 이름, 가격 / model : 메뉴 이름, 가격 비교 """
-            try:
-                menu = Menu.objects.get(id=order_menu['menu'].id)
-            except models.ObjectDoesNotExist:
-                raise ValidationError('menu id is wrong!')
+            menu = order_menu['menu']
             # req 레스토랑이 메뉴 모델에 레스토랑과 같은지
             if order_menu['name'] != menu.name:
                 raise ValidationError('menu.name != model menu.name')
@@ -81,7 +78,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     raise ValidationError('order_option_group.mandatory != model option_group.mandatory')
                 # mandatory = true -> option 1개만!
                 if order_option_group['mandatory']:
-                    if len(order_option_group['order_option']) != 1 :
+                    if len(order_option_group['order_option']) != 1:
                         raise ValidationError('mandatory true -> must len(order option list) == 1  ')
 
                 """order_option"""
