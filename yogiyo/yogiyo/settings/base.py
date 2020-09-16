@@ -38,16 +38,32 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # third party
     'rest_framework',
     'rest_framework.authtoken',
     'storages',
+    'rest_auth',
 
+    # my app
     'core',
     'restaurants',
     'users',
     'orders',
     'reviews',
+
+    # django-allauth
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'rest_auth.registration',
+
+    # provider
+    'allauth.socialaccount.providers.kakao',
 ]
+
+# 카카오 소셜 로그인
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -160,4 +176,14 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     # 'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+}
+
+SOCIALACCOUNT_PROVIDERS = {
+    'kakao': {
+        'APP': {
+            'client_id': '7c34ce562e2d7d667567eb85201fe06a',
+            'secret': 482167,
+            'key': ''
+        }
+    }
 }
