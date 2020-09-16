@@ -1,6 +1,3 @@
-from allauth.account.views import confirm_email
-from django.conf.urls import url
-from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
 from orders.views import OrderViewSet
