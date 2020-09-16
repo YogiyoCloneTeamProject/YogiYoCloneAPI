@@ -101,7 +101,8 @@ WSGI_APPLICATION = 'yogiyo.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'HOST': os.environ['DB_HOST'],
         'NAME': os.environ['DB_NAME'],
         'USER': os.environ['DB_USER'],

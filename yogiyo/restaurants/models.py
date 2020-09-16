@@ -1,6 +1,7 @@
-from django.contrib.gis.db import models
+# from django.contrib.gis.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db import models
 
 
 class CategoryChoice(models.TextChoices):
@@ -38,7 +39,9 @@ class Restaurant(models.Model):
     delivery_time = models.CharField(max_length=255)
     back_image = models.ImageField(upload_to='restaurant_back_image', null=True, blank=True)
     categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
-    point = models.PointField()
+    lat = models.FloatField()
+    lng = models.FloatField()
+    # point = models.PointField()
     review_count = models.PositiveIntegerField(default=0)
 
 
@@ -49,7 +52,6 @@ class MenuGroup(models.Model):
 
 def menu_img_path(instance, filename):
     filename = filename.split('?')[0]
-    print(filename)
     return f'menu_img/{filename}'
 
 

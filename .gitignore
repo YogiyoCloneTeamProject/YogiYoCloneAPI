@@ -132,4 +132,6 @@ images/
 static/
 /static
 datadump.json
+datadump-origin.json
+datadump-GIS.json
 yogiyo_crawl.json
