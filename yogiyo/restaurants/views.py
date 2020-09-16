@@ -5,6 +5,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from restaurants.models import Menu, Restaurant
 from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer
+from django_filters import rest_framework as filters
 
 
 class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
@@ -13,10 +14,21 @@ class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     serializer_class = MenuDetailSerializer
 
 
+class RestaurantFilter(filters.FilterSet):
+    payment_methods = filters.CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Restaurant
+        fields = ['payment_methods']
+
+
 class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
     """restaurant list, detail"""
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantListSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = RestaurantFilter
+    # filter_fields = ('payment_methods',)
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -30,6 +42,10 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
             category = self.request.query_params.get('category', None)
             if category:
                 queryset = queryset.filter(categories__contains=[category])
+
+                method = self.request.query_params.get('payment_method', None)
+                if method:
+                    queryset = self.filter_queryset(queryset)
 
             # PostGIS 거리 필터
             # queryset = self.filter_by_distance(queryset)

@@ -60,6 +60,9 @@ INSTALLED_APPS = [
 
     # provider
     'allauth.socialaccount.providers.kakao',
+
+    # lib
+    'django_filters',
 ]
 
 # 카카오 소셜 로그인
@@ -177,6 +180,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     # 'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
 }
 
 SOCIALACCOUNT_PROVIDERS = {
