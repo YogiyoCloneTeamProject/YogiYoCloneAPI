@@ -58,7 +58,20 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
 
 
 class RestaurantListSerializer(serializers.ModelSerializer):
+    representative_menus = serializers.SerializerMethodField()
+
     class Meta:
         # todo 리뷰 개수, 사장님 댓글 수, 대표메뉴 , 배달시간
         model = Restaurant
-        fields = ('id', 'name', 'star', 'image', 'delivery_discount', 'delivery_charge')
+        fields = (
+            'id', 'name', 'star', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time', 'review_count',
+            'representative_menus')
+
+    def get_representative_menus(self, obj):
+        return '대표메뉴 추가 예정...'
+
+
+class HomeViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Restaurant
+        fields = ('id', 'name', 'star', 'image', 'delivery_discount', 'delivery_charge', 'review_count')
