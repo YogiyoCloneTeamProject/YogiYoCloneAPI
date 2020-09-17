@@ -14,8 +14,6 @@ class UserManager(BaseUserManager):
             raise ValueError('The given email must be set')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-
-        user.set_password(password)
         user.save(using=self._db)
         return user
 
@@ -56,6 +54,7 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         if not self.id:
+            self.set_password(self.password)
             super().save(*args, **kwargs)
             Profile.objects.create(user_id=self.id)
         else:

@@ -9,6 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'email', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         """ POST: 유저 회원가입 """
@@ -24,7 +25,7 @@ class CustomAuthTokenSerializer(serializers.Serializer):
     email = serializers.CharField(label=_("email"))
     password = serializers.CharField(
         label=_("Password"),
-        style={'input_type':    'password'},
+        style={'input_type': 'password'},
         trim_whitespace=False
     )
 
