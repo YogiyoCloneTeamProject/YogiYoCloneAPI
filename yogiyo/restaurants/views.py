@@ -1,5 +1,5 @@
-from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D
+# from django.contrib.gis.geos import Point
+# from django.contrib.gis.measure import D
 from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -80,18 +80,18 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
             # queryset = self.filter_by_distance(queryset)
         return queryset  # 카테고리 없으면 전체 조회
 
-    def filter_by_distance(self, qs):
-        """query_params 위경도로 PointField 거리 필터링"""
-        # 실제 query_params
-        lng = self.request.query_params.get('lng', None)
-        lat = self.request.query_params.get('lat', None)
-        # 임의 좌표 사용
-        # lng = 127.057129
-        # lat = 37.545133
-
-        if lat and lng:
-            qs = qs.filter(point__distance_lte=(Point(lng, lat), D(m=500)))
-        return qs
+    # def filter_by_distance(self, qs):
+    #     """query_params 위경도로 PointField 거리 필터링"""
+    #     # 실제 query_params
+    #     lng = self.request.query_params.get('lng', None)
+    #     lat = self.request.query_params.get('lat', None)
+    #     # 임의 좌표 사용
+    #     # lng = 127.057129
+    #     # lat = 37.545133
+    #
+    #     if lat and lng:
+    #         qs = qs.filter(point__distance_lte=(Point(lng, lat), D(m=500)))
+    #     return qs
 
     @action(detail=False, methods=['GET'])
     def home_view_1(self, request, *args, **kwargs):
