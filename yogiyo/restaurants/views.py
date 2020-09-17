@@ -3,6 +3,7 @@ from django.contrib.gis.measure import D
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 
+from core.paginations import Pagination
 from restaurants.models import Menu, Restaurant
 from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer
 from django_filters import rest_framework as filters
@@ -28,6 +29,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     serializer_class = RestaurantListSerializer
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = RestaurantFilter
+
     # filter_fields = ('payment_methods',)
 
     def get_serializer_class(self):
@@ -39,17 +41,41 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         queryset = super().get_queryset()
         # query_params -> 카테고리
         if self.action == 'list':
+            # 음식점 카테고리
             category = self.request.query_params.get('category', None)
             if category:
                 queryset = queryset.filter(categories__contains=[category])
+            # 필터링 -> 결제 수단
+            method = self.request.query_params.get('payment_method', None)
+            if method:
+                queryset = self.filter_queryset(queryset)
+            # 정렬
+            order_by = self.request.query_params.get('order_by', None)
+            if order_by:
 
-                method = self.request.query_params.get('payment_method', None)
-                if method:
-                    queryset = self.filter_queryset(queryset)
+                if order_by == "delivery_charge":  # 배달요금 순
+                    Pagination.ordering = 'delivery_charge'
+                    # queryset = queryset.order_by('delivery_charge')
+                elif order_by == "star":  # 평점 높은 순
+                    Pagination.ordering = '-star'
+                    # queryset = queryset.order_by('-star')
+                elif order_by == "review":  # 리뷰 많은 순
+                    Pagination.ordering = '-review_count'
+                #     queryset = queryset.order_by('-review')
+                elif order_by == "min_order_price":  # 최소 주문 금액 순
+                    Pagination.ordering = 'min_order_price'
+                    # queryset = queryset.order_by('min_order_price')
+                # elif order_by == "distance":  # 거리순
+                #     Pagination.ordering = 'delivery_charge'
+                #     queryset = queryset.order_by('point')
+                # elif order_by == queryset.order_by('') # # 사장님 댓글 순
+                #     Pagination.ordering = 'delivery_charge'
+                # elif order_by == "delivery_time": # 배달시간순
+                #     Pagination.ordering = 'delivery_charge'
+                #     queryset = queryset.order_by('delivery_time')
 
             # PostGIS 거리 필터
             # queryset = self.filter_by_distance(queryset)
-
         return queryset  # 카테고리 없으면 전체 조회
 
     def filter_by_distance(self, qs):
