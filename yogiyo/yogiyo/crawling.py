@@ -38,14 +38,14 @@ class Crawling:
 
     def web_crawl(self):
         """웹에서 크롤 -> DB에 저장"""
-        page_id_list = self.get_page_id_list()
+        page_id_list, list_info_dict = self.get_page_id_list()
         for page_id in page_id_list:
             self.api_parsing(page_id)
 
     def json_crawl(self):
         """웹에서 크롤 -> yogiyo_crawl.json 파일로 저장"""
-        page_id_list = self.get_page_id_list()
-        self.dict_to_json_file(page_id_list)
+        page_id_list, list_info_dict = self.get_page_id_list()
+        self.dict_to_json_file(page_id_list, list_info_dict)
 
     def test_crawl(self):
         """테스트 10개만 web_crawl"""
@@ -237,15 +237,15 @@ class Crawling:
         # This saves the model so be sure that is it valid
         return file_name, files.File(lf)
 
-    def dict_to_json_file(self, page_id_list):
+    def dict_to_json_file(self, page_id_list, list_info_dict):
         crawl_data = []
         for page_id in page_id_list:
             restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat={lat}&lng={lng}'
             restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
             review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
             menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
-
             restaurant_data = {
+                'list_info': list_info_dict,
                 'restaurant_results': self.get_response_json_data(restaurant_api_url),
                 'restaurant_info_results': self.get_response_json_data(restaurant_info_api_url),
                 'review_results': self.get_response_json_data(review_api_url),
@@ -266,4 +266,8 @@ class Crawling:
         """레스토랑 id 리스트"""
         restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=50&lat={lat}&lng={lng}&order=rank&page=0&search='
         restaurant_list_results = self.get_response_json_data(restaurant_list_url)
-        return [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
+        list_info_dict = {restaurant_dict['id']: restaurant_dict for restaurant_dict in
+                          restaurant_list_results['restaurants']}
+
+        page_id_list = [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
+        return page_id_list, list_info_dict
