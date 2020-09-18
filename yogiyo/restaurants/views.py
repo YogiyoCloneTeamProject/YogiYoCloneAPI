@@ -63,9 +63,11 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     def filter_by_distance_manual(self, qs):
         data = self.request.GET
         if self.action == 'list':
-            lat = float(data.get('lat'))
-            lng = float(data.get('lng'))
+            lat = data.get('lat')
+            lng = data.get('lng')
             if lat and lng:
+                lat = float(lat)
+                lng = float(lng)
                 min_lat = lat - 0.0045
                 max_lat = lat + 0.0045
                 min_lon = lng - 0.007
