@@ -44,7 +44,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     def get_queryset(self):
         queryset = super().get_queryset()
         # PostGIS 거리 필터
-        # queryset = self.filter_by_distance(queryset)
+        queryset = self.filter_by_distance(queryset)
         return queryset  # 카테고리 없으면 전체 조회
 
     # def filter_by_distance(self, qs):
@@ -59,6 +59,22 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     #     if lat and lng:
     #         qs = qs.filter(point__distance_lte=(Point(lng, lat), D(m=500)))
     #     return qs
+
+    def filter_by_distance(self, qs):
+        data = self.request.GET
+        if self.action == 'list':
+            lat = float(data.get('lat'))
+            lng = float(data.get('lng'))
+            if lat and lng:
+                min_lat = lat - 0.0045
+                max_lat = lat + 0.0045
+                min_lon = lng - 0.007
+                max_lon = lng + 0.007
+
+                # 최소, 최대 위경도를 1km씩 설정해서 쿼리
+                qs = qs.filter(lat__gte=min_lat, lat__lte=max_lat,
+                               lng__gte=min_lon, lng__lte=max_lon)
+        return qs
 
     @action(detail=False, methods=['GET'])
     def home_view_1(self, request, *args, **kwargs):
