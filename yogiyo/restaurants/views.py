@@ -44,10 +44,10 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     def get_queryset(self):
         queryset = super().get_queryset()
         # PostGIS 거리 필터
-        queryset = self.filter_by_distance(queryset)
+        queryset = self.filter_by_distance_manual(queryset)
         return queryset  # 카테고리 없으면 전체 조회
 
-    # def filter_by_distance(self, qs):
+    # def filter_by_distance_GIS(self, qs):
     #     """query_params 위경도로 PointField 거리 필터링"""
     #     # 실제 query_params
     #     lng = self.request.query_params.get('lng', None)
@@ -60,7 +60,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     #         qs = qs.filter(point__distance_lte=(Point(lng, lat), D(m=500)))
     #     return qs
 
-    def filter_by_distance(self, qs):
+    def filter_by_distance_manual(self, qs):
         data = self.request.GET
         if self.action == 'list':
             lat = float(data.get('lat'))
