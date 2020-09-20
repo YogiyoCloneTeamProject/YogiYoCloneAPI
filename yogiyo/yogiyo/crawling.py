@@ -9,6 +9,7 @@ from rest_framework.utils import json
 from restaurants.models import Restaurant, MenuGroup, Menu, OptionGroup, Option
 from reviews.models import Review, ReviewImage
 import random
+
 lat = 37.545133
 lng = 127.057129
 
@@ -29,10 +30,11 @@ class Crawling:
         for restaurant_data in json_data:
             restaurant_results = restaurant_data['restaurant_results']
             restaurant_info_results = restaurant_data['restaurant_info_results']
+            list_info = restaurant_data['list_info']
             review_results = restaurant_data['review_results']
-            # menu_results = restaurant_data['menu_results']
+            menu_results = restaurant_data['menu_results']
 
-            restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
+            restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results, list_info)
             self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
             # self.menu_parsing(menu_results, restaurant)
 
@@ -75,11 +77,11 @@ class Crawling:
         review_results = self.get_response_json_data(review_api_url)
         menu_results = self.get_response_json_data(menu_api_url)
 
-        restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
+        # restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results, list_info)
         # self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
-        self.menu_parsing(menu_results, restaurant)
+        # self.menu_parsing(menu_results, restaurant)
 
-    def restaurant_parsing(self, restaurant_results, restaurant_info_results):
+    def restaurant_parsing(self, restaurant_results, restaurant_info_results, list_info):
         # top - info
         name = restaurant_results['name']
         star = restaurant_results['review_avg']
@@ -118,6 +120,9 @@ class Crawling:
         company_registration_number = restaurant_info_results['crmdata']['company_number']
         origin_information = restaurant_info_results['country_origin']
 
+        #
+        representative_menus = list_info['representative_menus']
+
         restaurant = Restaurant(
             name=name,
             star=star,
@@ -133,11 +138,12 @@ class Crawling:
             origin_information=origin_information,
             delivery_discount=discount,
             delivery_charge=delivery_charge,
-            delivery_time = int(restaurant_results['estimated_delivery_time'].split('~')[0]),
+            delivery_time=int(restaurant_results['estimated_delivery_time'].split('~')[0]),
             # point=Point(res_lng, res_lat),
             lat=res_lat,
             lng=res_lng,
-            categories=categories
+            categories=categories,
+            representative_menus=representative_menus
         )
         restaurant.save()
         if restaurant_image:
@@ -247,13 +253,13 @@ class Crawling:
             restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat={lat}&lng={lng}'
             restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
             review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
-            # menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
+            menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
             restaurant_data = {
                 'list_info': list_info_dict,
                 'restaurant_results': self.get_response_json_data(restaurant_api_url),
                 'restaurant_info_results': self.get_response_json_data(restaurant_info_api_url),
                 'review_results': self.get_response_json_data(review_api_url),
-                # 'menu_results': self.get_response_json_data(menu_api_url),
+                'menu_results': self.get_response_json_data(menu_api_url),
             }
             crawl_data.append(restaurant_data)
 
