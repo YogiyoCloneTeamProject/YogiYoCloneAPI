@@ -7,7 +7,8 @@ from rest_framework.viewsets import GenericViewSet
 
 from core.paginations import Pagination
 from restaurants.models import Menu, Restaurant
-from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer
+from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer, \
+    HomeViewSerializer
 from django_filters import rest_framework as filters
 from rest_framework.filters import OrderingFilter
 
@@ -39,6 +40,8 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return RestaurantDetailSerializer
+        if self.action in ('home_view_1', 'home_view_2','home_view_3','home_view_4','home_view_5','home_view_6'):
+            return HomeViewSerializer
         return super().get_serializer_class()
 
     def get_queryset(self):
@@ -93,16 +96,24 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         return Response(serializer.data)
 
     @action(detail=False, methods=['GET'])
-    def home_view_5(self, request, *args, **kwargs):
+    def home_view_3(self, request, *args, **kwargs):
         """배달비 무료"""
         queryset = self.get_queryset().filter(delivery_charge=0)[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['GET'])
-    def home_view_6(self, request, *args, **kwargs):
-        """todo 최근 7일동안 리뷰가 많아요
+    def home_view_4(self, request, *args, **kwargs):
+        """최근 7일동안 리뷰가 많아요
         - 리뷰 갯수 순 음식점 10개"""
         queryset = self.get_queryset().order_by('-review')[:10]
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def home_view_5(self, request, *args, **kwargs):
+        """todo 가장 빨리 배달돼요
+        - 배달예상시간 순"""
+        queryset = self.get_queryset().order_by('delivery_time')[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

@@ -43,6 +43,7 @@ class Restaurant(models.Model):
     lng = models.FloatField()
     # point = models.PointField()
     review_count = models.PositiveIntegerField(default=0)
+    representative_menus = models.CharField(max_length=255)
 
 
 class MenuGroup(models.Model):
