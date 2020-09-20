@@ -10,7 +10,9 @@ class Review(models.Model):
     delivery = models.PositiveIntegerField()
     amount = models.PositiveIntegerField()
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE)
+    order_menu = models.CharField(max_length=50)
     created = models.DateTimeField(auto_now_add=True)
+
 
     class Meta:
         ordering = ['-id']

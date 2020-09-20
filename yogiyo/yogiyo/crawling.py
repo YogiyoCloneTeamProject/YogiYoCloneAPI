@@ -8,7 +8,7 @@ from rest_framework.utils import json
 
 from restaurants.models import Restaurant, MenuGroup, Menu, OptionGroup, Option
 from reviews.models import Review, ReviewImage
-
+import random
 lat = 37.545133
 lng = 127.057129
 
@@ -30,11 +30,11 @@ class Crawling:
             restaurant_results = restaurant_data['restaurant_results']
             restaurant_info_results = restaurant_data['restaurant_info_results']
             review_results = restaurant_data['review_results']
-            menu_results = restaurant_data['menu_results']
+            # menu_results = restaurant_data['menu_results']
 
             restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
-            # self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
-            self.menu_parsing(menu_results, restaurant)
+            self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
+            # self.menu_parsing(menu_results, restaurant)
 
     def web_crawl(self):
         """웹에서 크롤 -> DB에 저장"""
@@ -67,7 +67,7 @@ class Crawling:
     def api_parsing(self, page_id):
         restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat={lat}&lng={lng}'
         restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
-        review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
+        review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=5&only_photo_review=false&page=1&sort=time'
         menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
 
         restaurant_results = self.get_response_json_data(restaurant_api_url)
@@ -133,8 +133,10 @@ class Crawling:
             origin_information=origin_information,
             delivery_discount=discount,
             delivery_charge=delivery_charge,
-            delivery_time=delivery_time,
-            point=Point(res_lng, res_lat),
+            delivery_time = int(restaurant_results['estimated_delivery_time'].split('~')[0]),
+            # point=Point(res_lng, res_lat),
+            lat=res_lat,
+            lng=res_lng,
             categories=categories
         )
         restaurant.save()
@@ -146,16 +148,18 @@ class Crawling:
 
     def review_parsing(self, review_results, restaurant):
         # todo 리뷰 파싱 완성
+        user_list = []
         for review_dict in review_results:
             review = Review(
-                # owner=user,
+                owner=random.choice(user_list),
                 restaurant=restaurant,
-                # order=,
+                order=review_dict['menu_summary'],
                 rating=review_dict['rating'],
                 taste=review_dict['rating_taste'],
                 delivery=review_dict['rating_delivery'],
                 amount=review_dict['rating_quantity'],
                 caption=review_dict['comment'],
+                created=review_dict['time']
             )
             review.save()
             for img in review_dict['review_images']:
@@ -243,13 +247,13 @@ class Crawling:
             restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat={lat}&lng={lng}'
             restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
             review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
-            menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
+            # menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
             restaurant_data = {
                 'list_info': list_info_dict,
                 'restaurant_results': self.get_response_json_data(restaurant_api_url),
                 'restaurant_info_results': self.get_response_json_data(restaurant_info_api_url),
                 'review_results': self.get_response_json_data(review_api_url),
-                'menu_results': self.get_response_json_data(menu_api_url),
+                # 'menu_results': self.get_response_json_data(menu_api_url),
             }
             crawl_data.append(restaurant_data)
 
