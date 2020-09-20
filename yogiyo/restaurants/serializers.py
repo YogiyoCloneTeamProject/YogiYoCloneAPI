@@ -3,6 +3,11 @@ from rest_framework import serializers
 from restaurants.models import Option, OptionGroup, Menu, MenuGroup, Restaurant
 
 
+class DeliveryTimeField(serializers.IntegerField):
+    def to_representation(self, value):
+        return f'{value}~{value + 10}분'
+
+
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
@@ -44,6 +49,7 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
     # todo 리뷰 보기
     menu_group = MenuGroupSerializer(read_only=True, many=True)
     photo_menu = serializers.SerializerMethodField()
+    delivery_time = DeliveryTimeField()
 
     def get_photo_menu(self, obj):
         m = MenuListSerializer(instance=Menu.objects.filter(menu_group__restaurant=obj, is_photomenu=True), many=True)
@@ -59,6 +65,10 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
 
 class RestaurantListSerializer(serializers.ModelSerializer):
     representative_menus = serializers.SerializerMethodField()
+    delivery_time = DeliveryTimeField()
+
+    def get_representative_menus(self, obj):
+        return '대표메뉴 추가 예정...'
 
     class Meta:
         # todo 리뷰 개수, 사장님 댓글 수, 대표메뉴 , 배달시간
@@ -67,11 +77,11 @@ class RestaurantListSerializer(serializers.ModelSerializer):
             'id', 'name', 'star', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time', 'review_count',
             'representative_menus')
 
-    def get_representative_menus(self, obj):
-        return '대표메뉴 추가 예정...'
-
 
 class HomeViewSerializer(serializers.ModelSerializer):
+    delivery_time = DeliveryTimeField()
+
     class Meta:
         model = Restaurant
-        fields = ('id', 'name', 'star', 'image', 'delivery_discount', 'delivery_charge', 'review_count')
+        fields = (
+            'id', 'name', 'star', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time', 'review_count')
