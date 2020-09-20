@@ -63,6 +63,7 @@ INSTALLED_APPS = [
 
     # lib
     'django_filters',
+    'drf_yasg',
 ]
 
 # 카카오 소셜 로그인
