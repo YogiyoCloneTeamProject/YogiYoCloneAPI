@@ -34,9 +34,9 @@ class Restaurant(models.Model):
     company_registration_number = models.CharField(max_length=255)
     origin_information = models.TextField()
     image = models.ImageField(upload_to='restaurant_image', null=True, blank=True)
-    delivery_discount = models.PositiveIntegerField(null=True, blank=True)
-    delivery_charge = models.PositiveIntegerField(null=True, blank=True)
-    delivery_time = models.CharField(max_length=255)
+    delivery_discount = models.PositiveIntegerField(null=True, blank=True)  # 배달 할인
+    delivery_charge = models.PositiveIntegerField(null=True, blank=True)  # 배달비
+    delivery_time = models.PositiveIntegerField()  # 배달 예상 시간
     back_image = models.ImageField(upload_to='restaurant_back_image', null=True, blank=True)
     categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
     lat = models.FloatField()
