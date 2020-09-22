@@ -56,9 +56,11 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         check_price = 0
         # req - model 데이터 일치 확인
         order_menus = attrs['order_menu']
+        count = 1
         for order_menu in order_menus:
             """req: 메뉴 이름, 가격 / model : 메뉴 이름, 가격 비교 """
             menu = order_menu['menu']
+            count = order_menu['count']
             # req 레스토랑이 메뉴 모델에 레스토랑과 같은지
             if order_menu['name'] != menu.name:
                 raise ValidationError('menu.name != model menu.name')
@@ -94,7 +96,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     check_price += order_option['price']
 
         # 총 가격 == 메뉴 가격 + 옵션 가격
-        if attrs['total_price'] != check_price:
+        total_price = attrs['total_price'] * count
+        if total_price != check_price:
             raise ValidationError('total price != check_price')
 
         return attrs
@@ -121,4 +124,4 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id',)
+        fields = ('id', 'restaurant')  # todo status 주문 상태
