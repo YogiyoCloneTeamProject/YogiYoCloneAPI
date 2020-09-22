@@ -10,16 +10,16 @@ class Review(models.Model):
     delivery = models.PositiveIntegerField()
     amount = models.PositiveIntegerField()
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE)
-    order_menu = models.CharField(max_length=50)
+    order_menu = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
-
+    like_count = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ['-id']
 
 
 class ReviewImage(models.Model):
-    """이미지 3장"""
+    """이미지 3장"""  # todo 리뷰 이미지 3장
     review = models.ForeignKey('Review', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='review_image')
 
