@@ -42,11 +42,13 @@ class Crawling:
         for restaurant_data in json_data:
             restaurant_results = restaurant_data['restaurant_results']
             restaurant_info_results = restaurant_data['restaurant_info_results']
+            list_info = restaurant_data['list_info']
             review_results = restaurant_data['review_results']
             # menu_results = restaurant_data['menu_results']
 
-            restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
+            restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results, list_info)
             self.review_parsing(review_results, restaurant, user_list=user_list)  # todo 리뷰 파싱 완성
+            self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
             # self.menu_parsing(menu_results, restaurant)
 
     def web_crawl(self):
@@ -90,9 +92,9 @@ class Crawling:
 
         restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
         # self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
-        self.menu_parsing(menu_results, restaurant)
+        # self.menu_parsing(menu_results, restaurant)
 
-    def restaurant_parsing(self, restaurant_results, restaurant_info_results):
+    def restaurant_parsing(self, restaurant_results, restaurant_info_results, list_info):
         # top - info
         name = restaurant_results['name']
         star = restaurant_results['review_avg']
@@ -129,6 +131,7 @@ class Crawling:
         business_name = restaurant_info_results['crmdata']['company_name']
         company_registration_number = restaurant_info_results['crmdata']['company_number']
         origin_information = restaurant_info_results['country_origin']
+        # representative_menus = list_info['representative_menus']
 
         restaurant = Restaurant(
             name=name,
@@ -150,6 +153,7 @@ class Crawling:
             lat=res_lat,
             lng=res_lng,
             categories=categories,
+            # representative_menus=representative_menus,
         )
         restaurant.save()
         # if restaurant_image:

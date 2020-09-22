@@ -84,4 +84,7 @@ class HomeViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
         fields = (
-            'id', 'name', 'star', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time', 'review_count')
+            'id', 'name', 'star', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time', 'review_count',
+            'representative_menus')
+# 찜 개수
+# 5) 1. 을 포함한 추가사항 5-1 최소주문 금액
