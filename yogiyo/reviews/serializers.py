@@ -4,6 +4,6 @@ from reviews.models import Review
 
 
 class ReviewListSerializer(serializers.ModelSerializer):
-    model = Review
-    # 레스토랑이랑 오더 추가
-    fields = ('owner', 'caption', 'rating', 'taste', 'amount', 'delivery', 'created')
+    class Meta:
+        model = Review
+        fields = ('id', 'owner', 'caption', 'like_count', 'rating', 'taste', 'amount', 'delivery', 'created')

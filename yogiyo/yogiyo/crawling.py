@@ -6,14 +6,17 @@ from django.contrib.gis.geos import Point
 from django.core import files
 from rest_framework.utils import json
 
+from orders.models import Order
 from restaurants.models import Restaurant, MenuGroup, Menu, OptionGroup, Option
 from reviews.models import Review, ReviewImage
 import random
 
+from users.models import User
+
 lat = 37.545133
 lng = 127.057129
 
-
+import uuid
 class Crawling:
 
     def __init__(self) -> None:
@@ -23,18 +26,28 @@ class Crawling:
             'x-apisecret': 'fe5183cc3dea12bd0ce299cf110a75a2'
         })
 
+    def user_create(self):
+        obj = User.objects.bulk_create([
+            User(email=str(uuid.uuid4())+'pop@a.com' , password='1111'),
+            User(email=str(uuid.uuid4())+'asd@a.com', password='1111'),
+            User(email=str(uuid.uuid4())+'oij@a.com', password='1111')
+        ])
+        return obj
+
     def json_parsing(self):
         """yogiyo_crawl.json 파일에서 파싱헤서 DB에 저장"""
         with open('yogiyo_crawl.json', 'r', encoding='utf-8') as file:
             json_data = json.load(file)
+        user_list = self.user_create()
         for restaurant_data in json_data:
             restaurant_results = restaurant_data['restaurant_results']
             restaurant_info_results = restaurant_data['restaurant_info_results']
             list_info = restaurant_data['list_info']
             review_results = restaurant_data['review_results']
-            menu_results = restaurant_data['menu_results']
+            # menu_results = restaurant_data['menu_results']
 
             restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results, list_info)
+            self.review_parsing(review_results, restaurant, user_list=user_list)  # todo 리뷰 파싱 완성
             self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
             # self.menu_parsing(menu_results, restaurant)
 
@@ -77,7 +90,7 @@ class Crawling:
         review_results = self.get_response_json_data(review_api_url)
         menu_results = self.get_response_json_data(menu_api_url)
 
-        # restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results, list_info)
+        restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results)
         # self.review_parsing(review_results, restaurant)  # todo 리뷰 파싱 완성
         # self.menu_parsing(menu_results, restaurant)
 
@@ -99,7 +112,6 @@ class Crawling:
         if discount is not None:
             discount = discount['additional']['delivery']['amount']
         delivery_charge = restaurant_results.get('delivery_fee')
-        delivery_time = restaurant_results['estimated_delivery_time']
         res_lat = restaurant_results['lat']
         res_lng = restaurant_results['lng']
         restaurant_image = restaurant_results['logo_url']
@@ -119,9 +131,7 @@ class Crawling:
         business_name = restaurant_info_results['crmdata']['company_name']
         company_registration_number = restaurant_info_results['crmdata']['company_number']
         origin_information = restaurant_info_results['country_origin']
-
-        #
-        representative_menus = list_info['representative_menus']
+        # representative_menus = list_info['representative_menus']
 
         restaurant = Restaurant(
             name=name,
@@ -143,34 +153,43 @@ class Crawling:
             lat=res_lat,
             lng=res_lng,
             categories=categories,
-            representative_menus=representative_menus
+            # representative_menus=representative_menus,
         )
         restaurant.save()
-        if restaurant_image:
-            restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
-        if restaurant_back_image:
-            restaurant.back_image.save(*self.save_img(restaurant_back_image))
+        # if restaurant_image:
+        #     restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
+        # if restaurant_back_image:
+        #     restaurant.back_image.save(*self.save_img(restaurant_back_image))
         return restaurant
 
-    def review_parsing(self, review_results, restaurant):
+    def review_parsing(self, review_results, restaurant, user_list):
         # todo 리뷰 파싱 완성
-        user_list = []
-        for review_dict in review_results:
+
+        for i in range(5):
+            try:
+                review_dict = review_results[i]
+            except IndexError:
+                break
+            owner = random.choice(user_list)
+            order = Order.objects.create(restaurant=restaurant, owner=owner, address='as',
+                                         payment_method=Order.PaymentMethodChoice.Cash, total_price=1000)
             review = Review(
-                owner=random.choice(user_list),
+                owner=owner,
                 restaurant=restaurant,
-                order=review_dict['menu_summary'],
+                order=order,
+                order_menu=review_dict['menu_summary'][:100],
                 rating=review_dict['rating'],
                 taste=review_dict['rating_taste'],
                 delivery=review_dict['rating_delivery'],
                 amount=review_dict['rating_quantity'],
-                caption=review_dict['comment'],
-                created=review_dict['time']
+                caption=review_dict['comment'][:298],
+                # created=review_dict['time'] # datetime field - >> auto add
+                like_count=review_dict['like_count']
             )
             review.save()
-            for img in review_dict['review_images']:
-                review_image = ReviewImage(review=review)
-                review_image.image.save(*self.save_img('https://www.yogiyo.co.kr' + img))
+            # for img in review_dict['review_images']:
+            #     review_image = ReviewImage(review=review)
+            #     review_image.image.save(*self.save_img(img['thumb']))
 
     def menu_parsing(self, menu_results, restaurant):
         """json에서 '메뉴그룹, 메뉴, 옵션그룹, 옵션' 파싱"""
@@ -253,13 +272,13 @@ class Crawling:
             restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat={lat}&lng={lng}'
             restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
             review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
-            menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
+            # menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
             restaurant_data = {
                 'list_info': list_info_dict,
                 'restaurant_results': self.get_response_json_data(restaurant_api_url),
                 'restaurant_info_results': self.get_response_json_data(restaurant_info_api_url),
                 'review_results': self.get_response_json_data(review_api_url),
-                'menu_results': self.get_response_json_data(menu_api_url),
+                # 'menu_results': self.get_response_json_data(menu_api_url),
             }
             crawl_data.append(restaurant_data)
 
