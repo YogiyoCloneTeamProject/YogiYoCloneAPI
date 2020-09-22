@@ -1,4 +1,4 @@
-from django.contrib.gis.geos import Point
+# from django.contrib.gis.geos import Point
 from model_bakery import baker
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -6,7 +6,6 @@ from rest_framework.test import APITestCase
 from orders.models import Order
 
 
-#
 # lat = 37.545133
 # lng = 127.057129
 # point = Point(lng, lat)
@@ -91,7 +90,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 5,# here
+                    "menu": 5,  # here
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
@@ -131,7 +130,6 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
 
     def test_order_create_menu_name(self):
         """req : menu.name -> wrong"""
@@ -180,8 +178,6 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
-
 
     def test_order_create_menu_price(self):
         """req : menu.price -> wrong"""
@@ -230,7 +226,6 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data, self.menu.id)
 
     def test_order_create_order_option_group_name(self):
         """req : order_option_group.name -> wrong"""
@@ -279,7 +274,6 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data, self.menu.id)
 
     def test_order_create_order_option_group_mandatory(self):
         """req : order_option_group.mandatory -> wrong"""
@@ -328,7 +322,6 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
 
     def test_order_create_order_option_group_mandatory_option_len(self):
         """req : order_option_group.mandatory true -> len(option) != 1"""
@@ -381,7 +374,6 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
 
     def test_order_create_order_option_name(self):
         """req : order_option name  -> wrong"""
@@ -430,7 +422,6 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
 
     def test_order_create_order_option_price(self):
         """req : order_option price  -> wrong"""
@@ -464,7 +455,7 @@ class OrderCreateTestCase(APITestCase):
                             "order_option": [
                                 {
                                     "name": self.options2[0].name,
-                                    "price": 4000 # here!
+                                    "price": 4000  # here!
                                 },
                             ]
                         },
@@ -479,7 +470,6 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
 
     def test_order_create_order_min_order_price(self):
         """req : total price < restaurant min price"""
@@ -528,7 +518,6 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
 
     def test_order_create_order_total_price(self):
         """req : total price -> wrong"""
@@ -577,4 +566,3 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        print(response.data)
