@@ -56,7 +56,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         price_list = []
         # req - model 데이터 일치 확인
         order_menus = attrs['order_menu']
-        count = 1
         for order_menu in order_menus:
             """req: 메뉴 이름, 가격 / model : 메뉴 이름, 가격 비교 """
             menu = order_menu['menu']
@@ -98,8 +97,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             price_list.append(check_price)
 
         # 총 가격 == (메뉴 가격 + 옵션 가격) * 주문 갯수
-        total_price = attrs['total_price'] * count
-        if total_price != sum(price_list):
+        if attrs['total_price'] != sum(price_list):
             raise ValidationError('total price != check_price')
 
         return attrs
