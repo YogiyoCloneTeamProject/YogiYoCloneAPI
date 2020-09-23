@@ -48,12 +48,12 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """req 데이터와 model 데이터 검증 """
-        # todo 순서보장?
+        # todo 할인
         # 음식점 최소가격 확인
         if attrs['total_price'] < attrs['restaurant'].min_order_price:
             raise ValidationError('total price < restaurant min price')
 
-        check_price = 0
+        price_list = []
         # req - model 데이터 일치 확인
         order_menus = attrs['order_menu']
         for order_menu in order_menus:
@@ -65,7 +65,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             if order_menu['price'] != menu.price:
                 raise ValidationError('menu.price != model menu.price')
 
-            check_price += order_menu['price']
+            check_price = order_menu['price']
 
             """order_option_group"""
             for order_option_group in order_menu['order_option_group']:
@@ -93,8 +93,11 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
                     check_price += order_option['price']
 
-        # 총 가격 == 메뉴 가격 + 옵션 가격
-        if attrs['total_price'] != check_price:
+            check_price *= order_menu['count']
+            price_list.append(check_price)
+
+        # 총 가격 == (메뉴 가격 + 옵션 가격) * 주문 갯수
+        if attrs['total_price'] != sum(price_list):
             raise ValidationError('total price != check_price')
 
         return attrs
@@ -121,4 +124,4 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id',)
+        fields = ('id', 'restaurant')  # todo status 주문 상태

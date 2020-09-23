@@ -3,7 +3,6 @@ from rest_framework.viewsets import GenericViewSet
 
 from orders.models import Order
 from orders.serializers import OrderSerializer, OrderListSerializer, OrderCreateSerializer
-from users.models import User
 
 
 class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
@@ -18,3 +17,13 @@ class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
         if self.action == 'list':
             return OrderListSerializer
         return super().get_serializer_class()
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == 'list':
+            # todo 로그인 비로그인 나누기
+            # 로그인
+            # qs = qs.filter(owner=self.request.user)
+            # 비로그인
+            qs = Order.objects.all()
+        return qs

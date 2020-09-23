@@ -46,12 +46,10 @@ class UserLoginTestCase(APITestCase):
     url = '/users/login'
 
     def setUp(self) -> None:
-        # self.user = baker.make(User, email=email, password=password)  # baker로 만들면 로그인 안됨..why
-        self.user = User.objects.create(email=email, password=password)
+        self.user = baker.make('users.User', email=email, password=password)  # baker로 만들면 로그인 안됨..why
 
     def test_with_correct_info(self):
         response = self.client.post(self.url, {'email': email, 'password': password})
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue('token' in response.data)
         self.assertTrue(Token.objects.filter(user=self.user, key=response.data['token']).exists())

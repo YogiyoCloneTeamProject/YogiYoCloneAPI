@@ -1,16 +1,17 @@
 # from django.contrib.gis.geos import Point
 # from django.contrib.gis.measure import D
+from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from core.paginations import Pagination
 from restaurants.models import Menu, Restaurant
 from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer, \
     HomeViewSerializer
-from django_filters import rest_framework as filters
-from rest_framework.filters import OrderingFilter
+
+HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6')
 
 
 class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
@@ -40,7 +41,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return RestaurantDetailSerializer
-        if self.action in ('home_view_1', 'home_view_2','home_view_3','home_view_4','home_view_5','home_view_6'):
+        if self.action in HOME_VIEWS:
             return HomeViewSerializer
         return super().get_serializer_class()
 
@@ -81,6 +82,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
                                lng__gte=min_lon, lng__lte=max_lon)
         return qs
 
+    # todo 우리 동네만
     @action(detail=False, methods=['GET'])
     def home_view_1(self, request, *args, **kwargs):
         """별점 - star 높은 음식점 10개 - 4점 이상만"""

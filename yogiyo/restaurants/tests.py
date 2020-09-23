@@ -1,13 +1,18 @@
+import datetime
+
 from django.test import TestCase
 from model_bakery import baker
 from munch import Munch
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from restaurants.models import Restaurant
+
 
 class RestaurantTestCase(APITestCase):
     def setUp(self) -> None:
-        self.restaurants = baker.make('restaurants.Restaurant', _quantity=2)
+        self.restaurants = baker.make('restaurants.Restaurant', _quantity=2,
+                                      opening_time=datetime.time(hour=22, minute=30, second=0))
         self.restaurant = self.restaurants[0]
         self.user = baker.make('users.User')
 
@@ -17,8 +22,7 @@ class RestaurantTestCase(APITestCase):
         response = self.client.get('/restaurants')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        for restaurant_response, restaurant in zip(response.data['results'], self.restaurants[::-1]):
+        for restaurant_response, restaurant in zip(response.data['results'], self.restaurants):
             self.assertEqual(restaurant_response['id'], restaurant.id)
             self.assertEqual(restaurant_response['name'], restaurant.name)
             self.assertEqual(restaurant_response['star'], restaurant.star)
@@ -40,11 +44,11 @@ class RestaurantTestCase(APITestCase):
         self.assertEqual(response_restaurant.name, self.restaurant.name)
         self.assertEqual(response_restaurant.star, self.restaurant.star)
         self.assertEqual(response_restaurant.notification, self.restaurant.notification)
-        self.assertEqual(response_restaurant.opening_hours, self.restaurant.opening_hours)
+        self.assertEqual(response_restaurant.opening_time, self.restaurant.opening_time.strftime('%H:%M:%S'))
         self.assertEqual(response_restaurant.tel_number, self.restaurant.tel_number)
         self.assertEqual(response_restaurant.address, self.restaurant.address)
-        self.assertEqual(response_restaurant.min_order, self.restaurant.min_order)
-        self.assertEqual(response_restaurant.payment_method, self.restaurant.payment_method)
+        self.assertEqual(response_restaurant.min_order_price, self.restaurant.min_order_price)
+        self.assertEqual(response_restaurant.payment_methods, self.restaurant.payment_methods)
         self.assertEqual(response_restaurant.business_name, self.restaurant.business_name)
         self.assertEqual(response_restaurant.company_registration_number, self.restaurant.company_registration_number)
         self.assertEqual(response_restaurant.origin_information, self.restaurant.origin_information)
@@ -92,7 +96,8 @@ class RestaurantTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
 
         category = "중식"
-        response = self.client.get(f'/restaurants?category={category}')
+        response = self.client.get(f'/restaurants?categories={category}')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         for r in response.data['results']:
-            self.assertTrue(category in r['categories'])
+            restaurant = Restaurant.objects.get(id=r['id'])
+            self.assertTrue(category in restaurant.categories)
