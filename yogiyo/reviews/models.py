@@ -13,7 +13,7 @@ class Review(models.Model):
         'orders.Order',
         on_delete=models.CASCADE
     )
-    order_menu = models.CharField(max_length=100)
+    menu_name = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
     like_count = models.PositiveIntegerField(default=0)
 

@@ -14,4 +14,5 @@ class ReviewListSerializer(serializers.ModelSerializer):
 class ReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ('owner', 'order', ' caption', 'taste', 'amount', 'delivery')
+        fields = ('id', 'taste', 'amount', 'delivery', 'restaurant', 'caption', 'order_menu', 'rating', 'owner', 'order')
+        read_only_fields = ('owner', 'order','rating')
