@@ -7,6 +7,14 @@ from restaurants.models import Menu
 from users.models import User
 
 
+class OrderMenuNameField(serializers.Field):
+    """order_menu: 치즈버거 x 1, 불고기버거 x 2"""
+
+    def to_representation(self, value):
+        names = [f'{order_menu.name} x {order_menu.count}' for order_menu in value.all()]
+        return ', '.join(names)
+
+
 class OrderOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderOption
@@ -26,7 +34,7 @@ class OrderMenuSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderMenu
-        fields = ('id', 'menu', 'name', 'price', 'count', 'order_option_group',)
+        fields = ('id', 'menu', 'name', 'price', 'count', 'order_option_group')
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -120,8 +128,16 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
 
 class OrderListSerializer(serializers.ModelSerializer):
+    # todo status 주문 상태
     """주문 내역 리스트"""
+    order_menu = OrderMenuNameField()
+    status = serializers.SerializerMethodField()
+    restaurant_name = serializers.CharField(source='restaurant.name')
+    restaurant_image = serializers.ImageField(source='restaurant.image')
 
     class Meta:
         model = Order
-        fields = ('id', 'restaurant')  # todo status 주문 상태
+        fields = ('id', 'order_menu', 'restaurant_name', 'restaurant_image', 'status', 'order_time')
+
+    def get_status(self, obj):
+        return '배달 상태 구현 예정...'

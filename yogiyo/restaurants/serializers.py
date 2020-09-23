@@ -3,7 +3,8 @@ from rest_framework import serializers
 from restaurants.models import Option, OptionGroup, Menu, MenuGroup, Restaurant
 
 
-class DeliveryTimeField(serializers.IntegerField):
+class DeliveryTimeField(serializers.Field):
+    """delivery_time: 10 -> 10~20분"""
     def to_representation(self, value):
         return f'{value}~{value + 10}분'
 
@@ -79,6 +80,7 @@ class RestaurantListSerializer(serializers.ModelSerializer):
 
 
 class HomeViewSerializer(serializers.ModelSerializer):
+    # todo 찜 개수, 최소주문 금액
     delivery_time = DeliveryTimeField()
 
     class Meta:
@@ -86,5 +88,3 @@ class HomeViewSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'star', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time', 'review_count',
             'representative_menus')
-# 찜 개수
-# 5) 1. 을 포함한 추가사항 5-1 최소주문 금액
