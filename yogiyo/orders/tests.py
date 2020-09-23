@@ -9,8 +9,6 @@ from orders.models import Order
 # lat = 37.545133
 # lng = 127.057129
 # point = Point(lng, lat)
-
-
 class OrderCreateTestCase(APITestCase):
     """주문 생성"""
 
@@ -20,17 +18,17 @@ class OrderCreateTestCase(APITestCase):
         self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거', price=9000)
         self.menu2 = baker.make('restaurants.Menu', menu_group=menu_group, name='불고기버', price=9000)
         self.option_groups = []
-        self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='움료추가', mandatory=False,
+        self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='음료추가', mandatory=False,
                                          menu=self.menu)
         self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='패티추가', mandatory=True,
                                          menu=self.menu)
-        self.option_groups_memu2 = baker.make('restaurants.OptionGroup', name='아무거나 추가', mandatory=True,
+        self.option_groups_menu2 = baker.make('restaurants.OptionGroup', name='아무거나 추가', mandatory=True,
                                               menu=self.menu2)
 
         self.options = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[0], price=1000)
         self.options2 = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[1], price=500)
 
-        self.url = f'/orders'
+        self.url = '/orders'
 
         self.user = baker.make('users.User')
 
@@ -223,7 +221,7 @@ class OrderCreateTestCase(APITestCase):
             "payment_method": Order.PaymentMethodChoice.Cash,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
-        self.client.force_authenticate(user=self.user)
+        # self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -566,3 +564,27 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class OrderListTestCase(APITestCase):
+    """주문 내역 리스트"""
+
+    def setUp(self) -> None:
+        self.restaurant = baker.make('restaurants.Restaurant', min_order_price=10000)
+        menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant, name='햄버거')
+        self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거', price=9000)
+        self.menu2 = baker.make('restaurants.Menu', menu_group=menu_group, name='불고기버', price=9000)
+        self.option_groups = []
+        self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='음료추가', mandatory=False,
+                                         menu=self.menu)
+        self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='패티추가', mandatory=True,
+                                         menu=self.menu)
+        self.option_groups_menu2 = baker.make('restaurants.OptionGroup', name='아무거나 추가', mandatory=True,
+                                              menu=self.menu2)
+
+        self.options = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[0], price=1000)
+        self.options2 = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[1], price=500)
+        self.orders = baker.make('orders.Order', _quantity=2)
+        self.url = '/orders'
+
+        self.user = baker.make('users.User')
