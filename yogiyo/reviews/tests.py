@@ -4,12 +4,13 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from orders.models import Order
+from restaurants.models import Restaurant
 
 
 class ReviewTestCase(APITestCase):
     def setUp(self) -> None:
         self.user = baker.make('users.User')
-        self.restaurant = baker.make('restaurants.Restaurant')
+        self.restaurant = baker.make('restaurants.Restaurant', review_count=10, amount=4, delivery=4, taste=4, rating=4)
         self.order = baker.make('orders.Order', owner=self.user, restaurant=self.restaurant)
         self.order_menu = baker.make('orders.OrderMenu', order=self.order, name='불고기버거')
         self.order_menu2 = baker.make('orders.OrderMenu', order=self.order, name='치즈버거')
@@ -64,6 +65,23 @@ class ReviewTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_review_create_user_wrong(self):
-        """ordering에 owner = request.user """
+    def test_review_star_restaurant(self):
+        """리뷰에서 준 별점들이 해당 레스토랑에 값 반영 """
+        self.data = {
+            "caption": "jmt!!",
+            "taste": 3,
+            "delivery": 4,
+            "amount": 2,
+        }
 
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(f'/orders/{self.order.id}/reviews', data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response)
+
+        saved_restaurant = Restaurant.objects.get(id=self.restaurant.id)
+
+        # 현재 평균 = 원래 평균 * 원래 리뷰수 + 리퀘스트 / 총 리뷰 수
+        self.assertEqual(saved_restaurant.taste, (self.restaurant.taste*self.restaurant.review_count + self.data['taste']) / saved_restaurant.review_count)
+        self.assertEqual(saved_restaurant.delivery, (self.restaurant.delivery*self.restaurant.review_count + self.data['delivery']) / saved_restaurant.review_count)
+        self.assertEqual(saved_restaurant.amount, (self.restaurant.amount*self.restaurant.review_count + self.data['amount']) / saved_restaurant.review_count)
