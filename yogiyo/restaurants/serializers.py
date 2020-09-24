@@ -5,6 +5,7 @@ from restaurants.models import Option, OptionGroup, Menu, MenuGroup, Restaurant
 
 class DeliveryTimeField(serializers.Field):
     """delivery_time: 10 -> 10~20분"""
+
     def to_representation(self, value):
         return f'{value}~{value + 10}분'
 
@@ -59,9 +60,10 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
         fields = (
-            'id', 'name', 'star', 'image', 'notification', 'opening_time', 'closing_time', 'tel_number', 'address',
-            'min_order_price', 'payment_methods', 'business_name', 'company_registration_number', 'origin_information',
-            'delivery_discount', 'delivery_charge', 'delivery_time', 'back_image', 'photo_menu', 'menu_group')
+            'id', 'name', 'rating', 'taste', 'delivery', 'amount', 'image', 'notification', 'opening_time',
+            'closing_time', 'tel_number', 'address', 'min_order_price', 'payment_methods', 'business_name',
+            'company_registration_number', 'origin_information', 'delivery_discount', 'delivery_charge',
+            'delivery_time', 'back_image', 'photo_menu', 'menu_group', 'review_count')
 
 
 class RestaurantListSerializer(serializers.ModelSerializer):
@@ -72,7 +74,7 @@ class RestaurantListSerializer(serializers.ModelSerializer):
         return '대표메뉴 추가 예정...'
 
     class Meta:
-        # todo 리뷰 개수, 사장님 댓글 수, 대표메뉴 , 배달시간
+        # todo 사장님 댓글 수, 대표메뉴
         model = Restaurant
         fields = (
             'id', 'name', 'star', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time', 'review_count',
@@ -80,7 +82,7 @@ class RestaurantListSerializer(serializers.ModelSerializer):
 
 
 class HomeViewSerializer(serializers.ModelSerializer):
-    # todo 찜 개수, 최소주문 금액
+    # todo 찜 개수, 최소주문 금액, 대표메뉴
     delivery_time = DeliveryTimeField()
 
     class Meta:

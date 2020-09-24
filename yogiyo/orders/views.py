@@ -21,9 +21,10 @@ class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
     def get_queryset(self):
         qs = super().get_queryset()
         if self.action == 'list':
-            # todo 로그인 비로그인 나누기
-            # 로그인
-            # qs = qs.filter(owner=self.request.user)
-            # 비로그인
-            qs = Order.objects.all()
+            if self.request.user:
+                # 로그인
+                qs = qs.filter(owner=self.request.user)
+            else:
+                # 비로그인
+                qs = Order.objects.all()
         return qs

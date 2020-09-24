@@ -3,14 +3,21 @@ from django.db import models
 
 class Order(models.Model):
     class PaymentMethodChoice(models.TextChoices):
-        Cash = '현금'
-        CreditCard = '신용카드'
-        yogiyo_pay = '요기서결제'
+        CASH = '현금'
+        CREDIT_CARD = '신용카드'
+        YOGIYO_PAY = '요기서결제'
+
+    class OrderStatusChoice(models.TextChoices):
+        WAITING_FOR_RECEIPT = '접수 대기 중'
+        RECEIPT_COMPLETE = '접수 완료'
+        DELIVERY = '배달 중'
+        DELIVERY_COMPLETE = '배달 완료'
 
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE)
     restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE, related_name='order')
     order_time = models.DateTimeField(auto_now_add=True)
-    # status = models.TextChoices() todo order status choice field
+    status = models.CharField(max_length=10, choices=OrderStatusChoice.choices,
+                              default=OrderStatusChoice.WAITING_FOR_RECEIPT)
     address = models.CharField(max_length=255)
     delivery_requests = models.CharField(max_length=255, default="(없음)")
     payment_method = models.CharField(max_length=10, choices=PaymentMethodChoice.choices)
