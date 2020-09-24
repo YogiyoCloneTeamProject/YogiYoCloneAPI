@@ -22,7 +22,10 @@ class CategoryChoice(models.TextChoices):
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
-    star = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+    rating = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+    taste = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+    delivery = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+    amount = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     notification = models.TextField()
     opening_time = models.TimeField()
     closing_time = models.TimeField()

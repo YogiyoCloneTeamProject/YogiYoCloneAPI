@@ -1,22 +1,21 @@
+import random
 import tempfile
+import uuid
 from datetime import datetime
 
 import requests
-from django.contrib.gis.geos import Point
 from django.core import files
 from rest_framework.utils import json
 
 from orders.models import Order
 from restaurants.models import Restaurant, MenuGroup, Menu, OptionGroup, Option
-from reviews.models import Review, ReviewImage
-import random
-
+from reviews.models import Review
 from users.models import User
 
 lat = 37.545133
 lng = 127.057129
 
-import uuid
+
 class Crawling:
 
     def __init__(self) -> None:
@@ -28,14 +27,15 @@ class Crawling:
 
     def user_create(self):
         obj = User.objects.bulk_create([
-            User(email=str(uuid.uuid4())+'pop@a.com' , password='1111'),
-            User(email=str(uuid.uuid4())+'asd@a.com', password='1111'),
-            User(email=str(uuid.uuid4())+'oij@a.com', password='1111')
+            User(email=str(uuid.uuid4()) + 'pop@a.com', password='1111'),
+            User(email=str(uuid.uuid4()) + 'asd@a.com', password='1111'),
+            User(email=str(uuid.uuid4()) + 'oij@a.com', password='1111')
         ])
         return obj
 
     def json_parsing(self):
-        """yogiyo_crawl.json 파일에서 파싱헤서 DB에 저장"""
+        """yogiyo_crawl_origin.json 파일에서 파싱헤서 DB에 저장"""
+        # with open('yogiyo_crawl_origin.json', 'r', encoding='utf-8') as file:
         with open('yogiyo_crawl.json', 'r', encoding='utf-8') as file:
             json_data = json.load(file)
         user_list = self.user_create()
@@ -58,7 +58,7 @@ class Crawling:
             self.api_parsing(page_id)
 
     def json_crawl(self):
-        """웹에서 크롤 -> yogiyo_crawl.json 파일로 저장"""
+        """웹에서 크롤 -> yogiyo_crawl_origin.json 파일로 저장"""
         page_id_list, list_info_dict = self.get_page_id_list()
         self.dict_to_json_file(page_id_list, list_info_dict)
 
@@ -131,7 +131,8 @@ class Crawling:
         business_name = restaurant_info_results['crmdata']['company_name']
         company_registration_number = restaurant_info_results['crmdata']['company_number']
         origin_information = restaurant_info_results['country_origin']
-        # representative_menus = list_info['representative_menus']
+        representative_menus = list_info['representative_menus']
+        print(representative_menus)
 
         restaurant = Restaurant(
             name=name,
@@ -172,7 +173,8 @@ class Crawling:
                 break
             owner = random.choice(user_list)
             order = Order.objects.create(restaurant=restaurant, owner=owner, address='as',
-                                         payment_method=Order.PaymentMethodChoice.Cash, total_price=1000)
+                                         payment_method=Order.PaymentMethodChoice.CASH, total_price=1000,
+                                         status=Order.OrderStatusChoice.DELIVERY_COMPLETE)
             review = Review(
                 owner=owner,
                 restaurant=restaurant,
@@ -183,10 +185,10 @@ class Crawling:
                 delivery=review_dict['rating_delivery'],
                 amount=review_dict['rating_quantity'],
                 caption=review_dict['comment'][:298],
-                # created=review_dict['time'] # datetime field - >> auto add
-                like_count=review_dict['like_count']
+                like_count=review_dict['like_count'],
             )
             review.save()
+            # todo S3에 이미지 저장
             # for img in review_dict['review_images']:
             #     review_image = ReviewImage(review=review)
             #     review_image.image.save(*self.save_img(img['thumb']))
@@ -272,13 +274,13 @@ class Crawling:
             restaurant_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/?lat={lat}&lng={lng}'
             restaurant_info_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/info/'
             review_api_url = f'https://www.yogiyo.co.kr/api/v1/reviews/{page_id}/?count=30&only_photo_review=false&page=1&sort=time'
-            # menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
+            menu_api_url = f'https://www.yogiyo.co.kr/api/v1/restaurants/{page_id}/menu/?add_photo_menu=android&add_one_dish_menu=true&order_serving_type=delivery'
             restaurant_data = {
-                'list_info': list_info_dict,
+                'list_info': list_info_dict[page_id],
                 'restaurant_results': self.get_response_json_data(restaurant_api_url),
                 'restaurant_info_results': self.get_response_json_data(restaurant_info_api_url),
                 'review_results': self.get_response_json_data(review_api_url),
-                # 'menu_results': self.get_response_json_data(menu_api_url),
+                'menu_results': self.get_response_json_data(menu_api_url),
             }
             crawl_data.append(restaurant_data)
 
@@ -295,8 +297,8 @@ class Crawling:
         """레스토랑 id 리스트"""
         restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=50&lat={lat}&lng={lng}&order=rank&page=0&search='
         restaurant_list_results = self.get_response_json_data(restaurant_list_url)
+
         list_info_dict = {restaurant_dict['id']: restaurant_dict for restaurant_dict in
                           restaurant_list_results['restaurants']}
-
         page_id_list = [restaurant_dict['id'] for restaurant_dict in restaurant_list_results['restaurants']]
         return page_id_list, list_info_dict

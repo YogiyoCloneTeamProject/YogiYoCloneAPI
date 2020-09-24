@@ -76,7 +76,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": (self.menu.price - delivery_discount) * count + self.options2[0].price
             # "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
@@ -126,7 +126,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
         self.client.force_authenticate(user=self.user)
@@ -174,7 +174,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
         self.client.force_authenticate(user=self.user)
@@ -222,7 +222,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
         # self.client.force_authenticate(user=self.user)
@@ -270,7 +270,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
         self.client.force_authenticate(user=self.user)
@@ -318,7 +318,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
         self.client.force_authenticate(user=self.user)
@@ -370,7 +370,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
         self.client.force_authenticate(user=self.user)
@@ -418,7 +418,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
         self.client.force_authenticate(user=self.user)
@@ -466,7 +466,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
         self.client.force_authenticate(user=self.user)
@@ -514,7 +514,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": 8000
         }
         self.client.force_authenticate(user=self.user)
@@ -562,7 +562,7 @@ class OrderCreateTestCase(APITestCase):
             ],
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
-            "payment_method": Order.PaymentMethodChoice.Cash,
+            "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": 12000
         }
         self.client.force_authenticate(user=self.user)
