@@ -3,11 +3,12 @@ from model_bakery import baker
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from core.temporary_image import TempraryImageMixin
 from orders.models import Order
 from restaurants.models import Restaurant
 
 
-class ReviewTestCase(APITestCase):
+class ReviewTestCase(APITestCase, TempraryImageMixin):
     def setUp(self) -> None:
         self.user = baker.make('users.User')
         self.restaurant = baker.make('restaurants.Restaurant', review_count=10, amount=4, delivery=4, taste=4, rating=4)
@@ -28,13 +29,29 @@ class ReviewTestCase(APITestCase):
             "taste": 3,
             "delivery": 4,
             "amount": 2,
+            "img": []
         }
         self.client.force_authenticate(user=self.user)
 
         response = self.client.post(f'/orders/{self.order.id}/reviews', data=self.data)
-
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response)
         self.assertTrue(Order.objects.get(id=self.order.id).review_written)
+
+    def test_review_create_img(self):
+        image_test = [self.temporary_image(), self.temporary_image()]
+
+        self.data = {
+            "caption": "jmt!!",
+            "taste": 3,
+            "delivery": 4,
+            "amount": 2,
+            "img": image_test
+        }
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(f'/orders/{self.order.id}/reviews', data=self.data, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response)
+        self.assertEqual(len(response.data['_img']), len(image_test))
 
     def test_review_duplicate(self):
         self.data = {
@@ -72,6 +89,7 @@ class ReviewTestCase(APITestCase):
             "taste": 3,
             "delivery": 4,
             "amount": 2,
+            "img" :[]
         }
 
         self.client.force_authenticate(user=self.user)
@@ -82,6 +100,10 @@ class ReviewTestCase(APITestCase):
         saved_restaurant = Restaurant.objects.get(id=self.restaurant.id)
 
         # 현재 평균 = 원래 평균 * 원래 리뷰수 + 리퀘스트 / 총 리뷰 수
-        self.assertEqual(saved_restaurant.taste, (self.restaurant.taste*self.restaurant.review_count + self.data['taste']) / saved_restaurant.review_count)
-        self.assertEqual(saved_restaurant.delivery, (self.restaurant.delivery*self.restaurant.review_count + self.data['delivery']) / saved_restaurant.review_count)
-        self.assertEqual(saved_restaurant.amount, (self.restaurant.amount*self.restaurant.review_count + self.data['amount']) / saved_restaurant.review_count)
+        self.assertEqual(saved_restaurant.taste, (self.restaurant.taste * self.restaurant.review_count + self.data[
+            'taste']) / saved_restaurant.review_count)
+        self.assertEqual(saved_restaurant.delivery, (
+                self.restaurant.delivery * self.restaurant.review_count + self.data[
+            'delivery']) / saved_restaurant.review_count)
+        self.assertEqual(saved_restaurant.amount, (self.restaurant.amount * self.restaurant.review_count + self.data[
+            'amount']) / saved_restaurant.review_count)

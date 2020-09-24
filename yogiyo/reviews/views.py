@@ -19,7 +19,7 @@ class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
     def perform_create(self, serializer):
         if 'order_pk' in self.kwargs:
             order = get_object_or_404(Order, id=self.kwargs.get('order_pk'))
-            rating = int((self.request.data['taste'] + self.request.data['delivery'] + self.request.data['amount']) / 3)
+            rating = int(int(self.request.data['taste'] + self.request.data['delivery'] + self.request.data['amount']) / 3)
 
             # 메뉴 이름/count(옵션끄룹이름(옵션이름,옵션이름), 옵션그룹이름(옵션이름,옵션이름)), 메뉴2/count…
             menu_list = []

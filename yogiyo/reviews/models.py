@@ -43,7 +43,7 @@ class Review(models.Model):
 
 class ReviewImage(models.Model):
     """이미지 3장"""  # todo 리뷰 이미지 3장
-    review = models.ForeignKey('Review', on_delete=models.CASCADE)
+    review = models.ForeignKey('Review', on_delete=models.CASCADE, related_name='img')
     image = models.ImageField(upload_to='review_image')
 
 
