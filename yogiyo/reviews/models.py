@@ -32,10 +32,10 @@ class Review(models.Model):
 
         """리뷰 생성할 때 해당 레스토랑의 별점을 반영한다"""
 
-        self.restaurant.taste = (self.restaurant.taste*self.restaurant.review_count + self.taste) / (self.restaurant.review_count +1)
-        self.restaurant.delivery = (self.restaurant.delivery*self.restaurant.review_count + self.delivery) / (self.restaurant.review_count +1)
-        self.restaurant.amount = (self.restaurant.amount*self.restaurant.review_count + self.amount) / (self.restaurant.review_count +1)
-        self.restaurant.rating = (self.restaurant.taste + self.restaurant.delivery + self.restaurant.amount) / 3
+        self.restaurant.average_taste = (self.restaurant.average_taste * self.restaurant.review_count + self.taste) / (self.restaurant.review_count + 1)
+        self.restaurant.average_delivery = (self.restaurant.average_delivery * self.restaurant.review_count + self.delivery) / (self.restaurant.review_count + 1)
+        self.restaurant.average_amount = (self.restaurant.average_amount * self.restaurant.review_count + self.amount) / (self.restaurant.review_count + 1)
+        self.restaurant.average_rating = (self.restaurant.average_taste + self.restaurant.average_delivery + self.restaurant.average_amount) / 3
 
         self.restaurant.review_count = F('review_count') + 1
         self.restaurant.save()
@@ -48,5 +48,5 @@ class ReviewImage(models.Model):
 
 
 class ReviewComment(models.Model):
-    review = models.OneToOneField('Review', on_delete=models.CASCADE)
+    review = models.OneToOneField('Review', on_delete=models.CASCADE, related_name='img')
     comments = models.CharField(max_length=300)

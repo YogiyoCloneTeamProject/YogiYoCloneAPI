@@ -135,3 +135,5 @@ datadump.json
 datadump-origin.json
 datadump-GIS.json
 yogiyo_crawl.json
+yogiyo_crawl_origin.json
+yogiyo_data_for_parsing.json

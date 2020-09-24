@@ -1,4 +1,3 @@
-from django.test import TestCase
 from model_bakery import baker
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -11,7 +10,8 @@ from restaurants.models import Restaurant
 class ReviewTestCase(APITestCase, TempraryImageMixin):
     def setUp(self) -> None:
         self.user = baker.make('users.User')
-        self.restaurant = baker.make('restaurants.Restaurant', review_count=10, amount=4, delivery=4, taste=4, rating=4)
+        self.restaurant = baker.make('restaurants.Restaurant', review_count=10, average_amount=4, average_delivery=4,
+                                     average_taste=4, average_rating=4)
         self.order = baker.make('orders.Order', owner=self.user, restaurant=self.restaurant)
         self.order_menu = baker.make('orders.OrderMenu', order=self.order, name='불고기버거')
         self.order_menu2 = baker.make('orders.OrderMenu', order=self.order, name='치즈버거')
@@ -89,7 +89,7 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
             "taste": 3,
             "delivery": 4,
             "amount": 2,
-            "img" :[]
+            "img": []
         }
 
         self.client.force_authenticate(user=self.user)
@@ -100,10 +100,12 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         saved_restaurant = Restaurant.objects.get(id=self.restaurant.id)
 
         # 현재 평균 = 원래 평균 * 원래 리뷰수 + 리퀘스트 / 총 리뷰 수
-        self.assertEqual(saved_restaurant.taste, (self.restaurant.taste * self.restaurant.review_count + self.data[
-            'taste']) / saved_restaurant.review_count)
-        self.assertEqual(saved_restaurant.delivery, (
-                self.restaurant.delivery * self.restaurant.review_count + self.data[
-            'delivery']) / saved_restaurant.review_count)
-        self.assertEqual(saved_restaurant.amount, (self.restaurant.amount * self.restaurant.review_count + self.data[
-            'amount']) / saved_restaurant.review_count)
+        self.assertEqual(saved_restaurant.average_taste, (
+                    self.restaurant.average_taste * self.restaurant.review_count + self.data[
+                'taste']) / saved_restaurant.review_count)
+        self.assertEqual(saved_restaurant.average_delivery, (
+                    self.restaurant.average_delivery * self.restaurant.review_count + self.data[
+                'delivery']) / saved_restaurant.review_count)
+        self.assertEqual(saved_restaurant.average_amount, (
+                    self.restaurant.average_amount * self.restaurant.review_count + self.data[
+                'amount']) / saved_restaurant.review_count)
