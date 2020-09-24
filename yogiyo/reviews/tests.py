@@ -3,6 +3,8 @@ from model_bakery import baker
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from orders.models import Order
+
 
 class ReviewTestCase(APITestCase):
     def setUp(self) -> None:
@@ -31,6 +33,7 @@ class ReviewTestCase(APITestCase):
         response = self.client.post(f'/orders/{self.order.id}/reviews', data=self.data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response)
+        self.assertTrue(Order.objects.get(id=self.order.id).review_written)
 
     def test_review_duplicate(self):
         self.data = {
@@ -47,5 +50,20 @@ class ReviewTestCase(APITestCase):
         # print(response.data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_review_destroy(self):
+        review = baker.make('reviews.Review', order=self.order)
 
+        response = self.client.delete(f'/reviews/{review.id}')
 
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_review_list(self):
+        baker.make('reviews.Review', restaurant=self.restaurant, _quantity=2)
+        baker.make('reviews.Review')
+        response = self.client.get(f'/restaurants/{self.restaurant.id}/reviews')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_review_create_user_wrong(self):
+        """ordering에 owner = request.user """
+        

@@ -5,12 +5,12 @@ from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Review
 
 
-# 다 이미지 추가해야함!!! 리스트로 ㅎㅎ
+# todo 이미지 필드 추가하기 !
 
 class ReviewListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ('id', 'owner', 'order', 'caption', 'like_count', 'rating', 'taste', 'amount', 'delivery')
+        fields = ('id', 'owner', 'order', 'restaurant' ,'caption', 'like_count', 'rating', 'taste', 'amount', 'delivery')
 
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
@@ -25,4 +25,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         is_order = Review.objects.filter(order_id=order_pk).first()
         if is_order is not None:
             raise ValidationError('this order already exists in Review models')
+
+        # todo """이 주문을 한 유저만 작성 할 수 있다 permission? validate  """
+
         return attrs

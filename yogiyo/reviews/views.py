@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import mixins
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 
@@ -8,16 +9,10 @@ from reviews.models import Review
 from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer
 
 
-class ReviewViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, GenericViewSet):
-    """review"""
+class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
+    """review post """
     queryset = Review.objects.all()
-    serializer_class = ReviewListSerializer
-
-    def get_serializer_class(self):
-        if self.action == 'create':  # todo 딜리트는 나중에..!
-            return ReviewCreateSerializer
-
-        return super().get_serializer_class()
+    serializer_class = ReviewCreateSerializer
 
     def perform_create(self, serializer):
         if 'order_pk' in self.kwargs:
@@ -48,6 +43,17 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.Destr
                 menu_name=menu_name
             )
 
-    # def get_queryset(self):
-    # queryset = super().get_queryset().filter(=self.kwargs.get('order_pk'))
-    # return queryset
+
+class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericViewSet):
+    """review get, delete"""
+    queryset = Review.objects.all()
+    serializer_class = ReviewListSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.action == 'list':
+            if 'restaurant_pk' in self.kwargs:
+                queryset = super().get_queryset().filter(restaurant=self.kwargs.get('restaurant_pk'))
+            else:
+                raise ValidationError('url should contains restaurant pk ')
+        return queryset
