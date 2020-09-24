@@ -13,10 +13,7 @@ class Review(models.Model):
     taste = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     delivery = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     amount = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
-    order = models.OneToOneField(
-        'orders.Order',
-        on_delete=models.CASCADE
-    )
+    order = models.OneToOneField('orders.Order', on_delete=models.CASCADE)
     menu_name = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
     like_count = models.PositiveIntegerField(default=0)
@@ -31,7 +28,6 @@ class Review(models.Model):
         self.order.save()
 
         """리뷰 생성할 때 해당 레스토랑의 별점을 반영한다"""
-
         self.restaurant.average_taste = (self.restaurant.average_taste * self.restaurant.review_count + self.taste) / (self.restaurant.review_count + 1)
         self.restaurant.average_delivery = (self.restaurant.average_delivery * self.restaurant.review_count + self.delivery) / (self.restaurant.review_count + 1)
         self.restaurant.average_amount = (self.restaurant.average_amount * self.restaurant.review_count + self.amount) / (self.restaurant.review_count + 1)
@@ -48,5 +44,5 @@ class ReviewImage(models.Model):
 
 
 class ReviewComment(models.Model):
-    review = models.OneToOneField('Review', on_delete=models.CASCADE, related_name='img')
+    review = models.OneToOneField('Review', on_delete=models.CASCADE, related_name='review_comment')
     comments = models.CharField(max_length=300)
