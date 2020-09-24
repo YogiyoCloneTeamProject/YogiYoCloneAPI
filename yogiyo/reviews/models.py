@@ -1,5 +1,7 @@
 from django.db import models
 
+from orders.models import Order
+
 
 class Review(models.Model):
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE)
@@ -19,6 +21,11 @@ class Review(models.Model):
 
     class Meta:
         ordering = ['-id']
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
+        self.order.review_written = True
+        self.order.save()
 
 
 class ReviewImage(models.Model):
