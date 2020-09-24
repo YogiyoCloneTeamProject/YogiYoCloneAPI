@@ -46,3 +46,4 @@ class ReviewImage(models.Model):
 class ReviewComment(models.Model):
     review = models.OneToOneField('Review', on_delete=models.CASCADE, related_name='review_comment')
     comments = models.CharField(max_length=300)
+    created = models.DateTimeField(auto_now_add=True)
