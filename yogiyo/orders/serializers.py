@@ -56,56 +56,20 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """req 데이터와 model 데이터 검증 """
-        # todo 할인
-        # 음식점 최소가격 확인
-        if attrs['total_price'] < attrs['restaurant'].min_order_price:
-            raise ValidationError('total price < restaurant min price')
+        discount = attrs['restaurant'].delivery_discount
+        if discount is None:
+            discount = 0
 
-        price_list = []
+        self.valid_min_order_price(attrs)
+
+        self.total_price = 0
         # req - model 데이터 일치 확인
         order_menus = attrs['order_menu']
         for order_menu in order_menus:
-            """req: 메뉴 이름, 가격 / model : 메뉴 이름, 가격 비교 """
-            menu = order_menu['menu']
-            # req 레스토랑이 메뉴 모델에 레스토랑과 같은지
-            if order_menu['name'] != menu.name:
-                raise ValidationError('menu.name != model menu.name')
-            if order_menu['price'] != menu.price:
-                raise ValidationError('menu.price != model menu.price')
-
-            check_price = order_menu['price']
-
-            """order_option_group"""
-            for order_option_group in order_menu['order_option_group']:
-                try:
-                    is_order_option_group = menu.option_group.get(name=order_option_group['name'])
-                except models.ObjectDoesNotExist:
-                    raise ValidationError('This option group is not included in this menu')
-
-                if order_option_group['mandatory'] != is_order_option_group.mandatory:
-                    raise ValidationError('order_option_group.mandatory != model option_group.mandatory')
-                # mandatory = true -> option 1개만!
-                if order_option_group['mandatory']:
-                    if len(order_option_group['order_option']) != 1:
-                        raise ValidationError('mandatory true -> must len(order option list) == 1  ')
-
-                """order_option"""
-                for order_option in order_option_group['order_option']:
-                    try:
-                        is_order_option = is_order_option_group.option.get(name=order_option['name'])
-                    except models.ObjectDoesNotExist:
-                        raise ValidationError('This option is not included in this option group')
-
-                    if order_option['price'] != is_order_option.price:
-                        raise ValidationError('order option.price != model option.price')
-
-                    check_price += order_option['price']
-
-            check_price *= order_menu['count']
-            price_list.append(check_price)
+            self.valid_order_menu(order_menu, discount)
 
         # 총 가격 == (메뉴 가격 + 옵션 가격) * 주문 갯수
-        if attrs['total_price'] != sum(price_list):
+        if attrs['total_price'] != self.total_price:
             raise ValidationError('total price != check_price')
 
         return attrs
@@ -125,6 +89,60 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 for order_option in order_options:
                     OrderOption.objects.create(order_option_group=order_option_group_obj, **order_option)
         return order
+
+    def valid_min_order_price(self, attrs):
+        # 매장 최소주문금액 검증
+        if attrs['total_price'] < attrs['restaurant'].min_order_price:
+            raise ValidationError('total price < restaurant min price')
+
+    def valid_order_menu(self, order_menu, discount):
+        """req: 메뉴 이름, 가격 / model : 메뉴 이름, 가격 비교 """
+        menu = order_menu['menu']
+        # req 레스토랑이 메뉴 모델에 레스토랑과 같은지
+        if order_menu['name'] != menu.name:
+            raise ValidationError('menu.name != model menu.name')
+        if order_menu['price'] != menu.price:
+            raise ValidationError('menu.price != model menu.price')
+
+        menu_price = order_menu['price']
+
+        """order_option_group"""
+        for order_option_group in order_menu['order_option_group']:
+            menu_price = self.valid_order_option_group(menu, order_option_group, menu_price)
+
+        menu_price = (menu_price - discount) * order_menu['count']
+        self.total_price += menu_price
+
+    def valid_order_option_group(self, menu, order_option_group, check_price):
+        try:
+            option_group = menu.option_group.get(name=order_option_group['name'])
+        except models.ObjectDoesNotExist:
+            raise ValidationError('This option group is not included in this menu')
+
+        if order_option_group['mandatory'] != option_group.mandatory:
+            raise ValidationError('order_option_group.mandatory != model option_group.mandatory')
+        # mandatory = true -> option 1개만!
+        if order_option_group['mandatory']:
+            if len(order_option_group['order_option']) != 1:
+                raise ValidationError('mandatory true -> must len(order option list) == 1  ')
+
+        """order_option"""
+        for order_option in order_option_group['order_option']:
+            check_price = self.valid_order_option(option_group, order_option, check_price)
+
+        return check_price
+
+    def valid_order_option(self, option_group, order_option, check_price):
+        try:
+            option = option_group.option.get(name=order_option['name'])
+        except models.ObjectDoesNotExist:
+            raise ValidationError('This option is not included in this option group')
+
+        if order_option['price'] != option.price:
+            raise ValidationError('order option.price != model option.price')
+
+        check_price += order_option['price']
+        return check_price
 
 
 class OrderListSerializer(serializers.ModelSerializer):

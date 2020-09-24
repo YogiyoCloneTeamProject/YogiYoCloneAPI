@@ -10,7 +10,7 @@ class Order(models.Model):
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE)
     restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE, related_name='order')
     order_time = models.DateTimeField(auto_now_add=True)
-    # status = models.TextChoices() todo order status choice field
+    # status = models.CharField(max_length=10, choices=PaymentMethodChoice.choices)
     address = models.CharField(max_length=255)
     delivery_requests = models.CharField(max_length=255, default="(없음)")
     payment_method = models.CharField(max_length=10, choices=PaymentMethodChoice.choices)
