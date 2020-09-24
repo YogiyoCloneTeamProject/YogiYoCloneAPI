@@ -137,7 +137,7 @@ class OrderListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'order_menu', 'restaurant_name', 'restaurant_image', 'status', 'order_time')
+        fields = ('id', 'order_menu', 'restaurant_name', 'restaurant_image', 'status', 'order_time', 'review_written')
 
     def get_status(self, obj):
         return '배달 상태 구현 예정...'
