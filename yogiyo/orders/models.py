@@ -15,6 +15,7 @@ class Order(models.Model):
     delivery_requests = models.CharField(max_length=255, default="(없음)")
     payment_method = models.CharField(max_length=10, choices=PaymentMethodChoice.choices)
     total_price = models.PositiveIntegerField()
+    review_written = models.BooleanField(default=False)
 
 
 class OrderMenu(models.Model):
