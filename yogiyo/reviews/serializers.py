@@ -26,6 +26,4 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         if is_order is not None:
             raise ValidationError('this order already exists in Review models')
 
-        # todo """이 주문을 한 유저만 작성 할 수 있다 permission? validate  """
-
         return attrs

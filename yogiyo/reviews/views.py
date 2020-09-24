@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 
+from core.permissions import ReviewIsOwner
 from orders.models import Order
 from reviews.models import Review
 from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer
@@ -13,6 +14,7 @@ class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
     """review post """
     queryset = Review.objects.all()
     serializer_class = ReviewCreateSerializer
+    # permission_classes = [ReviewIsOwner]
 
     def perform_create(self, serializer):
         if 'order_pk' in self.kwargs:
