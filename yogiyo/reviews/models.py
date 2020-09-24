@@ -1,16 +1,17 @@
 from django.db import models
 
 from orders.models import Order
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Review(models.Model):
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE)
     restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE)
     caption = models.CharField(max_length=300)
-    rating = models.PositiveIntegerField()
-    taste = models.PositiveIntegerField()
-    delivery = models.PositiveIntegerField()
-    amount = models.PositiveIntegerField()
+    rating = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+    taste = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+    delivery = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+    amount = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     order = models.OneToOneField(
         'orders.Order',
         on_delete=models.CASCADE

@@ -66,4 +66,4 @@ class ReviewTestCase(APITestCase):
 
     def test_review_create_user_wrong(self):
         """ordering에 owner = request.user """
-        
+
