@@ -65,7 +65,6 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         baker.make('reviews.Review', order=self.order)
         response = self.client.post(f'/orders/{self.order.id}/reviews', data=self.data)
 
-        # print(response.data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_review_destroy(self):
