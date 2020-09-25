@@ -1,4 +1,3 @@
-# from django.contrib.gis.geos import Point
 from model_bakery import baker
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -6,9 +5,6 @@ from rest_framework.test import APITestCase
 from orders.models import Order
 
 
-# lat = 37.545133
-# lng = 127.057129
-# point = Point(lng, lat)
 class OrderCreateTestCase(APITestCase):
     """주문 생성"""
 
@@ -47,20 +43,20 @@ class OrderCreateTestCase(APITestCase):
                     "count": 1,
                     "price": self.menu.price,
                     "order_option_group": [
-                        # {
-                        #     "name": self.option_groups[0].name,
-                        #     "mandatory": False,
-                        #     "order_option": [
-                        #         {
-                        #             "name": self.options[0].name,
-                        #             "price": self.options[0].price
-                        #         },
-                        #         {
-                        #             "name": self.options[1].name,
-                        #             "price": self.options[1].price
-                        #         }
-                        #     ]
-                        # },
+                        {
+                            "name": self.option_groups[0].name,
+                            "mandatory": False,
+                            "order_option": [
+                                {
+                                    "name": self.options[0].name,
+                                    "price": self.options[0].price
+                                },
+                                {
+                                    "name": self.options[1].name,
+                                    "price": self.options[1].price
+                                }
+                            ]
+                        },
                         {
                             "name": self.option_groups[1].name,
                             "mandatory": True,
@@ -77,8 +73,8 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": (self.menu.price - delivery_discount) * count + self.options2[0].price
-            # "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price - delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
