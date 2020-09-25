@@ -12,8 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    # email = serializers.EmailField()
-    email = serializers.CharField(label='email')
+    email = serializers.EmailField()
     password = serializers.CharField(
         label='Password',
         style={'input_type': 'password'},
@@ -28,8 +27,7 @@ class LoginSerializer(serializers.Serializer):
             msg = 'Must include "username" and "password".'
             raise serializers.ValidationError(msg, code='authorization')
 
-        user = authenticate(request=self.context.get('request'),
-                            email=email, password=password)
+        user = authenticate(request=self.context.get('request'), email=email, password=password)
         if user is None:
             msg = 'Unable to log in with provided credentials.'
             raise serializers.ValidationError(msg, code='authorization')

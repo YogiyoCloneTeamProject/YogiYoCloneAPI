@@ -6,6 +6,7 @@ bs4==0.0.1
 certifi==2020.6.20
 chardet==3.0.4
 defusedxml==0.6.0
+dj-inmemorystorage==2.1.0
 Django==3.1
 django-allauth==0.42.0
 django-environ==0.4.5
