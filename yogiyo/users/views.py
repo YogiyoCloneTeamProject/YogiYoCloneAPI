@@ -37,3 +37,11 @@ class BookmarkViewSet(mixins.CreateModelMixin,
                       GenericViewSet):
     queryset = Bookmark.objects.all()
     serializer_class = BookmarkSerializer
+    # todo 퍼미션 추가
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.user:
+            qs = qs.filter(user=self.request.user)
+        # todo 비로그인시 400
+        return qs
