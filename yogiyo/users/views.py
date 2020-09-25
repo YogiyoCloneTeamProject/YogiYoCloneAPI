@@ -1,12 +1,12 @@
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import status
+from rest_framework import status, mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
-from users.models import User
-from users.serializers import UserSerializer, LoginSerializer
+from users.models import User, Bookmark
+from users.serializers import UserSerializer, LoginSerializer, BookmarkSerializer
 
 
 class UserViewSet(ModelViewSet):
@@ -29,3 +29,11 @@ class UserViewSet(ModelViewSet):
             pass
         return Response({"detail": "Successfully logged out."},
                         status=status.HTTP_200_OK)
+
+
+class BookmarkViewSet(mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.ListModelMixin,
+                      GenericViewSet):
+    queryset = Bookmark.objects.all()
+    serializer_class = BookmarkSerializer

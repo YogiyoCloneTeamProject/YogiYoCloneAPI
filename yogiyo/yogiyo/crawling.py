@@ -34,7 +34,7 @@ class Crawling:
         return users
 
     def json_parsing(self):
-        """yogiyo_crawl_origin.json 파일에서 파싱헤서 DB에 저장"""
+        """yogiyo_data_for_parsing.json 파일에서 파싱헤서 DB에 저장"""
         with open('yogiyo_data_for_parsing.json', 'r', encoding='utf-8') as file:
             json_data = json.load(file)
         user_list = self.create_users()

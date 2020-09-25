@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 
-from users.models import User
+from users.models import User, Bookmark
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -34,3 +34,9 @@ class LoginSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return attrs
+
+
+class BookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookmark
+        fields = ('id', 'restaurant')
