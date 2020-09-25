@@ -38,11 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # third party
+    # lib
     'rest_framework',
     'rest_framework.authtoken',
     'storages',
     'rest_auth',
+    'django_filters',
+    'drf_yasg',
 
     # my app
     'core',
@@ -60,9 +62,6 @@ INSTALLED_APPS = [
 
     # provider
     'allauth.socialaccount.providers.kakao',
-
-    # lib
-    'django_filters',
 ]
 
 # 카카오 소셜 로그인
