@@ -5,17 +5,19 @@ from rest_framework.validators import UniqueTogetherValidator
 from reviews.models import Review, ReviewImage
 
 
-class ReviewListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Review
-        fields = (  # todo 이미지필드
-            'id', 'owner', 'order', 'restaurant', 'caption', 'like_count', 'rating', 'taste', 'amount', 'delivery')
-
-
 class ReviewImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReviewImage
         fields = ('id', 'image',)
+
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    images = ReviewImageSerializer(many=True, source='img', read_only=True)
+
+    class Meta:
+        model = Review
+        fields = (
+            'id', 'owner', 'order', 'restaurant', 'caption', 'like_count', 'rating', 'taste', 'amount', 'delivery', 'images')
 
 
 class ReviewCreateSerializer(serializers.ModelSerializer):

@@ -25,7 +25,7 @@ class RestaurantFilter(filters.FilterSet):
     categories = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
-        model = Restaurant
+        model = Restaurant 
         fields = ['payment_methods', 'categories']
 
 
