@@ -59,12 +59,11 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Restaurant
-        fields = (
-            'id', 'name', 'average_rating', 'average_taste', 'average_delivery', 'average_amount', 'image',
-            'notification', 'opening_time', 'closing_time', 'tel_number', 'address', 'min_order_price',
-            'payment_methods', 'business_name', 'company_registration_number', 'origin_information',
-            'delivery_discount', 'delivery_charge', 'delivery_time', 'back_image', 'photo_menu', 'menu_group',
-            'review_count')
+        fields = ('id', 'name', 'average_rating', 'average_taste', 'average_delivery', 'average_amount', 'image',
+                  'back_image', 'notification', 'opening_time', 'closing_time', 'tel_number', 'address',
+                  'min_order_price', 'payment_methods', 'business_name', 'company_registration_number',
+                  'origin_information', 'delivery_discount', 'delivery_charge', 'delivery_time', 'photo_menu',
+                  'menu_group', 'review_count')
 
 
 class RestaurantListSerializer(serializers.ModelSerializer):
@@ -77,10 +76,8 @@ class RestaurantListSerializer(serializers.ModelSerializer):
     class Meta:
         # todo 사장님 댓글 수, 대표메뉴
         model = Restaurant
-        fields = (
-            'id', 'name', 'average_rating', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time',
-            'review_count',
-            'representative_menus')
+        fields = ('id', 'name', 'average_rating', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time',
+                  'review_count', 'representative_menus')
 
 
 class HomeViewSerializer(serializers.ModelSerializer):
@@ -89,6 +86,5 @@ class HomeViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Restaurant
-        fields = (
-            'id', 'name', 'average_rating', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time',
-            'bookmark_count', 'review_count', 'representative_menus', 'min_order_price')
+        fields = ('id', 'name', 'average_rating', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time',
+                  'bookmark_count', 'review_count', 'representative_menus', 'min_order_price')

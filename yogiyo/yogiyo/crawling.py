@@ -9,7 +9,7 @@ from rest_framework.utils import json
 
 from orders.models import Order
 from restaurants.models import Restaurant, MenuGroup, Menu, OptionGroup, Option
-from reviews.models import Review
+from reviews.models import Review, ReviewComment, ReviewImage
 from users.models import User
 
 lat = 37.545133
@@ -38,6 +38,7 @@ class Crawling:
         with open('yogiyo_data_for_parsing.json', 'r', encoding='utf-8') as file:
             json_data = json.load(file)
         user_list = self.create_users()
+
         for restaurant_data in json_data:
             restaurant_results = restaurant_data['restaurant_results']
             restaurant_info_results = restaurant_data['restaurant_info_results']
@@ -49,7 +50,7 @@ class Crawling:
             restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results, list_info,
                                                  avgrating_results)
             self.review_parsing(review_results, restaurant, user_list=user_list)
-            # self.menu_parsing(menu_results, restaurant)
+            self.menu_parsing(menu_results, restaurant)
 
     def json_crawl(self):
         """웹에서 크롤 -> yogiyo_data_for_parsing.json 파일로 저장"""
@@ -99,10 +100,10 @@ class Crawling:
         average_quantity = avgrating_results['average_quantity']
         average_taste = avgrating_results['average_taste']
 
-        if restaurant_results['estimated_delivery_time'] == '':
-            estimated_delivery_time = 30
-        else:
+        try:
             estimated_delivery_time = int(restaurant_results['estimated_delivery_time'].split('~')[0])
+        except:
+            estimated_delivery_time = 30
 
         restaurant = Restaurant(
             name=name,
@@ -111,14 +112,14 @@ class Crawling:
             closing_time=closing_time,
             tel_number=tel_number,
             address=address,
-            min_order_price=min_order,
+            min_order_price=min_order,  # 20분~30분 - 20~30분
             payment_methods=payment_methods,
             business_name=business_name,
             company_registration_number=company_registration_number,
             origin_information=origin_information,
             delivery_discount=discount,
             delivery_charge=delivery_charge,
-            delivery_time=int(restaurant_results['estimated_delivery_time'].split('~')[0]),
+            delivery_time=estimated_delivery_time,
             lat=res_lat,
             lng=res_lng,
             categories=categories,
@@ -132,11 +133,10 @@ class Crawling:
             average_amount=average_quantity,
         )
         restaurant.save()
-        # todo S3에 이미지 저장
-        # if restaurant_image:
-        #     restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
-        # if restaurant_back_image:
-        #     restaurant.back_image.save(*self.save_img(restaurant_back_image))
+        if restaurant_image:
+            restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
+        if restaurant_back_image:
+            restaurant.back_image.save(*self.save_img(restaurant_back_image))
         return restaurant
 
     def review_parsing(self, review_results, restaurant, user_list):
@@ -163,12 +163,17 @@ class Crawling:
                 like_count=review_dict['like_count'],
             )
             review.save()
-            # todo S3에 이미지 저장
-            # for img in review_dict['review_images']:
-            #     review_image = ReviewImage(review=review)
-            #     review_image.image.save(*self.save_img(img['thumb']))
+            for img in review_dict['review_images']:
+                review_image = ReviewImage(review=review)
+                review_image.image.save(*self.save_img(img['thumb']))
 
-            # todo 사장님 댓글 크롤링
+            owner_reply = review_dict['owner_reply']
+            if owner_reply:
+                review_comment = ReviewComment(
+                    review=review,
+                    comments=owner_reply['comment'],
+                )
+                review_comment.save()
 
     def menu_parsing(self, menu_results, restaurant):
         """json에서 '메뉴그룹, 메뉴, 옵션그룹, 옵션' 파싱"""
@@ -201,18 +206,19 @@ class Crawling:
                             caption=menu_caption, is_photomenu=menu_is_photomenu)
                 menu.save()
                 if menu_img is not None:
-                    menu.image.save(*self.save_img(menu_img))  # todo None 리턴??
+                    menu.image.save(*self.save_img(menu_img))
                 for option_group_dict in menu_dict['subchoices']:
                     option_group_name = option_group_dict['name']
                     option_group_mandatory = option_group_dict['mandatory']
                     option_group = OptionGroup(menu=menu, name=option_group_name, mandatory=option_group_mandatory)
                     option_group.save()
 
+                    option_list = []
                     for option_dict in option_group_dict['subchoices']:
                         option_name = option_dict['name']
                         option_price = option_dict['price']
-                        option = Option(option_group=option_group, name=option_name, price=option_price)
-                        option.save()
+                        option_list.append(Option(option_group=option_group, name=option_name, price=option_price))
+                    Option.objects.bulk_create(option_list)
 
     def save_img(self, image_url):
         """이미지 저장"""
