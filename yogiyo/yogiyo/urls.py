@@ -13,17 +13,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+# from allauth.account.views import confirm_email
+from django.conf import settings
+from django.conf.urls import url
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
-from rest_framework.routers import SimpleRouter
-
-from tests.views import TestViewSet
-
-router = SimpleRouter()
-router.register('tests', TestViewSet)
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-]
+    path('', include('core.urls')),
 
-urlpatterns += router.urls
+    # 로그인
+    # path('account/', include('rest_auth.urls')),
+    # path('account/registration/', include('rest_auth.registration.urls')),
+    # path('account/', include('allauth.urls')),
+    # url(r'account/registration/confirm-email/(?P<key>.+)/$', confirm_email, name='confirm_email'),
+    # path('', include('django.contrib.auth.urls'))
+
+]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
