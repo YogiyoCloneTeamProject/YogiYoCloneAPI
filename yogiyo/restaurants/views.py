@@ -25,7 +25,7 @@ class RestaurantFilter(filters.FilterSet):
     categories = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
-        model = Restaurant
+        model = Restaurant 
         fields = ['payment_methods', 'categories']
 
 
@@ -86,7 +86,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     @action(detail=False, methods=['GET'])
     def home_view_1(self, request, *args, **kwargs):
         """별점 - star 높은 음식점 10개 - 4점 이상만"""
-        queryset = self.get_queryset().order_by('-star').filter(star__gte=4)[:10]
+        queryset = self.get_queryset().order_by('-average_rating').filter(average_rating__gte=4)[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 

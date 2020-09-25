@@ -25,7 +25,7 @@ class RestaurantTestCase(APITestCase):
         for restaurant_response, restaurant in zip(response.data['results'], self.restaurants):
             self.assertEqual(restaurant_response['id'], restaurant.id)
             self.assertEqual(restaurant_response['name'], restaurant.name)
-            self.assertEqual(restaurant_response['star'], restaurant.star)
+            self.assertEqual(restaurant_response['average_rating'], restaurant.average_rating)
             self.assertEqual(restaurant_response['image'], restaurant.image)
             self.assertEqual(restaurant_response['delivery_discount'], restaurant.delivery_discount)
             self.assertEqual(restaurant_response['delivery_charge'], restaurant.delivery_charge)
@@ -42,7 +42,7 @@ class RestaurantTestCase(APITestCase):
         response_restaurant = Munch(response.data)
         self.assertEqual(response_restaurant.id, self.restaurant.id)
         self.assertEqual(response_restaurant.name, self.restaurant.name)
-        self.assertEqual(response_restaurant.star, self.restaurant.star)
+        self.assertEqual(response_restaurant.average_rating, self.restaurant.average_rating)
         self.assertEqual(response_restaurant.notification, self.restaurant.notification)
         self.assertEqual(response_restaurant.opening_time, self.restaurant.opening_time.strftime('%H:%M:%S'))
         self.assertEqual(response_restaurant.tel_number, self.restaurant.tel_number)
