@@ -1,13 +1,31 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 
-from users.models import User, Bookmark
+from users.models import User, Bookmark, Profile
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'password')
+        fields = ('id', 'email', 'password', 'nickname')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        """유저 생성 시 프로필도 같이 생성"""
+        # todo 트랜잭션?
+        profile = validated_data.pop('nickname')
+        user = User.objects.create(**validated_data)
+        Profile.objects.create(user=user, **profile)
+        return user
+
+
+class UserRetrieveSerializer(serializers.ModelSerializer):
+    nickname = serializers.CharField(source='profile.nickname', allow_null=True, allow_blank=True)
+    phone_num = serializers.CharField(source='profile.phone_num', allow_null=True, allow_blank=True)
+
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'nickname', 'phone_num')
         extra_kwargs = {'password': {'write_only': True}}
 
 

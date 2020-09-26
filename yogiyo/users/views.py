@@ -6,12 +6,17 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
 from users.models import User, Bookmark
-from users.serializers import UserSerializer, LoginSerializer, BookmarkSerializer
+from users.serializers import UserCreateSerializer, UserRetrieveSerializer, LoginSerializer, BookmarkSerializer
 
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserRetrieveSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserCreateSerializer
+        return super().get_serializer_class()
 
     @action(methods=['post'], detail=False)
     def login(self, request, *args, **kwargs):
@@ -37,6 +42,7 @@ class BookmarkViewSet(mixins.CreateModelMixin,
                       GenericViewSet):
     queryset = Bookmark.objects.all()
     serializer_class = BookmarkSerializer
+
     # todo 퍼미션 추가
 
     def get_queryset(self):
