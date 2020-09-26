@@ -1,7 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from phonenumber_field.modelfields import PhoneNumberField
 
 
 class UserManager(BaseUserManager):
@@ -38,16 +37,13 @@ class UserManager(BaseUserManager):
 
 
 class Profile(models.Model):
-    """profile model"""
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     point = models.PositiveIntegerField(null=True, blank=True)
     nickname = models.CharField(max_length=20, null=True, blank=True)
-    phone_num = PhoneNumberField(null=True, blank=True, unique=True)
-
+    phone_num = models.CharField(null=True, blank=True, unique=True, max_length=15)
 
 
 class User(AbstractUser):
-    """User model."""
     username = None
     email = models.EmailField('email address', unique=True)
     objects = UserManager()

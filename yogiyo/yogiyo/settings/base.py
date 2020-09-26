@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'rest_auth',
     'django_filters',
     'drf_yasg',
-    'phonenumber_field',
 
     # my app
     'core',
