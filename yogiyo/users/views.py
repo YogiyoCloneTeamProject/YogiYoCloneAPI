@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
 from users.models import User, Bookmark
-from users.serializers import UserCreateSerializer, UserRetrieveSerializer, LoginSerializer, BookmarkSerializer
+from users.serializers import UserCreateSerializer, UserRetrieveSerializer, LoginSerializer, BookmarkSerializer, \
+    UserPhoneNumSerializer, UserPasswordSerializer, UserUpdateSerializer
 
 
 class UserViewSet(ModelViewSet):
@@ -16,6 +17,12 @@ class UserViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return UserCreateSerializer
+        if self.action == 'authorize_phone_num':
+            return UserPhoneNumSerializer
+        if self.action == 'update_password':
+            return UserPasswordSerializer
+        if self.action == 'partial_update':
+            return UserUpdateSerializer
         return super().get_serializer_class()
 
     @action(methods=['post'], detail=False)
@@ -34,6 +41,16 @@ class UserViewSet(ModelViewSet):
             pass
         return Response({"detail": "Successfully logged out."},
                         status=status.HTTP_200_OK)
+
+    @action(methods=['patch'], detail=True)
+    def authorize_phone_num(self, request, *args, **kwargs):
+        return Response({"detail": "Successfully logged out."},
+                        status=status.HTTP_200_OK)
+
+    @action(methods=['patch'], detail=True)
+    def update_password(self, request, *args, **kwargs):
+        """비밀번호 변경"""
+        return super().partial_update(request, *args, **kwargs)
 
 
 class BookmarkViewSet(mixins.CreateModelMixin,
