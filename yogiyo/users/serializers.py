@@ -5,6 +5,8 @@ from users.models import User, Bookmark, Profile
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
+    nickname = serializers.CharField(source='profile.nickname', allow_null=True, allow_blank=True)
+
     class Meta:
         model = User
         fields = ('id', 'email', 'password', 'nickname')
@@ -12,10 +14,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """유저 생성 시 프로필도 같이 생성"""
-        # todo 트랜잭션?
-        profile = validated_data.pop('nickname')
-        user = User.objects.create(**validated_data)
-        Profile.objects.create(user=user, **profile)
+        nickname = validated_data.pop('nickname') if 'nickname' in validated_data else None
+        user = User.objects.create(**validated_data, is_active=False)
+        Profile.objects.create(user=user, nickname=nickname)
         return user
 
 
