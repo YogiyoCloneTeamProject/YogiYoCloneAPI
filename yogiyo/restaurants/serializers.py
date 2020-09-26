@@ -25,7 +25,7 @@ class OptionGroupSerializer(serializers.ModelSerializer):
 
 
 class MenuDetailSerializer(serializers.ModelSerializer):
-    # todo 리뷰보기(개수) 추가
+    # todo 클린리뷰 카운트 추가
     option_group = OptionGroupSerializer(read_only=True, many=True)
 
     class Meta:
@@ -70,7 +70,7 @@ class RestaurantListSerializer(serializers.ModelSerializer):
     delivery_time = DeliveryTimeField()
 
     class Meta:
-        # todo 사장님 댓글 수, 대표메뉴
+        # todo 사장님 댓글 수
         model = Restaurant
         fields = ('id', 'name', 'average_rating', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time',
                   'review_count', 'representative_menus')

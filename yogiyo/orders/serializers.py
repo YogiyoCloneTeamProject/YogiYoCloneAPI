@@ -75,7 +75,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        # todo create할 때 option_group option menu ordering
+        # todo for문 돌리지 말고 모델에서 name으로 get - request 할때 id 순서 상관없이
         order_menus = validated_data.pop('order_menu')
         user = User.objects.first()  # todo 테스트용 owner 빼기
         order = Order.objects.create(owner=user, **validated_data)
