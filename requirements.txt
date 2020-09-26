@@ -13,6 +13,7 @@ Django==3.1
 django-allauth==0.42.0
 django-environ==0.4.5
 django-filter==2.3.0
+django-phonenumber-field==5.0.0
 django-rest-auth==0.9.5
 django-storages==1.10
 djangorestframework==3.11.1
@@ -30,6 +31,7 @@ model-bakery==1.1.1
 munch==2.5.0
 oauthlib==3.1.0
 packaging==20.4
+phonenumbers==8.12.9
 Pillow==7.2.0
 psycopg2-binary==2.8.5
 pyparsing==2.4.7
