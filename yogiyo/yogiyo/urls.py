@@ -13,23 +13,35 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-# from allauth.account.views import confirm_email
 from django.conf import settings
-from django.conf.urls import url
+# from allauth.account.views import confirm_email
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
-
-    # 로그인
-    # path('account/', include('rest_auth.urls')),
-    # path('account/registration/', include('rest_auth.registration.urls')),
-    # path('account/', include('allauth.urls')),
-    # url(r'account/registration/confirm-email/(?P<key>.+)/$', confirm_email, name='confirm_email'),
-    # path('', include('django.contrib.auth.urls'))
-
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# swagger 정보 설정, 관련 엔드포인트 추가
+# swagger 엔드포인트는 DEBUG Mode 에서만 노출
+# schema_view = get_schema_view(
+#     openapi.Info(
+#         title="Yogiyo API",
+#         default_version='v1',
+#         description="Test description",
+#         terms_of_service="https://www.google.com/policies/terms/",
+#         contact=openapi.Contact(email="hap2.dev@gmail.com"),
+#         license=openapi.License(name="BSD License"),
+#     ),
+#     public=True,
+#     permission_classes=(permissions.AllowAny,),
+# )
+# urlpatterns += [
+#     path(r'^redoc/$', schema_view.with_ui('redoc'))
+# ]
