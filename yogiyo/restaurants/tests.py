@@ -17,8 +17,6 @@ class RestaurantTestCase(APITestCase):
         self.user = baker.make('users.User')
 
     def test_restaurant_list(self):
-        self.client.force_authenticate(user=self.user)
-
         response = self.client.get('/restaurants')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -31,10 +29,8 @@ class RestaurantTestCase(APITestCase):
             self.assertEqual(restaurant_response['delivery_charge'], restaurant.delivery_charge)
 
     def test_restaurant_detail(self):
-        menu_group = baker.make('restaurants.MenuGroup', _quantity=1, restaurant=self.restaurant)
-        menu = baker.make('restaurants.Menu', _quantity=1, menu_group=menu_group[0])
-
-        self.client.force_authenticate(user=self.user)
+        menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant)
+        baker.make('restaurants.Menu', menu_group=menu_group)
 
         response = self.client.get(f'/restaurants/{self.restaurant.id}')
 
@@ -57,14 +53,12 @@ class RestaurantTestCase(APITestCase):
         self.assertEqual(response_restaurant.delivery_charge, self.restaurant.delivery_charge)
 
     def test_menu_detail(self):
-        menu_group = baker.make('restaurants.MenuGroup', _quantity=1, restaurant=self.restaurant)
-        menu = baker.make('restaurants.Menu', _quantity=1, menu_group=menu_group[0])
-        menu = menu[0]
+        menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant)
+        menu = baker.make('restaurants.Menu', menu_group=menu_group)
         option_group = baker.make('restaurants.OptionGroup', _quantity=2, menu=menu)
-        option = []
+        options = []
         for i in range(len(option_group)):
-            option += baker.make('restaurants.Option', _quantity=1, option_group=option_group[i])
-        self.client.force_authenticate(user=self.user)
+            options.append(baker.make('restaurants.Option', option_group=option_group[i]))
 
         response = self.client.get(f'/menu/{menu.id}')
 
@@ -92,8 +86,6 @@ class RestaurantTestCase(APITestCase):
         self.restaurants[0].save()
         self.restaurants[1].categories.extend(["일식", "중식"])
         self.restaurants[1].save()
-
-        self.client.force_authenticate(user=self.user)
 
         category = "중식"
         response = self.client.get(f'/restaurants?categories={category}')

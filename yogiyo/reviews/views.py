@@ -1,10 +1,8 @@
-from django.shortcuts import render
 from rest_framework import mixins
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 
-from core.permissions import ReviewIsOwner
 from orders.models import Order
 from reviews.models import Review
 from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer
@@ -15,6 +13,7 @@ class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewCreateSerializer
     # permission_classes = [ReviewIsOwner]
+    permission_classes = []
 
     def perform_create(self, serializer):
         if 'order_pk' in self.kwargs:
@@ -50,6 +49,7 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericView
     """review get, delete"""
     queryset = Review.objects.all()
     serializer_class = ReviewListSerializer
+    permission_classes = []
 
     def get_queryset(self):
         queryset = super().get_queryset()

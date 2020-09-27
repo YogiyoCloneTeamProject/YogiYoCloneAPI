@@ -8,6 +8,7 @@ from orders.serializers import OrderSerializer, OrderListSerializer, OrderCreate
 class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    permission_classes = []
 
     def get_serializer_class(self):
         if self.action == 'create':

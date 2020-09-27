@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 
+from core.permissions import IsUserSelf
 from users.models import User, Bookmark
 from users.serializers import UserCreateSerializer, UserRetrieveSerializer, LoginSerializer, BookmarkSerializer, \
     UserPhoneNumSerializer, UserPasswordSerializer, UserUpdateSerializer
@@ -12,9 +13,17 @@ from users.serializers import UserCreateSerializer, UserRetrieveSerializer, Logi
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserRetrieveSerializer
+    serializer_class = UserCreateSerializer
+
+    def get_permissions(self):
+        if self.action in ['retrieve', 'update_password', 'partial_update', 'logout']:
+            return [IsUserSelf()]
+        if self.action in ['login', 'authorize_phone_num', 'create']:
+            return []
 
     def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return UserRetrieveSerializer
         if self.action == 'create':
             return UserCreateSerializer
         if self.action == 'authorize_phone_num':
@@ -39,13 +48,12 @@ class UserViewSet(ModelViewSet):
             request.user.auth_token.delete()
         except (AttributeError, ObjectDoesNotExist):
             pass
-        return Response({"detail": "Successfully logged out."},
-                        status=status.HTTP_200_OK)
+        return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True)
     def authorize_phone_num(self, request, *args, **kwargs):
-        return Response({"detail": "Successfully logged out."},
-                        status=status.HTTP_200_OK)
+        """회원가입2 전화번호 인증 후 - 전화번호 추가, 유저 활성화"""
+        return super().partial_update(request, *args, **kwargs)
 
     @action(methods=['patch'], detail=True)
     def update_password(self, request, *args, **kwargs):
@@ -60,11 +68,8 @@ class BookmarkViewSet(mixins.CreateModelMixin,
     queryset = Bookmark.objects.all()
     serializer_class = BookmarkSerializer
 
-    # todo 퍼미션 추가
-
     def get_queryset(self):
         qs = super().get_queryset()
         if self.request.user:
             qs = qs.filter(user=self.request.user)
-        # todo 비로그인시 400
         return qs
