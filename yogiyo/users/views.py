@@ -18,7 +18,7 @@ class UserViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action in ['retrieve', 'update_password', 'partial_update', 'logout']:
             return [IsUserSelf()]
-        if self.action in ['login', 'authorize_phone_num', 'create']:
+        if self.action in ['login', 'authorize_phone_num', 'create', 'list']:
             return []
         return super().get_permissions()
 
