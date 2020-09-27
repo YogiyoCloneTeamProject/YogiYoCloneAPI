@@ -56,7 +56,6 @@ class User(AbstractUser):
         if not self.id:
             self.set_password(self.password)
             super().save(*args, **kwargs)
-            Profile.objects.create(user_id=self.id)
         else:
             super().save(*args, **kwargs)
 
