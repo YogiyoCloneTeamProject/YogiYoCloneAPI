@@ -7,16 +7,24 @@ from users.models import User, Bookmark, Profile
 class UserPhoneNumSerializer(serializers.ModelSerializer):
     """회원가입2 전화번호 인증 (활성)"""
     phone_num = serializers.CharField(source='profile.phone_num')
+    nickname = serializers.CharField(source='profile.nickname', allow_null=True, allow_blank=True)
 
     class Meta:
         model = User
         fields = ('id', 'email', 'nickname', 'phone_num')
         read_only_fields = ('email', 'nickname')
 
+    def update(self, instance, validated_data):
+        instance.profile.phone_num = validated_data.pop('profile')['phone_num']
+        instance.profile.save()
+        validated_data['is_acticve'] = True
+        return super().update(instance, validated_data)
+
 
 class UserUpdateSerializer(serializers.ModelSerializer):
-    """회원정보 수정 - 닉네임, 전화번호 only"""
-    phone_num = serializers.CharField(source='profile.phone_num')
+    """회원정보 수정 - 닉네임 only"""
+    phone_num = serializers.CharField(source='profile.phone_num', read_only=True)
+    nickname = serializers.CharField(source='profile.nickname', allow_null=True, allow_blank=True)
 
     class Meta:
         model = User
@@ -26,13 +34,18 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
 class UserPasswordSerializer(serializers.ModelSerializer):
     """비밀번호 변경"""
-    nickname = serializers.CharField(source='profile.nickname', allow_null=True, allow_blank=True)
+    nickname = serializers.CharField(source='profile.nickname', allow_null=True, allow_blank=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'nickname', 'password',)
+        fields = ('id', 'email', 'nickname', 'password')
         read_only_fields = ('email', 'nickname')
         extra_kwargs = {'password': {'write_only': True}}
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -45,9 +58,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        nickname = validated_data.pop('nickname') if 'nickname' in validated_data else None
+        profile = validated_data.pop('profile')
         user = User.objects.create(**validated_data, is_active=False)
-        Profile.objects.create(user=user, nickname=nickname)
+        Profile.objects.create(user=user, **profile)
         return user
 
 

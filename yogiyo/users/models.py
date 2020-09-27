@@ -38,7 +38,7 @@ class UserManager(BaseUserManager):
 
 
 class Profile(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    user = models.OneToOneField('User', on_delete=models.CASCADE, related_name='profile')
     point = models.PositiveIntegerField(null=True, blank=True)
     nickname = models.CharField(max_length=20, null=True, blank=True)
     phone_num = PhoneNumberField(null=True, blank=True, unique=True)
@@ -56,7 +56,6 @@ class User(AbstractUser):
         if not self.id:
             self.set_password(self.password)
             super().save(*args, **kwargs)
-            Profile.objects.create(user_id=self.id)
         else:
             super().save(*args, **kwargs)
 

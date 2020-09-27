@@ -1,5 +1,3 @@
-# from django.contrib.gis.geos import Point
-# from django.contrib.gis.measure import D
 from django_filters import rest_framework as filters
 from rest_framework import mixins
 from rest_framework.decorators import action
@@ -18,6 +16,7 @@ class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     """menu detail"""
     queryset = Menu.objects.all()
     serializer_class = MenuDetailSerializer
+    permission_classes = []
 
 
 class RestaurantFilter(filters.FilterSet):
@@ -37,6 +36,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     filterset_class = RestaurantFilter
     ordering_fields = ['star', 'delivery_charge', 'min_order_price', 'review_count', 'delivery_time']
     ordering = ('id',)
+    permission_classes = []
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
