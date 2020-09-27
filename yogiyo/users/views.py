@@ -20,6 +20,7 @@ class UserViewSet(ModelViewSet):
             return [IsUserSelf()]
         if self.action in ['login', 'authorize_phone_num', 'create']:
             return []
+        return super().get_permissions()
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
