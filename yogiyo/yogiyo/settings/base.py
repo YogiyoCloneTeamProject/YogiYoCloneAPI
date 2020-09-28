@@ -53,20 +53,7 @@ INSTALLED_APPS = [
     'users',
     'orders',
     'reviews',
-
-    # django-allauth
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'rest_auth.registration',
-
-    # provider
-    'allauth.socialaccount.providers.kakao',
 ]
-
-# 카카오 소셜 로그인
-# SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -183,14 +170,4 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
-}
-
-SOCIALACCOUNT_PROVIDERS = {
-    'kakao': {
-        'APP': {
-            'client_id': '7c34ce562e2d7d667567eb85201fe06a',
-            'secret': 482167,
-            'key': ''
-        }
-    }
 }
