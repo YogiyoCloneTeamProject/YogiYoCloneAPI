@@ -34,7 +34,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     serializer_class = RestaurantListSerializer
     filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
     filterset_class = RestaurantFilter
-    ordering_fields = ['star', 'delivery_charge', 'min_order_price', 'review_count', 'delivery_time']
+    ordering_fields = ['average_rating', 'delivery_charge', 'min_order_price', 'review_count', 'delivery_time']
     ordering = ('id',)
     permission_classes = []
 
@@ -47,28 +47,16 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        # PostGIS 거리 필터
         queryset = self.filter_by_distance_manual(queryset)
+
         search = self.request.query_params.get('search', None)
         if search:
             queryset = Restaurant.objects.filter(
                 Q(name__icontains=search) | Q(menu_group__menu__name__icontains=search)).distinct()
-        return queryset  # 카테고리 없으면 전체 조회
-
-    # def filter_by_distance_GIS(self, qs):
-    #     """query_params 위경도로 PointField 거리 필터링"""
-    #     # 실제 query_params
-    #     lng = self.request.query_params.get('lng', None)
-    #     lat = self.request.query_params.get('lat', None)
-    #     # 임의 좌표 사용
-    #     # lng = 127.057129
-    #     # lat = 37.545133
-    #
-    #     if lat and lng:
-    #         qs = qs.filter(point__distance_lte=(Point(lng, lat), D(m=500)))
-    #     return qs
+        return queryset
 
     def filter_by_distance_manual(self, qs):
+        """좌표 기준 반경 1km 쿼리"""
         data = self.request.GET
         if self.action == 'list':
             lat = data.get('lat')
@@ -76,10 +64,10 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
             if lat and lng:
                 lat = float(lat)
                 lng = float(lng)
-                min_lat = lat - 0.0045
-                max_lat = lat + 0.0045
-                min_lon = lng - 0.007
-                max_lon = lng + 0.007
+                min_lat = lat - 0.009
+                max_lat = lat + 0.009
+                min_lon = lng - 0.015
+                max_lon = lng + 0.01
 
                 # 최소, 최대 위경도를 1km씩 설정해서 쿼리
                 qs = qs.filter(lat__gte=min_lat, lat__lte=max_lat,
