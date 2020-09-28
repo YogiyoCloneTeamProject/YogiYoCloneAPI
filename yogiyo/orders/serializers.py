@@ -56,9 +56,9 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """req 데이터와 model 데이터 검증 """
-        discount = attrs['restaurant'].delivery_discount
-        if discount is None:
-            discount = 0
+        restaurant = attrs['restaurant']
+        delivery_charge = restaurant.delivery_charge if restaurant.delivery_charge is not None else 0
+        discount = restaurant.delivery_discount if restaurant.delivery_discount is not None else 0
 
         self.valid_min_order_price(attrs)
 
@@ -69,7 +69,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
             self.valid_order_menu(order_menu, discount)
 
         # 총 가격 == (메뉴 가격 + 옵션 가격) * 주문 갯수
-        if attrs['total_price'] != self.total_price:
+        if attrs['total_price'] != self.total_price + delivery_charge:
             raise ValidationError('total price != check_price')
 
         return attrs

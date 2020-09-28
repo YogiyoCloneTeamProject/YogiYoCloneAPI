@@ -22,7 +22,7 @@ class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
     def get_queryset(self):
         qs = super().get_queryset()
         if self.action == 'list':
-            if self.request.user:
+            if self.request.user.is_authenticated:
                 # 로그인
                 qs = qs.filter(owner=self.request.user)
             else:
