@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-
+from django.db.models import Q
 from restaurants.models import Menu, Restaurant
 from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer, \
     HomeViewSerializer
@@ -48,6 +48,11 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = self.filter_by_distance_manual(queryset)
+
+        search = self.request.query_params.get('search', None)
+        if search:
+            queryset = Restaurant.objects.filter(
+                Q(name__icontains=search) | Q(menu_group__menu__name__icontains=search)).distinct()
         return queryset
 
     def filter_by_distance_manual(self, qs):
