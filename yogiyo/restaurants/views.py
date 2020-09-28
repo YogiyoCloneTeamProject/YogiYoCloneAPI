@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-
+from django.db.models import Q
 from restaurants.models import Menu, Restaurant
 from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer, \
     HomeViewSerializer
@@ -24,7 +24,7 @@ class RestaurantFilter(filters.FilterSet):
     categories = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
-        model = Restaurant 
+        model = Restaurant
         fields = ['payment_methods', 'categories']
 
 
@@ -49,6 +49,10 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         queryset = super().get_queryset()
         # PostGIS 거리 필터
         queryset = self.filter_by_distance_manual(queryset)
+        search = self.request.query_params.get('search', None)
+        if search:
+            queryset = Restaurant.objects.filter(
+                Q(name__icontains=search) | Q(menu_group__menu__name__icontains=search)).distinct()
         return queryset  # 카테고리 없으면 전체 조회
 
     # def filter_by_distance_GIS(self, qs):
