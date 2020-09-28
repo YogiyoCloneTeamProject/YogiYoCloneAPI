@@ -9,7 +9,8 @@ class OrderCreateTestCase(APITestCase):
     """주문 생성"""
 
     def setUp(self) -> None:
-        self.restaurant = baker.make('restaurants.Restaurant', min_order_price=5000)
+        self.restaurant = baker.make('restaurants.Restaurant', min_order_price=5000, delivery_discount=2000,
+                                     delivery_charge=1000)
         menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant, name='햄버거')
         self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거', price=9000)
         self.menu2 = baker.make('restaurants.Menu', menu_group=menu_group, name='불고기버', price=9000)
@@ -74,7 +75,7 @@ class OrderCreateTestCase(APITestCase):
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
-                0].price - delivery_discount
+                0].price - delivery_discount + self.restaurant.delivery_charge
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)

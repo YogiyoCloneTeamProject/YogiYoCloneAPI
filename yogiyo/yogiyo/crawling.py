@@ -26,12 +26,8 @@ class Crawling:
         })
 
     def create_users(self):
-        users = User.objects.bulk_create([
-            User(email=str(uuid.uuid4()) + 'pop@a.com', password='1111'),
-            User(email=str(uuid.uuid4()) + 'asd@a.com', password='1111'),
-            User(email=str(uuid.uuid4()) + 'oij@a.com', password='1111')
-        ])
-        return users
+        for i in range(1, 4):
+            User(email=f'testuser{i}@a.com', password='1111').save()
 
     def json_parsing(self):
         """yogiyo_data_for_parsing.json 파일에서 파싱헤서 DB에 저장"""
