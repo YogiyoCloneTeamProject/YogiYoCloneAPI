@@ -66,7 +66,7 @@ class UserRetrieveTestCase(APITestCase):
 class UserAuthorizePhoneNumTestCase(APITestCase):
 
     def setUp(self) -> None:
-        self.user = baker.make('users.User')
+        self.user = baker.make('users.User', is_active=False)
         baker.make('users.Profile', user=self.user)
         self.data = {
             'phone_num': '010-1111-1111'
