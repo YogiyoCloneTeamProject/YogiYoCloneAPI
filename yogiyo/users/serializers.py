@@ -17,8 +17,9 @@ class UserPhoneNumSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.profile.phone_num = validated_data.pop('profile')['phone_num']
         instance.profile.save()
-        validated_data['is_acticve'] = True
-        return super().update(instance, validated_data)
+        instance.is_active = True
+        instance.save()
+        return instance
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
