@@ -14,7 +14,7 @@ from users.serializers import UserCreateSerializer, UserRetrieveSerializer, Logi
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserRetrieveSerializer
-    pagination_class = None
+    pagination_class = None  # todo 유저리스트 테스트용 - 삭제예정
 
     def get_permissions(self):
         if self.action in ['retrieve', 'update_password', 'partial_update', 'logout']:
