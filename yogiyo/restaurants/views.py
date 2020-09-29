@@ -5,9 +5,11 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from django.db.models import Q
+from taggit.models import Tag
+
 from restaurants.models import Menu, Restaurant
 from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer, \
-    HomeViewSerializer
+    HomeViewSerializer, TagSerializer
 
 HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6')
 
@@ -99,7 +101,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     @action(detail=False, methods=['GET'])
     def home_view_4(self, request, *args, **kwargs):
         """최근 7일동안 리뷰가 많아요
-        - 리뷰 갯수 순 음식점 10개"""
+        - 리뷰 개수 순 음식점 10개"""
         queryset = self.get_queryset().order_by('-review')[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -111,3 +113,18 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         queryset = self.get_queryset().order_by('delivery_time')[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class TagViewSet(mixins.ListModelMixin, GenericViewSet):
+    """tag - search (자동완성)"""
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = []
+    pagination_class = None
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        tag_search = self.request.query_params.get('name', None)
+        if tag_search is not None:
+            queryset = queryset.filter(name__icontains=tag_search)
+        return queryset
