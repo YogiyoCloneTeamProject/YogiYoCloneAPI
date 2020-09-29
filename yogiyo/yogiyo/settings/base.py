@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_yasg',
     'phonenumber_field',
+    'taggit',
 
     # my app
     'core',

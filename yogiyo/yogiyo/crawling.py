@@ -49,8 +49,8 @@ class Crawling:
 
             restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results, list_info,
                                                  avgrating_results)
-            self.review_parsing(review_results, restaurant, user_list=user_list)
-            self.menu_parsing(menu_results, restaurant)
+            # self.review_parsing(review_results, restaurant, user_list=user_list)
+            # self.menu_parsing(menu_results, restaurant)
 
     def json_crawl(self):
         """웹에서 크롤 -> yogiyo_data_for_parsing.json 파일로 저장"""
@@ -133,6 +133,11 @@ class Crawling:
             average_amount=average_quantity,
         )
         restaurant.save()
+
+        tags = list_info.get('keywords')
+        if tags:
+            restaurant.tags.add(*tags.split())
+
         if restaurant_image:
             restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
         if restaurant_back_image:
