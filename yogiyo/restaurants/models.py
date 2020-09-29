@@ -4,7 +4,6 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from taggit.managers import TaggableManager
 
-
 class CategoryChoice(models.TextChoices):
     ONE_SERVING = '1인분주문'
     FRANCHISE = '프랜차이즈'

@@ -1,7 +1,7 @@
 import random
 import tempfile
-import uuid
 from datetime import datetime
+from uuid import uuid4
 
 import requests
 from django.core import files
@@ -27,7 +27,7 @@ class Crawling:
 
     def create_users(self):
         for i in range(1, 4):
-            User(email=f'testuser{i}@a.com', password='1111').save()
+            User(email=f'{uuid4()}testuser@a.com', password='1111').save()
         return list(User.objects.all())
 
     def json_parsing(self):
@@ -46,8 +46,8 @@ class Crawling:
 
             restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results, list_info,
                                                  avgrating_results)
-            self.review_parsing(review_results, restaurant, user_list=user_list)
-            self.menu_parsing(menu_results, restaurant)
+            # self.review_parsing(review_results, restaurant, user_list=user_list)
+            # self.menu_parsing(menu_results, restaurant)
 
     def json_crawl(self):
         """웹에서 크롤 -> yogiyo_data_for_parsing.json 파일로 저장"""
@@ -97,7 +97,6 @@ class Crawling:
         average_quantity = avgrating_results['average_quantity']
         average_taste = avgrating_results['average_taste']
 
-        tags = restaurant_results.get('keywords')
         try:
             estimated_delivery_time = int(restaurant_results['estimated_delivery_time'].split('~')[0])
         except:
@@ -132,9 +131,10 @@ class Crawling:
         )
         restaurant.save()
 
-        restaurant.tags.add(tags)
+        tags = list_info.get('keywords')
+        if tags:
+            restaurant.tags.add(*tags.split())
 
-        print(restaurant.tags.all())
         if restaurant_image:
             restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
         if restaurant_back_image:
