@@ -2,6 +2,7 @@
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from taggit.managers import TaggableManager
 
 
 class CategoryChoice(models.TextChoices):
@@ -47,6 +48,7 @@ class Restaurant(models.Model):
     # point = models.PointField()
     review_count = models.PositiveIntegerField(default=0)
     representative_menus = models.CharField(max_length=255)
+    tags = TaggableManager()
 
 
 class MenuGroup(models.Model):

@@ -96,6 +96,7 @@ class Crawling:
         average_quantity = avgrating_results['average_quantity']
         average_taste = avgrating_results['average_taste']
 
+        tags = restaurant_results.get('keywords')
         try:
             estimated_delivery_time = int(restaurant_results['estimated_delivery_time'].split('~')[0])
         except:
@@ -129,6 +130,10 @@ class Crawling:
             average_amount=average_quantity,
         )
         restaurant.save()
+
+        restaurant.tags.add(tags)
+
+        print(restaurant.tags.all())
         if restaurant_image:
             restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
         if restaurant_back_image:
