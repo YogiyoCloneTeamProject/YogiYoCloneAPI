@@ -28,6 +28,7 @@ class Crawling:
     def create_users(self):
         for i in range(1, 4):
             User(email=f'testuser{i}@a.com', password='1111').save()
+        return list(User.objects.all())
 
     def json_parsing(self):
         """yogiyo_data_for_parsing.json 파일에서 파싱헤서 DB에 저장"""
