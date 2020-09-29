@@ -1,9 +1,10 @@
 import random
 import tempfile
-import uuid
 from datetime import datetime
+from uuid import uuid4
 
 import requests
+from django.conf import settings
 from django.core import files
 from rest_framework.utils import json
 
@@ -19,6 +20,8 @@ lng = 127.057129
 class Crawling:
 
     def __init__(self) -> None:
+        settings.CRAWLING = True
+
         self.s = requests.Session()
         self.s.headers.update({
             'x-apikey': 'iphoneap',
@@ -27,7 +30,7 @@ class Crawling:
 
     def create_users(self):
         for i in range(1, 4):
-            User(email=f'testuser{i}@a.com', password='1111').save()
+            User(email=f'{uuid4()}testuser@a.com', password='1111').save()
         return list(User.objects.all())
 
     def json_parsing(self):
