@@ -77,7 +77,7 @@ class RestaurantListSerializer(serializers.ModelSerializer):
                   'review_count', 'representative_menus', 'owner_comment_count')
 
     def get_owner_comment_count(self, restaurant):
-        # todo 사장님 댓글 수
+        # todo 사장님 댓글 수 - 0이면 null로
         return 10
 
     def get_delivery_discount(self, restaurant):

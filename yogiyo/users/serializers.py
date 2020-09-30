@@ -22,15 +22,20 @@ class UserPhoneNumSerializer(serializers.ModelSerializer):
         return instance
 
 
-class UserUpdateSerializer(serializers.ModelSerializer):
+class UserUpdateNicknameSerializer(serializers.ModelSerializer):
     """회원정보 수정 - 닉네임 only"""
     phone_num = serializers.CharField(source='profile.phone_num', read_only=True)
-    nickname = serializers.CharField(source='profile.nickname', allow_null=True, allow_blank=True)
+    nickname = serializers.CharField(source='profile.nickname', allow_null=True, allow_blank=True, required=True)
 
     class Meta:
         model = User
         fields = ('id', 'email', 'nickname', 'phone_num')
         read_only_fields = ('email',)
+
+    def update(self, user, validated_data):
+        user.profile.nickname = validated_data.pop('profile').get('nickname')
+        user.profile.save()
+        return user
 
 
 class UserPasswordSerializer(serializers.ModelSerializer):
