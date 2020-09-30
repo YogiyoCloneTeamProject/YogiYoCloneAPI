@@ -1,9 +1,10 @@
 import random
 import tempfile
-import uuid
 from datetime import datetime
+from uuid import uuid4
 
 import requests
+from django.conf import settings
 from django.core import files
 from rest_framework.utils import json
 
@@ -19,6 +20,8 @@ lng = 127.057129
 class Crawling:
 
     def __init__(self) -> None:
+        settings.CRAWLING = True
+
         self.s = requests.Session()
         self.s.headers.update({
             'x-apikey': 'iphoneap',
@@ -27,7 +30,8 @@ class Crawling:
 
     def create_users(self):
         for i in range(1, 4):
-            User(email=f'testuser{i}@a.com', password='1111').save()
+            User(email=f'{uuid4()}testuser@a.com', password='1111').save()
+        return list(User.objects.all())
 
     def json_parsing(self):
         """yogiyo_data_for_parsing.json 파일에서 파싱헤서 DB에 저장"""
@@ -45,8 +49,8 @@ class Crawling:
 
             restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results, list_info,
                                                  avgrating_results)
-            self.review_parsing(review_results, restaurant, user_list=user_list)
-            self.menu_parsing(menu_results, restaurant)
+            # self.review_parsing(review_results, restaurant, user_list=user_list)
+            # self.menu_parsing(menu_results, restaurant)
 
     def json_crawl(self):
         """웹에서 크롤 -> yogiyo_data_for_parsing.json 파일로 저장"""
@@ -129,6 +133,11 @@ class Crawling:
             average_amount=average_quantity,
         )
         restaurant.save()
+
+        tags = list_info.get('keywords')
+        if tags:
+            restaurant.tags.add(*tags.split())
+
         if restaurant_image:
             restaurant.image.save(*self.save_img('https://www.yogiyo.co.kr' + restaurant_image))
         if restaurant_back_image:
@@ -262,7 +271,7 @@ class Crawling:
 
     def get_page_id_list(self):
         """레스토랑 id 리스트"""
-        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=60&lat={lat}&lng={lng}&order=rank&page=0&search='
+        restaurant_list_url = f'https://www.yogiyo.co.kr/api/v1/restaurants-geo/?items=450&lat={lat}&lng={lng}&order=rank&page=0&search='
         restaurant_list_results = self.get_response_json_data(restaurant_list_url)['restaurants']
 
         list_info_dict = {restaurant_dict['id']: restaurant_dict for restaurant_dict in restaurant_list_results}
