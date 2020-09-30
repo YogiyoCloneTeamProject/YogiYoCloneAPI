@@ -78,37 +78,56 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     # todo 우리 동네만
     @action(detail=False, methods=['GET'])
     def home_view_1(self, request, *args, **kwargs):
-        """별점 - star 높은 음식점 10개 - 4점 이상만"""
+        """나의 입맛저격 - 별점 순"""
         queryset = self.get_queryset().order_by('-average_rating').filter(average_rating__gte=4)[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['GET'])
     def home_view_2(self, request, *args, **kwargs):
-        """todo 우리동네 찜 많은 음식점"""
+        """우리동네 찜 많은 음식점 - 찜 개수 순"""
         queryset = self.get_queryset().order_by('-bookmark')[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['GET'])
     def home_view_3(self, request, *args, **kwargs):
+        """todo 오늘만 할인"""
+        queryset = self.get_queryset().filter(delivery_discount__gt=0)[:10]
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def home_view_4(self, request, *args, **kwargs):
+        """todo 요즘 뜨는 우리동네 음식점"""
+        queryset = self.get_queryset().order_by('-bookmark')[:10]
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def home_view_5(self, request, *args, **kwargs):
         """배달비 무료"""
         queryset = self.get_queryset().filter(delivery_charge=0)[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['GET'])
-    def home_view_4(self, request, *args, **kwargs):
-        """최근 7일동안 리뷰가 많아요
-        - 리뷰 갯수 순 음식점 10개"""
+    def home_view_6(self, request, *args, **kwargs):
+        """최근 7일동안 리뷰가 많아요"""
         queryset = self.get_queryset().order_by('-review')[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['GET'])
-    def home_view_5(self, request, *args, **kwargs):
-        """todo 가장 빨리 배달돼요
-        - 배달예상시간 순"""
+    def home_view_6(self, request, *args, **kwargs):
+        """todo 요기요 플러스 맛집"""
+        queryset = self.get_queryset().order_by('-review')[:10]
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def home_view_8(self, request, *args, **kwargs):
+        """가장 빨리 배달돼요"""
         queryset = self.get_queryset().order_by('delivery_time')[:10]
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
