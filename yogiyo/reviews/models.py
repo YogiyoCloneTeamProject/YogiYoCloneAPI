@@ -64,3 +64,4 @@ class ReviewComment(models.Model):
         """ restaurant - review_comment_count +1 """
         Restaurant.objects.filter(id=self.review.restaurant_id).update(
             review_comment_count=F('review_comment_count') + 1)
+
