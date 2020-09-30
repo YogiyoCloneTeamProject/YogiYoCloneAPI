@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from .models import User, Profile
+from .models import User, Profile, Bookmark
 
 
 class ProfileInline(admin.TabularInline):
@@ -26,9 +26,15 @@ class UserAdmin(DjangoUserAdmin):
     search_fields = ('email', 'profile__nickname')
     ordering = ('id',)
     inlines = [ProfileInline]
+    readonly_fields = ['email']
 
     def nickname(self, user):
         return user.profile.nickname
 
     def phone_num(self, user):
         return user.profile.phone_num
+
+
+@admin.register(Bookmark)
+class BookmarkAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'restaurant']
