@@ -61,7 +61,5 @@ class ReviewComment(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         super().save(force_insert, force_update, using, update_fields)
-        """ restaurant - review_count +1 """
-        print("g")
-        print(Restaurant.objects.get(id=self.review.restaurant_id).review_count)
-        Restaurant.objects.filter(id=self.review.restaurant_id).update(review_count=F('review_count') + 1)
+        """ restaurant - review_comment_count +1 """
+        Restaurant.objects.filter(id=self.review.restaurant_id).update(review_comment_count=F('review_comment_count') + 1)

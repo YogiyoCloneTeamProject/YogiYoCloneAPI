@@ -110,7 +110,7 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
             'amount']) / saved_restaurant.review_count)
 
     def test_review_comment_create(self):
-        restaurant = baker.make('restaurants.Restaurant', review_count=10)
+        restaurant = baker.make('restaurants.Restaurant', review_count=11)
 
         review = baker.make('reviews.Review', restaurant=restaurant)
         data = {
@@ -118,6 +118,5 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         }
         response = self.client.post(f'/reviews/{review.id}/comment', data=data)
 
-        print(response.data)
-        print(Restaurant.objects.get(id=restaurant.id).review_count)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Restaurant.objects.get(id=restaurant.id).review_count, 12)
