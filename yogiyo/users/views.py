@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from core.permissions import IsUserSelf
+from restaurants.models import Restaurant
+from restaurants.serializers import RestaurantListSerializer
 from users.models import User, Bookmark
 from users.serializers import UserCreateSerializer, UserRetrieveSerializer, LoginSerializer, BookmarkSerializer, \
     UserPhoneNumSerializer, UserPasswordSerializer, UserUpdateSerializer
@@ -79,13 +81,23 @@ class UserViewSet(mixins.CreateModelMixin,
 
 class BookmarkViewSet(mixins.CreateModelMixin,
                       mixins.DestroyModelMixin,
-                      mixins.ListModelMixin,
                       GenericViewSet):
     queryset = Bookmark.objects.all()
     serializer_class = BookmarkSerializer
+    permission_classes = [AllowAny]
+
+
+class BookmarkListViewSet(mixins.ListModelMixin,
+                          GenericViewSet):
+    queryset = Restaurant.objects.all()
+    serializer_class = RestaurantListSerializer
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         qs = super().get_queryset()
-        if self.request.user:
-            qs = qs.filter(user=self.request.user)
-        return qs
+        # todo 유저의 찜 내역으로
+        # if self.request.user:
+        #     qs = qs.filter(user=self.request.user)
+        # qs.filter()
+        # return qs
+        return Restaurant.objects.filter(bookmark__user=User.objects.first())
