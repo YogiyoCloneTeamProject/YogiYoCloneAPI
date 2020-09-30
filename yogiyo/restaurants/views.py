@@ -35,7 +35,8 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     serializer_class = RestaurantListSerializer
     filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
     filterset_class = RestaurantFilter
-    ordering_fields = ['average_rating', 'delivery_charge', 'min_order_price', 'review_count', 'delivery_time']
+    ordering_fields = ['average_rating', 'delivery_charge', 'min_order_price', 'review_count', 'delivery_time',
+                       'review_comment_count']
     ordering = ('id',)
     permission_classes = [AllowAny]
 
