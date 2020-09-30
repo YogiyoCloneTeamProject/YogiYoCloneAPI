@@ -103,6 +103,22 @@ class UserUpdatePasswordTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
 
+class UserUpdateNicknameTestCase(APITestCase):
+
+    def setUp(self) -> None:
+        self.old_nickname = 'old'
+        self.new_nickname = 'new'
+        self.user = baker.make('users.User')
+        baker.make('users.Profile', user=self.user, nickname=self.old_nickname)
+        self.data = {'nickname': self.new_nickname}
+
+    def test_success(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.patch(f'/users/{self.user.id}', data=self.data)
+        res = response.data
+        self.assertEqual(response.status_code, status.HTTP_200_OK, res)
+
+
 class UserLoginTestCase(APITestCase):
     url = '/users/login'
 
