@@ -38,6 +38,7 @@ class UserViewSet(ModelViewSet):
 
     @action(methods=['post'], detail=False)
     def login(self, request, *args, **kwargs):
+        """로그인"""
         serializer = LoginSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
@@ -46,6 +47,7 @@ class UserViewSet(ModelViewSet):
 
     @action(methods=['delete'], detail=False)
     def logout(self, request, *args, **kwargs):
+        """로그아웃"""
         try:
             request.user.auth_token.delete()
         except (AttributeError, ObjectDoesNotExist):
@@ -61,6 +63,13 @@ class UserViewSet(ModelViewSet):
     def update_password(self, request, *args, **kwargs):
         """비밀번호 변경"""
         return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """회원 탈퇴(비활성화)"""
+        instance = self.get_object()
+        instance.is_active = False
+        instance.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 class BookmarkViewSet(mixins.CreateModelMixin,
