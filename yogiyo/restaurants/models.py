@@ -49,6 +49,9 @@ class Restaurant(models.Model):
     representative_menus = models.CharField(max_length=255)
     tags = TaggableManager()
 
+    def __str__(self):
+        return f'({self.id}){self.name}'
+
 
 class MenuGroup(models.Model):
     restaurant = models.ForeignKey('Restaurant', on_delete=models.CASCADE, related_name='menu_group')

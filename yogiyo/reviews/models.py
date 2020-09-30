@@ -7,14 +7,14 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Review(models.Model):
-    owner = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE)
+    owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='review')
+    restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE, related_name='review')
     caption = models.CharField(max_length=300)
     rating = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     taste = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     delivery = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     amount = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
-    order = models.OneToOneField('orders.Order', on_delete=models.CASCADE)
+    order = models.OneToOneField('orders.Order', on_delete=models.CASCADE, related_name='review')
     menu_name = models.CharField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
     like_count = models.PositiveIntegerField(default=0)
@@ -46,6 +46,6 @@ class ReviewImage(models.Model):
 
 
 class ReviewComment(models.Model):
-    review = models.OneToOneField('Review', on_delete=models.CASCADE, related_name='review_comment')
+    review = models.OneToOneField('Review', on_delete=models.CASCADE)
     comments = models.CharField(max_length=300)
     created = models.DateTimeField(auto_now_add=True)
