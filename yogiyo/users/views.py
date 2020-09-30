@@ -2,8 +2,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status, mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.viewsets import GenericViewSet
 
 from core.permissions import IsUserSelf
 from users.models import User, Bookmark
@@ -11,16 +12,20 @@ from users.serializers import UserCreateSerializer, UserRetrieveSerializer, Logi
     UserPhoneNumSerializer, UserPasswordSerializer, UserUpdateSerializer
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(mixins.CreateModelMixin,
+                  mixins.RetrieveModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.ListModelMixin,
+                  GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserRetrieveSerializer
     pagination_class = None  # todo 유저리스트 테스트용 - 삭제예정
 
     def get_permissions(self):
-        if self.action in ['retrieve', 'update_password', 'partial_update', 'logout']:
+        if self.action in ['retrieve', 'update_password', 'partial_update', 'logout', 'destroy']:
             return [IsUserSelf()]
         if self.action in ['login', 'authorize_phone_num', 'create', 'list']:
-            return []
+            return [AllowAny()]
         return super().get_permissions()
 
     def get_serializer_class(self):
