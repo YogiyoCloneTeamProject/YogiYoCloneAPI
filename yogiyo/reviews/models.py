@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.db.models import F
 
@@ -28,10 +29,11 @@ class Review(models.Model):
         self.order.save()
 
         """리뷰 생성할 때 해당 레스토랑의 별점을 반영한다"""
-        self.restaurant.average_taste = (self.restaurant.average_taste * self.restaurant.review_count + self.taste) / (self.restaurant.review_count + 1)
-        self.restaurant.average_delivery = (self.restaurant.average_delivery * self.restaurant.review_count + self.delivery) / (self.restaurant.review_count + 1)
-        self.restaurant.average_amount = (self.restaurant.average_amount * self.restaurant.review_count + self.amount) / (self.restaurant.review_count + 1)
-        self.restaurant.average_rating = (self.restaurant.average_taste + self.restaurant.average_delivery + self.restaurant.average_amount) / 3
+        if not settings.CRAWLING:  # 크롤링 시 사용 X
+            self.restaurant.average_taste = (self.restaurant.average_taste * self.restaurant.review_count + self.taste) / (self.restaurant.review_count + 1)
+            self.restaurant.average_delivery = (self.restaurant.average_delivery * self.restaurant.review_count + self.delivery) / (self.restaurant.review_count + 1)
+            self.restaurant.average_amount = (self.restaurant.average_amount * self.restaurant.review_count + self.amount) / (self.restaurant.review_count + 1)
+            self.restaurant.average_rating = (self.restaurant.average_taste + self.restaurant.average_delivery + self.restaurant.average_amount) / 3
 
         self.restaurant.review_count = F('review_count') + 1
         self.restaurant.save()

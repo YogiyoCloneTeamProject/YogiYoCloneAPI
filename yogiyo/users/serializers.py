@@ -105,4 +105,4 @@ class LoginSerializer(serializers.Serializer):
 class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookmark
-        fields = ('id', 'restaurant')
+        fields = ('id', 'user', 'restaurant')
