@@ -1,29 +1,29 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from reviews.models import Review, ReviewImage, ReviewComment
+from reviews.models import Review, ReviewImage, OwnerComment
 
 
 class ReviewImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReviewImage
-        fields = ('id', 'image',)
+        fields = ('id', 'image')
 
 
-class ReviewCommentSerializer(serializers.ModelSerializer):
+class OwnerCommentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ReviewComment
-        fields = ('id', 'comments', 'created', 'review_id',)
+        model = OwnerComment
+        fields = ('id', 'comments', 'created', 'review_id')
 
 
 class ReviewListSerializer(serializers.ModelSerializer):
     images = ReviewImageSerializer(many=True, source='img', read_only=True)
-    reviewcomment = ReviewCommentSerializer()
+    ownercomment = OwnerCommentSerializer()
 
     class Meta:
         model = Review
         fields = (
             'id', 'owner', 'order', 'restaurant', 'caption', 'like_count', 'rating', 'taste', 'amount', 'delivery',
-            'images', 'created','reviewcomment',)
+            'images', 'created', 'ownercomment')
 
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
@@ -54,7 +54,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
 
         #  이미지 세장보다 많으면 error
         if 3 < len(images):
-            raise ValidationError('image maximum 3! ')
+            raise ValidationError('image maximum 3!')
 
         image_list = []
         for image in images:

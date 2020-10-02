@@ -4,8 +4,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from orders.models import Order
-from reviews.models import Review, ReviewComment
-from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer, ReviewCommentSerializer
+from reviews.models import Review, OwnerComment
+from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer, OwnerCommentSerializer
 
 
 class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
@@ -18,7 +18,8 @@ class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
     def perform_create(self, serializer):
         if 'order_pk' in self.kwargs:
             order = get_object_or_404(Order, id=self.kwargs.get('order_pk'))
-            rating = (int(self.request.data['taste']) + int(self.request.data['delivery']) + int(self.request.data['amount'])) / 3
+            rating = (int(self.request.data['taste']) + int(self.request.data['delivery']) + int(
+                self.request.data['amount'])) / 3
 
             # 메뉴 이름/count(옵션끄룹이름(옵션이름,옵션이름), 옵션그룹이름(옵션이름,옵션이름)), 메뉴2/count…
             menu_list = []
@@ -61,14 +62,12 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericView
         return queryset
 
 
-class ReviewCommentViewSet(ModelViewSet):
-    queryset = ReviewComment.objects.all()
-    serializer_class = ReviewCommentSerializer
-    permission_classes = [] # todo admin only
+class OwnerCommentViewSet(ModelViewSet):
+    queryset = OwnerComment.objects.all()
+    serializer_class = OwnerCommentSerializer
+    permission_classes = []  # todo admin only
 
     def perform_create(self, serializer):
         if 'review_pk' in self.kwargs:
             review = get_object_or_404(Review, id=self.kwargs.get('review_pk'))
-            serializer.save(
-               review=review
-            )
+            serializer.save(review=review)

@@ -117,9 +117,6 @@ class RestaurantTestCase(APITestCase):
             if i == 4:
                 self.assertTrue(len(res) <= 9)
             self.home_view_test(res)
-            for restaurant_respone in res:
-                owner_comment_count = restaurant_respone['owner_comment_count']
-                self.assertTrue((owner_comment_count is None) or (0 < owner_comment_count))
 
     def test_post_tag_list(self):
         """태그 자동완성 list"""

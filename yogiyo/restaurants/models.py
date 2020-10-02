@@ -47,7 +47,7 @@ class Restaurant(models.Model):
     review_count = models.PositiveIntegerField(default=0)
     representative_menus = models.CharField(max_length=255)
     tags = TaggableManager()
-    review_comment_count = models.PositiveIntegerField(default=0)
+    owner_comment_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f'({self.id}){self.name}'
