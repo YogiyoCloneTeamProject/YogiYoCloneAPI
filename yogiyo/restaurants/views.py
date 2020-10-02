@@ -155,6 +155,9 @@ class TagViewSet(mixins.ListModelMixin, GenericViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         tag_search = self.request.query_params.get('name', None)
-        if tag_search is not None:
+        if tag_search:
             queryset = queryset.filter(name__icontains=tag_search)
+        elif tag_search == '' or tag_search is None:
+            queryset = []
+
         return queryset
