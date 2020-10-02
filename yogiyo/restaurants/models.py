@@ -44,7 +44,6 @@ class Restaurant(models.Model):
     categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
     lat = models.FloatField()
     lng = models.FloatField()
-    # point = models.PointField()
     review_count = models.PositiveIntegerField(default=0)
     representative_menus = models.CharField(max_length=255)
     tags = TaggableManager()

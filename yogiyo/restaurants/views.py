@@ -53,11 +53,6 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         qs = super().get_queryset()
         qs = self.filter_by_distance_manual(qs)
         qs = self.filter_by_search(qs)
-
-        search = self.request.query_params.get('search', None)
-        if search:
-            qs = Restaurant.objects.filter(
-                Q(name__icontains=search) | Q(menu_group__menu__name__icontains=search)).distinct()
         return qs
 
     def filter_by_search(self, qs):
