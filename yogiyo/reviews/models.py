@@ -5,6 +5,8 @@ from django.db.models import F
 from orders.models import Order
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+from restaurants.models import Restaurant
+
 
 class Review(models.Model):
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='review')
@@ -30,10 +32,17 @@ class Review(models.Model):
 
         """리뷰 생성할 때 해당 레스토랑의 별점을 반영한다"""
         if not settings.CRAWLING:  # 크롤링 시 사용 X
-            self.restaurant.average_taste = (self.restaurant.average_taste * self.restaurant.review_count + self.taste) / (self.restaurant.review_count + 1)
-            self.restaurant.average_delivery = (self.restaurant.average_delivery * self.restaurant.review_count + self.delivery) / (self.restaurant.review_count + 1)
-            self.restaurant.average_amount = (self.restaurant.average_amount * self.restaurant.review_count + self.amount) / (self.restaurant.review_count + 1)
-            self.restaurant.average_rating = (self.restaurant.average_taste + self.restaurant.average_delivery + self.restaurant.average_amount) / 3
+            self.restaurant.average_taste = (
+                                                    self.restaurant.average_taste * self.restaurant.review_count + self.taste) / (
+                                                    self.restaurant.review_count + 1)
+            self.restaurant.average_delivery = (
+                                                       self.restaurant.average_delivery * self.restaurant.review_count + self.delivery) / (
+                                                       self.restaurant.review_count + 1)
+            self.restaurant.average_amount = (
+                                                     self.restaurant.average_amount * self.restaurant.review_count + self.amount) / (
+                                                     self.restaurant.review_count + 1)
+            self.restaurant.average_rating = (
+                                                     self.restaurant.average_taste + self.restaurant.average_delivery + self.restaurant.average_amount) / 3
 
         self.restaurant.review_count = F('review_count') + 1
         self.restaurant.save()
@@ -49,3 +58,10 @@ class ReviewComment(models.Model):
     review = models.OneToOneField('Review', on_delete=models.CASCADE)
     comments = models.CharField(max_length=300)
     created = models.DateTimeField(auto_now_add=True)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
+        """ restaurant - review_comment_count +1 """
+        Restaurant.objects.filter(id=self.review.restaurant_id).update(
+            review_comment_count=F('review_comment_count') + 1)
+

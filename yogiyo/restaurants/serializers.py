@@ -74,7 +74,7 @@ class RestaurantListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
         fields = ('id', 'name', 'average_rating', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time',
-                  'review_count', 'representative_menus', 'owner_comment_count')
+                  'review_count', 'representative_menus', 'owner_comment_count', 'review_comment_count')
 
     def get_owner_comment_count(self, restaurant):
         # todo 사장님 댓글 수 - 0이면 null로
