@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.validators import UniqueTogetherValidator
-
-from reviews.models import Review, ReviewImage
+from reviews.models import Review, ReviewImage, ReviewComment
 
 
 class ReviewImageSerializer(serializers.ModelSerializer):
@@ -11,13 +9,21 @@ class ReviewImageSerializer(serializers.ModelSerializer):
         fields = ('id', 'image',)
 
 
+class ReviewCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewComment
+        fields = ('id', 'comments', 'created', 'review_id',)
+
+
 class ReviewListSerializer(serializers.ModelSerializer):
     images = ReviewImageSerializer(many=True, source='img', read_only=True)
+    reviewcomment = ReviewCommentSerializer()
 
     class Meta:
         model = Review
         fields = (
-            'id', 'owner', 'order', 'restaurant', 'caption', 'like_count', 'rating', 'taste', 'amount', 'delivery', 'images')
+            'id', 'owner', 'order', 'restaurant', 'caption', 'like_count', 'rating', 'taste', 'amount', 'delivery',
+            'images', 'created','reviewcomment',)
 
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
