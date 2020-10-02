@@ -93,3 +93,14 @@ class RestaurantTestCase(APITestCase):
         for r in response.data['results']:
             restaurant = Restaurant.objects.get(id=r['id'])
             self.assertTrue(category in restaurant.categories)
+
+    def home_view_test(self, res):
+        print(res)
+        print(Restaurant.objects.all())
+        self.assertEqual()
+
+    def test_home_view_1(self):
+        response = self.client.get(f'/restaurants/home_view_1')
+        res = response.data['results']
+        self.assertEqual(response.status_code, status.HTTP_200_OK, res)
+        self.home_view_test(res)
