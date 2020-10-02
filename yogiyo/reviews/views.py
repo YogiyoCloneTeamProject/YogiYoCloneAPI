@@ -1,11 +1,11 @@
 from rest_framework import mixins
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from orders.models import Order
-from reviews.models import Review
-from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer
+from reviews.models import Review, ReviewComment
+from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer, ReviewCommentSerializer
 
 
 class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
@@ -59,3 +59,16 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericView
             else:
                 raise ValidationError('url should contains restaurant pk ')
         return queryset
+
+
+class ReviewCommentViewSet(ModelViewSet):
+    queryset = ReviewComment.objects.all()
+    serializer_class = ReviewCommentSerializer
+    permission_classes = [] # todo admin only
+
+    def perform_create(self, serializer):
+        if 'review_pk' in self.kwargs:
+            review = get_object_or_404(Review, id=self.kwargs.get('review_pk'))
+            serializer.save(
+               review=review
+            )

@@ -6,10 +6,14 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from django.db.models import Q
+from taggit.models import Tag
 
 from restaurants.models import Menu, Restaurant
 from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer, \
-    HomeViewSerializer
+    HomeViewSerializer, TagSerializer
+
+HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6')
 
 
 class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
@@ -34,7 +38,8 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     serializer_class = RestaurantListSerializer
     filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
     filterset_class = RestaurantFilter
-    ordering_fields = ['average_rating', 'delivery_charge', 'min_order_price', 'review_count', 'delivery_time']
+    ordering_fields = ['average_rating', 'delivery_charge', 'min_order_price', 'review_count', 'delivery_time',
+                       'review_comment_count']
     ordering = ('id',)
     permission_classes = [AllowAny]
     HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6')
@@ -52,17 +57,14 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         qs = self.filter_by_distance_manual(qs)
         qs = self.filter_by_search(qs)
 
-        search = self.request.query_params.get('search', None)
-        if search:
-            qs = Restaurant.objects.filter(
-                Q(name__icontains=search) | Q(menu_group__menu__name__icontains=search)).distinct()
         return qs
 
     def filter_by_search(self, qs):
         search = self.request.query_params.get('search', None)
         if search:
             qs = Restaurant.objects.filter(
-                Q(name__icontains=search) | Q(menu_group__menu__name__icontains=search)).distinct()
+                Q(name__icontains=search) | Q(menu_group__menu__name__icontains=search) | Q(
+                    tags__name__icontains=search)).distinct()
         return qs
 
     def filter_by_distance_manual(self, qs):
@@ -141,3 +143,18 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     def home_view_results(self, qs):
         serializer = self.get_serializer(qs[:self.PAGE_SIZE], many=True)
         return Response({'results': serializer.data})
+
+
+class TagViewSet(mixins.ListModelMixin, GenericViewSet):
+    """tag - search (자동완성)"""
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = []
+    pagination_class = None
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        tag_search = self.request.query_params.get('name', None)
+        if tag_search is not None:
+            queryset = queryset.filter(name__icontains=tag_search)
+        return queryset

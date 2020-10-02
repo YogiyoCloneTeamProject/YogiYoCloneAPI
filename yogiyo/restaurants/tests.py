@@ -93,3 +93,16 @@ class RestaurantTestCase(APITestCase):
         for r in response.data['results']:
             restaurant = Restaurant.objects.get(id=r['id'])
             self.assertTrue(category in restaurant.categories)
+
+    def test_post_tag_list(self):
+        """태그 자동완성 list"""
+        self.restaurant.tags.add("chicken", "pizza", "pasta", "coke", "pizza2")
+
+        self.client.force_authenticate(user=self.user)
+        search = "pi"
+        response = self.client.get(f'/tags?name={search}')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        for r in response.data:
+            self.assertTrue(r['name'].startswith(search))
