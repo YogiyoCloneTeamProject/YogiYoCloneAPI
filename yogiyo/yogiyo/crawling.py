@@ -10,7 +10,7 @@ from rest_framework.utils import json
 
 from orders.models import Order
 from restaurants.models import Restaurant, MenuGroup, Menu, OptionGroup, Option
-from reviews.models import Review, ReviewComment, ReviewImage
+from reviews.models import Review, OwnerComment, ReviewImage
 from users.models import User
 
 lat = 37.545133
@@ -174,7 +174,7 @@ class Crawling:
 
             owner_reply = review_dict['owner_reply']
             if owner_reply:
-                review_comment = ReviewComment(
+                review_comment = OwnerComment(
                     review=review,
                     comments=owner_reply['comment'],
                 )

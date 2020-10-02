@@ -69,16 +69,11 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
 
 class RestaurantListSerializer(serializers.ModelSerializer):
     delivery_time = DeliveryTimeField()
-    owner_comment_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Restaurant
         fields = ('id', 'name', 'average_rating', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time',
-                  'review_count', 'representative_menus', 'owner_comment_count', 'review_comment_count',)
-
-    def get_owner_comment_count(self, restaurant):
-        # todo 사장님 댓글 수
-        return 10
+                  'review_count', 'representative_menus', 'owner_comment_count')
 
 
 class BookmarkRestaurantSerializer(RestaurantListSerializer):
@@ -89,7 +84,7 @@ class BookmarkRestaurantSerializer(RestaurantListSerializer):
 
     def get_owner_comment_count(self, restaurant):
         # 사장님 댓글 수 - 0이면 null로
-        return restaurant.review_comment_count if restaurant.review_comment_count != 0 else None
+        return restaurant.owner_comment_count if restaurant.owner_comment_count != 0 else None
 
     def get_delivery_discount(self, restaurant):
         return restaurant.delivery_discount if restaurant.delivery_discount != 0 else None
@@ -105,4 +100,4 @@ class HomeViewSerializer(RestaurantListSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ('id', 'name',)
+        fields = ('id', 'name')
