@@ -64,6 +64,7 @@ class UserViewSet(mixins.CreateModelMixin,
     @action(methods=['patch'], detail=True)
     def authorize_phone_num(self, request, *args, **kwargs):
         """회원가입2 전화번호 인증 후 - 전화번호 추가, 유저 활성화"""
+        # todo 아무나 authorize_phone_num 할수없게 인증이 필요
         return super().partial_update(request, *args, **kwargs)
 
     @action(methods=['patch'], detail=True)
@@ -89,15 +90,25 @@ class BookmarkViewSet(mixins.CreateModelMixin,
 
 class BookmarkListViewSet(mixins.ListModelMixin,
                           GenericViewSet):
+    # todo Restaurant -> Bookmark
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantListSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
         qs = super().get_queryset()
-        # todo 유저의 찜 내역으로
-        # if self.request.user:
-        #     qs = qs.filter(user=self.request.user)
-        # qs.filter()
-        # return qs
-        return Restaurant.objects.filter(bookmark__user=User.objects.first())
+
+        if self.action == 'test':
+            # todo 빈 찜 내역(테스트용) 삭제예정
+            return qs.filter(bookmark__user_id=999)
+
+        if self.request.user.is_authenticated:
+            qs = qs.filter(bookmark__user=self.request.user)
+        else:
+            # todo 로그인 안한 유저의 찜 내역(테스트용) 삭제예정
+            qs = qs.filter(bookmark__user=User.objects.first())
+        return qs
+
+    @action(detail=False)
+    def test(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)

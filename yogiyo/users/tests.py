@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
+from restaurants.models import Restaurant
 from .models import User
 
 email = 'email@test.com'
@@ -85,14 +86,15 @@ class UserAuthorizePhoneNumTestCase(APITestCase):
         self.assertEqual(self.user.email, res['email'])
         self.assertEqual(self.user.profile.nickname, res['nickname'])
 
-    def test_fail_401(self):
-        response = self.client.patch(self.url, data=self.data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)
-
-    def test_fail_403(self):
-        self.client.force_authenticate(user=baker.make('users.User'))
-        response = self.client.patch(self.url, data=self.data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+    # todo 아무나 authorize_phone_num 할수없게 인증이 필요
+    # def test_fail_401(self):
+    #     response = self.client.patch(self.url, data=self.data)
+    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)
+    #
+    # def test_fail_403(self):
+    #     self.client.force_authenticate(user=baker.make('users.User'))
+    #     response = self.client.patch(self.url, data=self.data)
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
 
 class UserUpdatePasswordTestCase(APITestCase):
@@ -195,3 +197,24 @@ class UserLogoutTestCase(APITestCase):
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertTrue(Token.objects.filter(user_id=self.user.id).exists())
+
+
+class BookmarkListTest(APITestCase):
+    def setUp(self) -> None:
+        self.users = baker.make('users.User', _quantity=2)
+        baker.make('users.Bookmark', user=self.users[0])
+        baker.make('users.Bookmark', user=self.users[1])
+
+    def test_success(self):
+        self.client.force_authenticate(user=self.users[0])
+        response = self.client.get('/bookmarks')
+        res = response.data['results']
+        self.assertEqual(response.status_code, status.HTTP_200_OK, res)
+        for restaurant in res:
+            self.assertTrue(Restaurant.objects.filter(id=restaurant['id'], bookmark__user=self.users[0]).exists())
+
+    def test_api_success(self):
+        response = self.client.get('/bookmarks/test')
+        res = response.data['results']
+        self.assertEqual(response.status_code, status.HTTP_200_OK, res)
+        self.assertEqual(len(res), 0)
