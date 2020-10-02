@@ -11,7 +11,7 @@ from restaurants.models import Restaurant
 from restaurants.serializers import RestaurantListSerializer
 from users.models import User, Bookmark
 from users.serializers import UserCreateSerializer, UserRetrieveSerializer, LoginSerializer, BookmarkSerializer, \
-    UserPhoneNumSerializer, UserPasswordSerializer, UserUpdateSerializer
+    UserPhoneNumSerializer, UserPasswordSerializer, UserUpdateNicknameSerializer
 
 
 class UserViewSet(mixins.CreateModelMixin,
@@ -40,7 +40,7 @@ class UserViewSet(mixins.CreateModelMixin,
         if self.action == 'update_password':
             return UserPasswordSerializer
         if self.action == 'partial_update':
-            return UserUpdateSerializer
+            return UserUpdateNicknameSerializer
         return super().get_serializer_class()
 
     @action(methods=['post'], detail=False)
