@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
-from .models import User, Profile
+from .models import User
 
 email = 'email@test.com'
 password = '1111'
@@ -71,9 +71,10 @@ class UserAuthorizePhoneNumTestCase(APITestCase):
         self.data = {
             'phone_num': '010-1111-1111'
         }
+        self.url = f'/users/{self.user.id}/authorize_phone_num'
 
     def test_success(self):
-        response = self.client.patch(f'/users/{self.user.id}/authorize_phone_num', data=self.data)
+        response = self.client.patch(self.url, data=self.data)
 
         res = response.data
         self.assertEqual(response.status_code, status.HTTP_200_OK, res)
@@ -84,6 +85,15 @@ class UserAuthorizePhoneNumTestCase(APITestCase):
         self.assertEqual(self.user.email, res['email'])
         self.assertEqual(self.user.profile.nickname, res['nickname'])
 
+    def test_fail_401(self):
+        response = self.client.patch(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)
+
+    def test_fail_403(self):
+        self.client.force_authenticate(user=baker.make('users.User'))
+        response = self.client.patch(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
+
 
 class UserUpdatePasswordTestCase(APITestCase):
 
@@ -93,14 +103,24 @@ class UserUpdatePasswordTestCase(APITestCase):
         self.user = baker.make('users.User', email=email, password=self.old_password)
         baker.make('users.Profile', user=self.user)
         self.data = {'password': self.new_password}
+        self.url = f'/users/{self.user.id}/update_password'
 
     def test_success(self):
         self.client.force_authenticate(user=self.user)
-        response = self.client.patch(f'/users/{self.user.id}/update_password', data=self.data)
+        response = self.client.patch(self.url, data=self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         response = self.client.post('/users/login', {'email': email, 'password': self.new_password})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+    def test_fail_401(self):
+        response = self.client.patch(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)
+
+    def test_fail_403(self):
+        self.client.force_authenticate(user=baker.make('users.User'))
+        response = self.client.patch(self.url, data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
 
 class UserUpdateNicknameTestCase(APITestCase):
@@ -117,6 +137,15 @@ class UserUpdateNicknameTestCase(APITestCase):
         response = self.client.patch(f'/users/{self.user.id}', data=self.data)
         res = response.data
         self.assertEqual(response.status_code, status.HTTP_200_OK, res)
+
+    def test_fail_401(self):
+        response = self.client.patch(f'/users/{self.user.id}', data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)
+
+    def test_fail_403(self):
+        self.client.force_authenticate(user=baker.make('users.User'))
+        response = self.client.patch(f'/users/{self.user.id}', data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN, response.data)
 
 
 class UserLoginTestCase(APITestCase):
@@ -153,7 +182,7 @@ class UserLogoutTestCase(APITestCase):
     url = '/users/logout'
 
     def setUp(self) -> None:
-        self.user = baker.make(User, email=email, password=password)
+        self.user = baker.make('users.User', email=email, password=password)
         self.token = baker.make(Token, user=self.user)
 
     def test_should_delete_token(self):
@@ -162,7 +191,7 @@ class UserLogoutTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertFalse(Token.objects.filter(user_id=self.user.id).exists())
 
-    # def test_should_denied_delete_token(self):
-    #     response = self.client.delete(self.url)
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #     self.assertTrue(Token.objects.filter(user_id=self.user.id).exists())
+    def test_should_denied_delete_token(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertTrue(Token.objects.filter(user_id=self.user.id).exists())
