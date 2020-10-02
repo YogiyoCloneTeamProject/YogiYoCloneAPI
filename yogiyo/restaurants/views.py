@@ -42,7 +42,8 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
                        'review_comment_count']
     ordering = ('id',)
     permission_classes = [AllowAny]
-    HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6')
+    HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6',
+                  'home_view_7', 'home_view_8', 'home_view_9')
     PAGE_SIZE = 20
 
     def get_serializer_class(self):
@@ -62,9 +63,9 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     def filter_by_search(self, qs):
         search = self.request.query_params.get('search', None)
         if search:
-            qs = Restaurant.objects.filter(
-                Q(name__icontains=search) | Q(menu_group__menu__name__icontains=search) | Q(
-                    tags__name__icontains=search)).distinct()
+            qs = Restaurant.objects.filter(Q(name__icontains=search) |
+                                           Q(menu_group__menu__name__icontains=search) |
+                                           Q(tags__name__icontains=search)).distinct()
         return qs
 
     def filter_by_distance_manual(self, qs):

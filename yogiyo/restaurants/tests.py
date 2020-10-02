@@ -11,7 +11,7 @@ from restaurants.models import Restaurant
 
 class RestaurantTestCase(APITestCase):
     def setUp(self) -> None:
-        self.restaurants = baker.make('restaurants.Restaurant', _quantity=2,
+        self.restaurants = baker.make('restaurants.Restaurant', _quantity=10,
                                       opening_time=datetime.time(hour=22, minute=30, second=0))
         self.restaurant = self.restaurants[0]
         self.user = baker.make('users.User')
@@ -93,6 +93,33 @@ class RestaurantTestCase(APITestCase):
         for r in response.data['results']:
             restaurant = Restaurant.objects.get(id=r['id'])
             self.assertTrue(category in restaurant.categories)
+
+    def home_view_test(self, res):
+        for restaurant_response in res:
+            self.assertTrue('id' in restaurant_response)
+            self.assertTrue('name' in restaurant_response)
+            self.assertTrue('average_rating' in restaurant_response)
+            self.assertTrue('image' in restaurant_response)
+            self.assertTrue('delivery_discount' in restaurant_response)
+            self.assertTrue('delivery_charge' in restaurant_response)
+            self.assertTrue('delivery_time' in restaurant_response)
+            self.assertTrue('bookmark_count' in restaurant_response)
+            self.assertTrue('review_count' in restaurant_response)
+            self.assertTrue('representative_menus' in restaurant_response)
+            self.assertTrue('min_order_price' in restaurant_response)
+            self.assertTrue('owner_comment_count' in restaurant_response)
+
+    def test_home_view_1(self):
+        for i in range(1, 10):
+            response = self.client.get(f'/restaurants/home_view_{i}')
+            res = response.data['results']
+            self.assertEqual(response.status_code, status.HTTP_200_OK, res)
+            if i == 4:
+                self.assertTrue(len(res) <= 9)
+            self.home_view_test(res)
+            for restaurant_respone in res:
+                owner_comment_count = restaurant_respone['owner_comment_count']
+                self.assertTrue((owner_comment_count is None) or (0 < owner_comment_count))
 
     def test_post_tag_list(self):
         """태그 자동완성 list"""
