@@ -80,6 +80,11 @@ class RestaurantListSerializer(serializers.ModelSerializer):
         # todo 사장님 댓글 수 - 0이면 null로
         return 10
 
+
+class BookmarkRestaurantSerializer(RestaurantListSerializer):
+    class Meta(RestaurantListSerializer.Meta):
+        pass
+
     def get_delivery_discount(self, restaurant):
         return restaurant.delivery_discount if restaurant.delivery_discount != 0 else None
 

@@ -37,7 +37,8 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     ordering_fields = ['average_rating', 'delivery_charge', 'min_order_price', 'review_count', 'delivery_time']
     ordering = ('id',)
     permission_classes = [AllowAny]
-    HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6')
+    HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6',
+                  'home_view_7', 'home_view_8', 'home_view_9')
     PAGE_SIZE = 20
 
     def get_serializer_class(self):

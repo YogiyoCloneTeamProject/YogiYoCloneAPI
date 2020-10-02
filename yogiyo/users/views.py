@@ -8,7 +8,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from core.permissions import IsUserSelf
 from restaurants.models import Restaurant
-from restaurants.serializers import RestaurantListSerializer
+from restaurants.serializers import BookmarkRestaurantSerializer
 from users.models import User, Bookmark
 from users.serializers import UserCreateSerializer, UserRetrieveSerializer, LoginSerializer, BookmarkSerializer, \
     UserPhoneNumSerializer, UserPasswordSerializer, UserUpdateNicknameSerializer
@@ -92,7 +92,7 @@ class BookmarkListViewSet(mixins.ListModelMixin,
                           GenericViewSet):
     # todo Restaurant -> Bookmark
     queryset = Restaurant.objects.all()
-    serializer_class = RestaurantListSerializer
+    serializer_class = BookmarkRestaurantSerializer
     permission_classes = [AllowAny]
 
     def get_queryset(self):
