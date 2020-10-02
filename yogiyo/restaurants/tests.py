@@ -120,3 +120,16 @@ class RestaurantTestCase(APITestCase):
             for restaurant_respone in res:
                 owner_comment_count = restaurant_respone['owner_comment_count']
                 self.assertTrue((owner_comment_count is None) or (0 < owner_comment_count))
+
+    def test_post_tag_list(self):
+        """태그 자동완성 list"""
+        self.restaurant.tags.add("chicken", "pizza", "pasta", "coke", "pizza2")
+
+        self.client.force_authenticate(user=self.user)
+        search = "pi"
+        response = self.client.get(f'/tags?name={search}')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+
+        for r in response.data:
+            self.assertTrue(r['name'].startswith(search))

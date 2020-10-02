@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from taggit.models import Tag
 
 from restaurants.models import Option, OptionGroup, Menu, MenuGroup, Restaurant
 
@@ -99,3 +100,9 @@ class HomeViewSerializer(RestaurantListSerializer):
 
     class Meta(RestaurantListSerializer.Meta):
         fields = RestaurantListSerializer.Meta.fields + ('bookmark_count', 'min_order_price')
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ('id', 'name',)
