@@ -23,6 +23,7 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         self.order_option2_1 = baker.make('orders.OrderOption', order_option_group=self.order_option_group2,
                                           name='콜라 쪼금')
 
+
     def test_review_create(self):
         self.data = {
             "caption": "jmt!!",
@@ -34,6 +35,7 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         self.client.force_authenticate(user=self.user)
 
         response = self.client.post(f'/orders/{self.order.id}/reviews', data=self.data)
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response)
         self.assertTrue(Order.objects.get(id=self.order.id).review_written)
 
