@@ -63,3 +63,6 @@ class User(AbstractUser):
 class Bookmark(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='bookmark')
     restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE, related_name='bookmark')
+
+    class Meta:
+        unique_together = ['user', 'restaurant']
