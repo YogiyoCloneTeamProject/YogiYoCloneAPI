@@ -40,7 +40,7 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response)
 
         self.assertTrue(Order.objects.get(id=self.order.id).review_written)
-        print(response.data)
+
         response_review = Munch(response.data)
         self.assertTrue(response_review.id)
         self.assertEqual(response_review.caption, self.data['caption'])
@@ -140,10 +140,12 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
 
     def test_owner_comment_create(self):
         restaurant = baker.make('restaurants.Restaurant', owner_comment_count=11)
-
         review = baker.make('reviews.Review', restaurant=restaurant)
 
         data = {"comments": "감사합니다 ^^"}
+
+        superuser = baker.make('users.User', is_superuser=True)  # superuser permission
+        self.client.force_authenticate(user=superuser)
 
         response = self.client.post(f'/reviews/{review.id}/comments', data=data)
 

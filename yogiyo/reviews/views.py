@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from core.permissions import IsSuperUser
 from orders.models import Order
 from reviews.models import Review, OwnerComment
 from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer, OwnerCommentSerializer
@@ -71,7 +72,7 @@ class OwnerCommentViewSet(mixins.UpdateModelMixin, mixins.DestroyModelMixin, Gen
 class OwnerCommentCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
     queryset = OwnerComment.objects.all()
     serializer_class = OwnerCommentSerializer
-    permission_classes = []
+    permission_classes = [IsSuperUser]
 
     def perform_create(self, serializer):
         if 'review_pk' in self.kwargs:
