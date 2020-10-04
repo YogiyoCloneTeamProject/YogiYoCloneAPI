@@ -1,10 +1,12 @@
 from model_bakery import baker
+from munch import Munch
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from core.temporary_image import TempraryImageMixin
 from orders.models import Order
 from restaurants.models import Restaurant
+from reviews.models import OwnerComment
 
 
 class ReviewTestCase(APITestCase, TempraryImageMixin):
@@ -34,8 +36,18 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         self.client.force_authenticate(user=self.user)
 
         response = self.client.post(f'/orders/{self.order.id}/reviews', data=self.data)
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response)
+
         self.assertTrue(Order.objects.get(id=self.order.id).review_written)
+
+        response_review = Munch(response.data)
+        self.assertTrue(response_review.id)
+        self.assertEqual(response_review.caption, self.data['caption'])
+        self.assertEqual(response_review.taste, self.data['taste'])
+        self.assertEqual(response_review.delivery, self.data['delivery'])
+        self.assertEqual(response_review.amount, self.data['amount'])
+        self.assertEqual(response_review.taste, self.data['taste'])
 
     def test_review_create_img(self):
         image_test = [self.temporary_image(), self.temporary_image()]
@@ -50,19 +62,24 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         self.client.force_authenticate(user=self.user)
 
         response = self.client.post(f'/orders/{self.order.id}/reviews', data=self.data, format='multipart')
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response)
+
         self.assertEqual(len(response.data['_img']), len(image_test))
 
     def test_review_duplicate(self):
+        """order : review -> one to one relationship """
         self.data = {
             "caption": "jmt!!",
             "taste": 3,
             "delivery": 4,
             "amount": 2,
+            "img": [],
         }
         self.client.force_authenticate(user=self.user)
 
         baker.make('reviews.Review', order=self.order)
+
         response = self.client.post(f'/orders/{self.order.id}/reviews', data=self.data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -75,11 +92,22 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_review_list(self):
-        baker.make('reviews.Review', restaurant=self.restaurant, _quantity=2)
-        baker.make('reviews.Review')
+        reviews = baker.make('reviews.Review', restaurant=self.restaurant, _quantity=2)
+
         response = self.client.get(f'/restaurants/{self.restaurant.id}/reviews')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        for response_review, review_obj in zip(response.data['results'], reviews):
+            self.assertEqual(response_review['id'], review_obj.id)
+            self.assertEqual(response_review['owner'], review_obj.owner.id)
+            self.assertEqual(response_review['order'], review_obj.order.id)
+            self.assertEqual(response_review['restaurant'], review_obj.restaurant.id)
+            self.assertEqual(response_review['caption'], review_obj.caption)
+            self.assertEqual(response_review['like_count'], 0)
+            self.assertEqual(response_review['taste'], review_obj.taste)
+            self.assertEqual(response_review['amount'], review_obj.amount)
+            self.assertEqual(response_review['delivery'], review_obj.delivery)
 
     def test_review_star_restaurant(self):
         """리뷰에서 준 별점들이 해당 레스토랑에 값 반영 """
@@ -94,6 +122,7 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         self.client.force_authenticate(user=self.user)
 
         response = self.client.post(f'/orders/{self.order.id}/reviews', data=self.data)
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response)
 
         saved_restaurant = Restaurant.objects.get(id=self.restaurant.id)
@@ -111,10 +140,42 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
 
     def test_owner_comment_create(self):
         restaurant = baker.make('restaurants.Restaurant', owner_comment_count=11)
-
         review = baker.make('reviews.Review', restaurant=restaurant)
-        data = {"comments": "감사합니다 ^^ "}
-        response = self.client.post(f'/reviews/{review.id}/comment', data=data)
+
+        data = {"comments": "감사합니다 ^^"}
+
+        superuser = baker.make('users.User', is_superuser=True)  # superuser permission
+        self.client.force_authenticate(user=superuser)
+
+        response = self.client.post(f'/reviews/{review.id}/comments', data=data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertTrue(response.data['id'])
+        self.assertEqual(response.data['comments'], data['comments'])
+        self.assertEqual(response.data['review_id'], review.id)
         self.assertEqual(Restaurant.objects.get(id=restaurant.id).owner_comment_count, 12)
+
+    def test_owner_comment_update(self):
+        review_comment = baker.make('reviews.OwnerComment', comments='감사합니다!')
+        data = {"comments": "죄송합니다 ^^"}
+
+        response = self.client.patch(f'/comments/{review_comment.id}', data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(Restaurant.objects.get(id=review_comment.review.restaurant.id).owner_comment_count, 1)
+        self.assertTrue(response.data['id'])
+        self.assertEqual(response.data['comments'], data['comments'])
+        self.assertEqual(response.data['review_id'], review_comment.review.id)
+
+    def test_owner_comment_delete(self):
+        review_comment = baker.make('reviews.OwnerComment', comments='감사합니다!')
+
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.delete(f'/comments/{review_comment.id}')
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        self.assertEqual(OwnerComment.objects.filter(pk=review_comment.id).count(), 0)

@@ -23,7 +23,6 @@ class IsReviewOwner(permissions.BasePermission):
 
 class IsUserSelf(permissions.IsAuthenticated):
     """유저 자신에 대한 권한"""
-
     def has_object_permission(self, request, view, obj):
         return obj == request.user
 
@@ -32,3 +31,10 @@ class IsOwner(permissions.IsAuthenticated):
 
     def has_object_permission(self, request, view, obj):
         return obj.owner == request.user
+
+class IsSuperUser(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        """super_user permission"""
+        return request.user and \
+               request.user.is_authenticated and \
+               request.user.is_superuser
