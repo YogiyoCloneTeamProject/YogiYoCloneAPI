@@ -62,10 +62,16 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericView
         return queryset
 
 
-class OwnerCommentViewSet(ModelViewSet):
+class OwnerCommentViewSet(mixins.UpdateModelMixin, mixins.DestroyModelMixin, GenericViewSet):
     queryset = OwnerComment.objects.all()
     serializer_class = OwnerCommentSerializer
     permission_classes = []  # todo admin only
+
+
+class OwnerCommentCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
+    queryset = OwnerComment.objects.all()
+    serializer_class = OwnerCommentSerializer
+    permission_classes = []
 
     def perform_create(self, serializer):
         if 'review_pk' in self.kwargs:
