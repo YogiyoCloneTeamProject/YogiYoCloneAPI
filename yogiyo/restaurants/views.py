@@ -44,7 +44,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     permission_classes = [AllowAny]
     HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6',
                   'home_view_7', 'home_view_8', 'home_view_9')
-    PAGE_SIZE = 20
+    HOME_VIEW_PAGE_SIZE = 20
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -108,7 +108,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     @action(detail=False, methods=['GET'])
     def home_view_4(self, request, *args, **kwargs):
         """요즘 뜨는 우리동네 음식점 - 9개만"""
-        qs = self.filter_queryset(self.get_queryset())[:9]
+        qs = self.get_queryset()[:9]
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
@@ -142,7 +142,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         return self.home_view_results(qs)
 
     def home_view_results(self, qs):
-        serializer = self.get_serializer(qs[:self.PAGE_SIZE], many=True)
+        serializer = self.get_serializer(qs[:self.HOME_VIEW_PAGE_SIZE], many=True)
         return Response({'results': serializer.data})
 
 

@@ -11,8 +11,9 @@ from restaurants.models import Restaurant
 
 class RestaurantTestCase(APITestCase):
     def setUp(self) -> None:
-        self.restaurants = baker.make('restaurants.Restaurant', _quantity=10,
-                                      opening_time=datetime.time(hour=22, minute=30, second=0))
+        self.restaurants = baker.make('restaurants.Restaurant', _quantity=2,
+                                      opening_time=datetime.time(hour=22, minute=30, second=0),
+                                      average_rating=4, delivery_discount=1000, delivery_charge=2000,)
         self.restaurant = self.restaurants[0]
         self.user = baker.make('users.User')
 
@@ -109,7 +110,7 @@ class RestaurantTestCase(APITestCase):
             self.assertTrue('min_order_price' in restaurant_response)
             self.assertTrue('owner_comment_count' in restaurant_response)
 
-    def test_home_view_1(self):
+    def test_home_view(self):
         for i in range(1, 10):
             response = self.client.get(f'/restaurants/home_view_{i}')
             res = response.data['results']
