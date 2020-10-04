@@ -13,7 +13,10 @@ class RestaurantTestCase(APITestCase):
     def setUp(self) -> None:
         self.restaurants = baker.make('restaurants.Restaurant', _quantity=2,
                                       opening_time=datetime.time(hour=22, minute=30, second=0),
-                                      average_rating=4, delivery_discount=1000, delivery_charge=2000,)
+                                      delivery_charge=2000, average_rating=4, delivery_discount=1000)
+        self.restaurants += baker.make('restaurants.Restaurant', _quantity=2,
+                                       opening_time=datetime.time(hour=22, minute=30, second=0),
+                                       delivery_charge=3000, average_rating=3, delivery_discount=2000)
         self.restaurant = self.restaurants[0]
         self.user = baker.make('users.User')
 
@@ -95,6 +98,23 @@ class RestaurantTestCase(APITestCase):
             restaurant = Restaurant.objects.get(id=r['id'])
             self.assertTrue(category in restaurant.categories)
 
+    def test_ordering_average_rating(self):
+        """ordering - average_rating"""
+        self.ordering_test('average_rating', True)
+
+    def test_ordering_delivery_charge(self):
+        """ordering - delivery_charge"""
+        self.ordering_test('delivery_charge', False)
+
+    def ordering_test(self, ordering, reverse):
+        if reverse:
+            response = self.client.get(f'/restaurants?ordering=-{ordering}')
+        else:
+            response = self.client.get(f'/restaurants?ordering={ordering}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        r = sorted(response.data['results'], key=lambda x: x[ordering], reverse=reverse)
+        self.assertEqual(r, response.data['results'])
+
     def home_view_test(self, res):
         for restaurant_response in res:
             self.assertTrue('id' in restaurant_response)
@@ -117,6 +137,8 @@ class RestaurantTestCase(APITestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK, res)
             if i == 4:
                 self.assertTrue(len(res) <= 9)
+            else:
+                self.assertTrue(len(res) <= 20)
             self.home_view_test(res)
 
     def test_post_tag_list(self):
@@ -130,4 +152,4 @@ class RestaurantTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         for r in response.data:
-            self.assertTrue(r['name'].startswith(search))
+            self.assertTrue(search in r['name'])
