@@ -211,10 +211,10 @@ class BookmarkListTest(APITestCase):
         res = response.data['results']
         self.assertEqual(response.status_code, status.HTTP_200_OK, res)
         for restaurant_respone in res:
-            self.assertTrue(Restaurant.objects.filter(id=restaurant_respone['id'], bookmark__user=self.users[0]).exists())
+            self.assertTrue(
+                Restaurant.objects.filter(id=restaurant_respone['id'], bookmark__user=self.users[0]).exists())
             owner_comment_count = restaurant_respone['owner_comment_count']
             self.assertTrue(owner_comment_count != 0)
-
 
     def test_api_success(self):
         response = self.client.get('/bookmarks/test')
