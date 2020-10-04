@@ -49,7 +49,7 @@ class Review(models.Model):
 
 
 class ReviewImage(models.Model):
-    """이미지 3장"""  # todo 리뷰 이미지 3장
+    """이미지 3장"""
     review = models.ForeignKey('Review', on_delete=models.CASCADE, related_name='img')
     image = models.ImageField(upload_to='review_image')
 
@@ -60,5 +60,10 @@ class OwnerComment(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        super().save(force_insert, force_update, using, update_fields)
-        Restaurant.objects.filter(id=self.review.restaurant_id).update(owner_comment_count=F('owner_comment_count') + 1)
+        if self.id:
+            """owner_comment create -> restaurant.owner_comment_count + 1 """
+            super().save(force_insert, force_update, using, update_fields)
+        elif not self.id:
+            super().save(force_insert, force_update, using, update_fields)
+            Restaurant.objects.filter(id=self.review.restaurant_id).update(
+                owner_comment_count=F('owner_comment_count') + 1)
