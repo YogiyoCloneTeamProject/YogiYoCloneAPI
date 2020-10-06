@@ -29,7 +29,7 @@ class Crawling:
         })
 
     def create_users(self):
-        User.objects.create_superuser('admin@a.com', '1111')
+        # User.objects.create_superuser('admin@a.com', '1111')
         for i in range(1, 4):
             User(email=f'{uuid4()}testuser@a.com', password='1111').save()
         return list(User.objects.all())
@@ -40,7 +40,9 @@ class Crawling:
             json_data = json.load(file)
         user_list = self.create_users()
         i = 1
-        for restaurant_data in json_data:
+        # for restaurant_data in json_data:
+        for j in range(126, len(json_data)):
+            restaurant_data = json_data[j]
             restaurant_results = restaurant_data['restaurant_results']
             restaurant_info_results = restaurant_data['restaurant_info_results']
             list_info = restaurant_data['list_info']
@@ -214,7 +216,9 @@ class Crawling:
                             caption=menu_caption, is_photomenu=menu_is_photomenu)
                 menu.save()
                 if menu_img is not None:
-                    menu.image.save(*self.save_img(menu_img))
+                    a = self.save_img(menu_img)
+                    if a is not None:
+                        menu.image.save(*a)
                 for option_group_dict in menu_dict['subchoices']:
                     option_group_name = option_group_dict['name']
                     option_group_mandatory = option_group_dict['mandatory']
@@ -280,3 +284,9 @@ class Crawling:
         list_info_dict = {restaurant_dict['id']: restaurant_dict for restaurant_dict in restaurant_list_results}
 
         return list_info_dict
+
+
+def remove_duplicated_restaurant():
+    for r in Restaurant.objects.all()[::-1]:
+        if Restaurant.objects.filter(name=r.name).count() != 1:
+            r.delete()

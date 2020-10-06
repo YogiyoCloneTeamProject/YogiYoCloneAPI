@@ -165,15 +165,18 @@ class RestaurantTestCase(APITestCase):
                 self.assertTrue(len(res) <= 20)
             self.home_view_test(res)
 
-    def test_post_tag_list(self):
+    def test_tag_list_success(self):
         """태그 자동완성 list"""
         self.restaurant.tags.add("chicken", "pizza", "pasta", "coke", "pizza2")
-
-        self.client.force_authenticate(user=self.user)
         search = "pi"
         response = self.client.get(f'/tags?name={search}')
-
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         for r in response.data:
             self.assertTrue(search in r['name'])
+
+    def test_tag_list_empty(self):
+        self.restaurant.tags.add("chicken", "pizza", "pasta", "coke", "pizza2")
+        response = self.client.get(f'/tags?name=')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data), 0)

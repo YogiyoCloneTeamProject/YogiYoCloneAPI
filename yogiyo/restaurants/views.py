@@ -6,7 +6,6 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from django.db.models import Q
 from taggit.models import Tag
 
 from restaurants.models import Menu, Restaurant
@@ -160,5 +159,4 @@ class TagViewSet(mixins.ListModelMixin, GenericViewSet):
             queryset = queryset.filter(name__icontains=tag_search)
         elif tag_search == '' or tag_search is None:
             queryset = []
-
-        return queryset
+        return queryset[:10]
