@@ -29,17 +29,20 @@ class Crawling:
         })
 
     def create_users(self):
+        # User.objects.create_superuser('admin@a.com', '1111')
         for i in range(1, 4):
             User(email=f'{uuid4()}testuser@a.com', password='1111').save()
         return list(User.objects.all())
 
     def json_parsing(self):
         """yogiyo_data_for_parsing.json 파일에서 파싱헤서 DB에 저장"""
-        with open('yogiyo_data_for_parsing.json', 'r', encoding='utf-8') as file:
+        with open('yogiyo_data_for_parsing-final.json', 'r', encoding='utf-8') as file:
             json_data = json.load(file)
         user_list = self.create_users()
-
-        for restaurant_data in json_data:
+        i = 1
+        # for restaurant_data in json_data:
+        for j in range(126, len(json_data)):
+            restaurant_data = json_data[j]
             restaurant_results = restaurant_data['restaurant_results']
             restaurant_info_results = restaurant_data['restaurant_info_results']
             list_info = restaurant_data['list_info']
@@ -49,8 +52,10 @@ class Crawling:
 
             restaurant = self.restaurant_parsing(restaurant_results, restaurant_info_results, list_info,
                                                  avgrating_results)
-            # self.review_parsing(review_results, restaurant, user_list=user_list)
-            # self.menu_parsing(menu_results, restaurant)
+            self.review_parsing(review_results, restaurant, user_list=user_list)
+            self.menu_parsing(menu_results, restaurant)
+            print(i)
+            i += 1
 
     def json_crawl(self):
         """웹에서 크롤 -> yogiyo_data_for_parsing.json 파일로 저장"""
@@ -60,7 +65,7 @@ class Crawling:
     def restaurant_parsing(self, restaurant_results, restaurant_info_results, list_info, avgrating_results):
         # top - info
         name = restaurant_results['name']
-        min_order = restaurant_results['min_order_amount']
+        min_order_price = restaurant_results['min_order_amount']
         methods = []
         for method in restaurant_results['payment_methods']:
             if method == "creditcard":
@@ -101,9 +106,9 @@ class Crawling:
         average_taste = avgrating_results['average_taste']
 
         try:
-            estimated_delivery_time = int(restaurant_results['estimated_delivery_time'].split('~')[0])
+            delivery_time = int(restaurant_results['estimated_delivery_time'].split('~')[0])
         except:
-            estimated_delivery_time = 30
+            delivery_time = 30
 
         restaurant = Restaurant(
             name=name,
@@ -112,14 +117,14 @@ class Crawling:
             closing_time=closing_time,
             tel_number=tel_number,
             address=address,
-            min_order_price=min_order,  # 20분~30분 - 20~30분
+            min_order_price=min_order_price,
             payment_methods=payment_methods,
             business_name=business_name,
             company_registration_number=company_registration_number,
             origin_information=origin_information,
             delivery_discount=discount,
             delivery_charge=delivery_charge,
-            delivery_time=estimated_delivery_time,
+            delivery_time=delivery_time,
             lat=res_lat,
             lng=res_lng,
             categories=categories,
@@ -211,7 +216,9 @@ class Crawling:
                             caption=menu_caption, is_photomenu=menu_is_photomenu)
                 menu.save()
                 if menu_img is not None:
-                    menu.image.save(*self.save_img(menu_img))
+                    a = self.save_img(menu_img)
+                    if a is not None:
+                        menu.image.save(*a)
                 for option_group_dict in menu_dict['subchoices']:
                     option_group_name = option_group_dict['name']
                     option_group_mandatory = option_group_dict['mandatory']
@@ -277,3 +284,9 @@ class Crawling:
         list_info_dict = {restaurant_dict['id']: restaurant_dict for restaurant_dict in restaurant_list_results}
 
         return list_info_dict
+
+
+def remove_duplicated_restaurant():
+    for r in Restaurant.objects.all()[::-1]:
+        if Restaurant.objects.filter(name=r.name).count() != 1:
+            r.delete()

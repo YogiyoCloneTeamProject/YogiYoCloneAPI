@@ -208,15 +208,14 @@ class BookmarkListTest(APITestCase):
     def test_success(self):
         self.client.force_authenticate(user=self.users[0])
         response = self.client.get('/bookmarks')
-        r = response.data['results']
-        self.assertEqual(response.status_code, status.HTTP_200_OK, r)
-        for restaurant_respone in r:
-            self.assertTrue(
-                Restaurant.objects.filter(id=restaurant_respone['id'], bookmark__user=self.users[0]).exists())
-            owner_comment_count = restaurant_respone['owner_comment_count']
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        for r in response.data['results']:
+            self.assertTrue(Restaurant.objects.filter(id=r['id'], bookmark__user=self.users[0]).exists())
+            owner_comment_count = r['owner_comment_count']
             self.assertTrue(owner_comment_count != 0)
 
     def test_api_success(self):
+        """todo 빈리스트 테스트용 - 삭제 예정"""
         response = self.client.get('/bookmarks/test')
         r = response.data['results']
         self.assertEqual(response.status_code, status.HTTP_200_OK, r)
