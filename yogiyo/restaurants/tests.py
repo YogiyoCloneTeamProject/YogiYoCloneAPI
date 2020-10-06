@@ -11,8 +11,13 @@ from restaurants.models import Restaurant
 
 class RestaurantTestCase(APITestCase):
     def setUp(self) -> None:
-        self.restaurants = baker.make('restaurants.Restaurant', _quantity=10,
-                                      opening_time=datetime.time(hour=22, minute=30, second=0))
+        self.restaurants = [baker.make('restaurants.Restaurant', name='피자헛',
+                                       opening_time=datetime.time(hour=22, minute=30, second=0),
+                                       delivery_charge=2000, average_rating=4, delivery_discount=1000),
+                            baker.make('restaurants.Restaurant', name='엽떡',
+                                       opening_time=datetime.time(hour=22, minute=30, second=0),
+                                       delivery_charge=3000, average_rating=3, delivery_discount=2000)
+                            ]
         self.restaurant = self.restaurants[0]
         self.user = baker.make('users.User')
 
@@ -94,6 +99,46 @@ class RestaurantTestCase(APITestCase):
             restaurant = Restaurant.objects.get(id=r['id'])
             self.assertTrue(category in restaurant.categories)
 
+    def test_filtering_search(self):
+        response = self.client.get(f'/restaurants?search=피자')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        r = response.data['results']
+
+    def test_ordering_average_rating(self):
+        self.ordering_test('average_rating', True)
+
+    def test_ordering_delivery_charge(self):
+        self.ordering_test('delivery_charge', False)
+
+    def test_ordering_min_order_price(self):
+        response = self.client.get(f'/restaurants?ordering=min_order_price')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        r = response.data['results']
+        restaurant_list = [Restaurant.objects.get(id=x['id']) for x in r]
+        min_order_price_list = [x.min_order_price for x in restaurant_list]
+        self.assertEqual(min_order_price_list, sorted(min_order_price_list))
+
+    def test_ordering_review_count(self):
+        self.ordering_test('review_count', True)
+
+    def test_ordering_owner_comment_count(self):
+        self.ordering_test('owner_comment_count', True)
+
+    def test_ordering_delivery_time(self):
+        response = self.client.get(f'/restaurants?ordering=delivery_time')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        r = sorted(response.data['results'], key=lambda x: int(x['delivery_time'].split('~')[0]), reverse=False)
+        self.assertEqual(r, response.data['results'])
+
+    def ordering_test(self, ordering, reverse):
+        if reverse:
+            response = self.client.get(f'/restaurants?ordering=-{ordering}')
+        else:
+            response = self.client.get(f'/restaurants?ordering={ordering}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        r = sorted(response.data['results'], key=lambda x: x[ordering], reverse=reverse)
+        self.assertEqual(r, response.data['results'])
+
     def home_view_test(self, res):
         for restaurant_response in res:
             self.assertTrue('id' in restaurant_response)
@@ -109,13 +154,15 @@ class RestaurantTestCase(APITestCase):
             self.assertTrue('min_order_price' in restaurant_response)
             self.assertTrue('owner_comment_count' in restaurant_response)
 
-    def test_home_view_1(self):
+    def test_home_view(self):
         for i in range(1, 10):
             response = self.client.get(f'/restaurants/home_view_{i}')
             res = response.data['results']
             self.assertEqual(response.status_code, status.HTTP_200_OK, res)
             if i == 4:
                 self.assertTrue(len(res) <= 9)
+            else:
+                self.assertTrue(len(res) <= 20)
             self.home_view_test(res)
 
     def test_post_tag_list(self):
@@ -129,4 +176,4 @@ class RestaurantTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
 
         for r in response.data:
-            self.assertTrue(r['name'].startswith(search))
+            self.assertTrue(search in r['name'])
