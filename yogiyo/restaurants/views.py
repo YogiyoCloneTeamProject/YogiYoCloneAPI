@@ -6,7 +6,6 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from django.db.models import Q
 from taggit.models import Tag
 
 from restaurants.models import Menu, Restaurant
@@ -38,13 +37,13 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     serializer_class = RestaurantListSerializer
     filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
     filterset_class = RestaurantFilter
-    ordering_fields = ['average_rating', 'delivery_charge', 'min_order_price', 'review_count', 'delivery_time',
+    ordering_fields = ['average_rating', 'delivery_charge', 'min_order_price', 'delivery_time', 'review_count',
                        'owner_comment_count']
     ordering = ('id',)
     permission_classes = [AllowAny]
     HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6',
                   'home_view_7', 'home_view_8', 'home_view_9')
-    PAGE_SIZE = 20
+    HOME_VIEW_PAGE_SIZE = 20
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -61,7 +60,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         return qs
 
     def filter_by_search(self, qs):
-        search = self.request.query_params.get('search', None)
+        search = self.request.query_params.get('search')
         if search:
             qs = Restaurant.objects.filter(Q(name__icontains=search) |
                                            Q(menu_group__menu__name__icontains=search) |
@@ -108,7 +107,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     @action(detail=False, methods=['GET'])
     def home_view_4(self, request, *args, **kwargs):
         """요즘 뜨는 우리동네 음식점 - 9개만"""
-        qs = self.filter_queryset(self.get_queryset())[:9]
+        qs = self.get_queryset()[:9]
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
@@ -142,7 +141,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         return self.home_view_results(qs)
 
     def home_view_results(self, qs):
-        serializer = self.get_serializer(qs[:self.PAGE_SIZE], many=True)
+        serializer = self.get_serializer(qs[:self.HOME_VIEW_PAGE_SIZE], many=True)
         return Response({'results': serializer.data})
 
 
@@ -150,15 +149,14 @@ class TagViewSet(mixins.ListModelMixin, GenericViewSet):
     """tag - search (자동완성)"""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = []
+    permission_classes = [AllowAny]
     pagination_class = None
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        tag_search = self.request.query_params.get('name', None)
+        tag_search = self.request.query_params.get('name')
         if tag_search:
             queryset = queryset.filter(name__icontains=tag_search)
         elif tag_search == '' or tag_search is None:
             queryset = []
-
-        return queryset
+        return queryset[:10]

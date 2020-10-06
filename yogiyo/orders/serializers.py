@@ -43,7 +43,22 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'order_menu', 'address', 'delivery_requests', 'payment_method')
+        fields = ('id', 'order_menu', 'address', 'delivery_requests', 'payment_method', 'order_time')
+
+
+class OrderListSerializer(serializers.ModelSerializer):
+    """주문 내역 리스트"""
+    order_menu = OrderMenuNameField()
+    # status = serializers.SerializerMethodField()
+    restaurant_name = serializers.CharField(source='restaurant.name')
+    restaurant_image = serializers.ImageField(source='restaurant.image')
+
+    class Meta:
+        model = Order
+        fields = ('id', 'order_menu', 'restaurant_name', 'restaurant_image', 'status', 'order_time', 'review_written')
+
+    # def get_status(self, obj):  # todo status 주문 상태
+    #     return '배달 상태 구현 예정...'
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
@@ -56,20 +71,25 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """req 데이터와 model 데이터 검증 """
-        restaurant = attrs['restaurant']
-        delivery_charge = restaurant.delivery_charge if restaurant.delivery_charge is not None else 0
-        discount = restaurant.delivery_discount if restaurant.delivery_discount is not None else 0
 
-        self.valid_min_order_price(attrs)
+        # 매장 최소주문금액 검증
+        if attrs['total_price'] < attrs['restaurant'].min_order_price:
+            raise ValidationError('total price < restaurant min price')
 
         self.total_price = 0
         # req - model 데이터 일치 확인
         order_menus = attrs['order_menu']
         for order_menu in order_menus:
-            self.valid_order_menu(order_menu, discount)
+            self.valid_order_menu(order_menu)
 
-        # 총 가격 == (메뉴 가격 + 옵션 가격) * 주문 갯수
-        if attrs['total_price'] != self.total_price + delivery_charge:
+        # 총 가격 == ((메뉴 가격 + 옵션 가격) * 주문 갯수) + 배달요금 - 배달할인
+        restaurant = attrs['restaurant']
+        delivery_charge = restaurant.delivery_charge if restaurant.delivery_charge is not None else 0
+        discount = restaurant.delivery_discount if restaurant.delivery_discount is not None else 0
+        # todo 나중에 배달할인, 배달요금 적용하기
+        delivery_charge = 2000
+        discount = 1000
+        if attrs['total_price'] != self.total_price + delivery_charge - discount:
             raise ValidationError('total price != check_price')
 
         return attrs
@@ -90,12 +110,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     OrderOption.objects.create(order_option_group=order_option_group_obj, **order_option)
         return order
 
-    def valid_min_order_price(self, attrs):
-        # 매장 최소주문금액 검증
-        if attrs['total_price'] < attrs['restaurant'].min_order_price:
-            raise ValidationError('total price < restaurant min price')
-
-    def valid_order_menu(self, order_menu, discount):
+    def valid_order_menu(self, order_menu):
         """req: 메뉴 이름, 가격 / model : 메뉴 이름, 가격 비교 """
         menu = order_menu['menu']
         # req 레스토랑이 메뉴 모델에 레스토랑과 같은지
@@ -110,7 +125,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         for order_option_group in order_menu['order_option_group']:
             menu_price = self.valid_order_option_group(menu, order_option_group, menu_price)
 
-        menu_price = (menu_price - discount) * order_menu['count']
+        menu_price = menu_price * order_menu['count']
         self.total_price += menu_price
 
     def valid_order_option_group(self, menu, order_option_group, check_price):
@@ -143,19 +158,3 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
         check_price += order_option['price']
         return check_price
-
-
-class OrderListSerializer(serializers.ModelSerializer):
-    # todo status 주문 상태
-    """주문 내역 리스트"""
-    order_menu = OrderMenuNameField()
-    status = serializers.SerializerMethodField()
-    restaurant_name = serializers.CharField(source='restaurant.name')
-    restaurant_image = serializers.ImageField(source='restaurant.image')
-
-    class Meta:
-        model = Order
-        fields = ('id', 'order_menu', 'restaurant_name', 'restaurant_image', 'status', 'order_time', 'review_written')
-
-    def get_status(self, obj):
-        return '배달 상태 구현 예정...'

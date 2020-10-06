@@ -55,9 +55,7 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         if not self.id:
             self.set_password(self.password)
-            super().save(*args, **kwargs)
-        else:
-            super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class Bookmark(models.Model):

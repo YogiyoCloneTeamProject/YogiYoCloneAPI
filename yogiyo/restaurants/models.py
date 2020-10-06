@@ -26,28 +26,29 @@ class Restaurant(models.Model):
     average_taste = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     average_delivery = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     average_amount = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+    payment_methods = ArrayField(models.CharField(max_length=255))
+    delivery_time = models.PositiveIntegerField()  # 배달 예상 시간
+    delivery_discount = models.PositiveIntegerField(null=True, blank=True)  # 배달 할인
+    delivery_charge = models.PositiveIntegerField(null=True, blank=True)  # 배달비
+    min_order_price = models.PositiveIntegerField()
+    categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
+    lat = models.FloatField()
+    lng = models.FloatField()
+    representative_menus = models.CharField(max_length=255)
+    tags = TaggableManager()
+    review_count = models.PositiveIntegerField(default=0)
+
+    image = models.ImageField(upload_to='restaurant_image', null=True, blank=True)
+    back_image = models.ImageField(upload_to='restaurant_back_image', null=True, blank=True)
+    business_name = models.CharField(max_length=255)
+    company_registration_number = models.CharField(max_length=255)
+    origin_information = models.TextField()
+    owner_comment_count = models.PositiveIntegerField(default=0)
     notification = models.TextField()
     opening_time = models.TimeField()
     closing_time = models.TimeField()
     tel_number = models.CharField(max_length=20)
     address = models.CharField(max_length=255)
-    min_order_price = models.PositiveIntegerField()
-    payment_methods = ArrayField(models.CharField(max_length=255))
-    business_name = models.CharField(max_length=255)
-    company_registration_number = models.CharField(max_length=255)
-    origin_information = models.TextField()
-    image = models.ImageField(upload_to='restaurant_image', null=True, blank=True)
-    delivery_discount = models.PositiveIntegerField(null=True, blank=True)  # 배달 할인
-    delivery_charge = models.PositiveIntegerField(null=True, blank=True)  # 배달비
-    delivery_time = models.PositiveIntegerField()  # 배달 예상 시간
-    back_image = models.ImageField(upload_to='restaurant_back_image', null=True, blank=True)
-    categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
-    lat = models.FloatField()
-    lng = models.FloatField()
-    review_count = models.PositiveIntegerField(default=0)
-    representative_menus = models.CharField(max_length=255)
-    tags = TaggableManager()
-    owner_comment_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f'({self.id}){self.name}'

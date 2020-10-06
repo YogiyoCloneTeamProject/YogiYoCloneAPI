@@ -75,7 +75,7 @@ class OrderCreateTestCase(APITestCase):
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
-                0].price - delivery_discount + self.restaurant.delivery_charge
+                0].price + 1000
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
@@ -124,7 +124,7 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price + 1000
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)

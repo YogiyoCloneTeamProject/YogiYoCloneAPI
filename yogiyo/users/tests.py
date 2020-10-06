@@ -21,11 +21,11 @@ class UserRegisterTestCase(APITestCase):
             'nickname': None
         }
         response = self.client.post(self.url, data)
-        res = response.data
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, res)
-        self.assertEqual(res['email'], data['email'])
-        self.assertEqual(res['nickname'], data['nickname'])
-        self.assertFalse(User.objects.get(id=res['id']).is_active)
+        r = response.data
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, r)
+        self.assertEqual(r['email'], data['email'])
+        self.assertEqual(r['nickname'], data['nickname'])
+        self.assertFalse(User.objects.get(id=r['id']).is_active)
 
     def test_without_email(self):
         response = self.client.post(self.url, {'email': '', 'password': password})
@@ -57,11 +57,11 @@ class UserRetrieveTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f'/users/{self.user.id}')
 
-        res = response.data
-        self.assertEqual(response.status_code, status.HTTP_200_OK, res)
-        self.assertEqual(self.user.profile.nickname, res['nickname'])
-        self.assertEqual(self.user.profile.phone_num, res['phone_num'])
-        self.assertEqual(self.user.email, res['email'])
+        r = response.data
+        self.assertEqual(response.status_code, status.HTTP_200_OK, r)
+        self.assertEqual(self.user.profile.nickname, r['nickname'])
+        self.assertEqual(self.user.profile.phone_num, r['phone_num'])
+        self.assertEqual(self.user.email, r['email'])
 
 
 class UserAuthorizePhoneNumTestCase(APITestCase):
@@ -77,14 +77,14 @@ class UserAuthorizePhoneNumTestCase(APITestCase):
     def test_success(self):
         response = self.client.patch(self.url, data=self.data)
 
-        res = response.data
-        self.assertEqual(response.status_code, status.HTTP_200_OK, res)
-        authorizde_user = User.objects.get(id=res['id'])
-        self.assertEqual(self.data['phone_num'], res['phone_num'])
-        self.assertEqual(authorizde_user.profile.phone_num, res['phone_num'])
+        r = response.data
+        self.assertEqual(response.status_code, status.HTTP_200_OK, r)
+        authorizde_user = User.objects.get(id=r['id'])
+        self.assertEqual(self.data['phone_num'], r['phone_num'])
+        self.assertEqual(authorizde_user.profile.phone_num, r['phone_num'])
         self.assertTrue(authorizde_user.is_active)
-        self.assertEqual(self.user.email, res['email'])
-        self.assertEqual(self.user.profile.nickname, res['nickname'])
+        self.assertEqual(self.user.email, r['email'])
+        self.assertEqual(self.user.profile.nickname, r['nickname'])
 
     # todo 아무나 authorize_phone_num 할수없게 인증이 필요
     # def test_fail_401(self):
@@ -137,8 +137,8 @@ class UserUpdateNicknameTestCase(APITestCase):
     def test_success(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.patch(f'/users/{self.user.id}', data=self.data)
-        res = response.data
-        self.assertEqual(response.status_code, status.HTTP_200_OK, res)
+        r = response.data
+        self.assertEqual(response.status_code, status.HTTP_200_OK, r)
 
     def test_fail_401(self):
         response = self.client.patch(f'/users/{self.user.id}', data=self.data)
@@ -158,10 +158,10 @@ class UserLoginTestCase(APITestCase):
 
     def test_with_correct_info(self):
         response = self.client.post(self.url, {'email': email, 'password': password})
-        res = response.data
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, res)
-        self.assertTrue('token' in res)
-        self.assertTrue(Token.objects.filter(user=self.user, key=res['token']).exists())
+        r = response.data
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, r)
+        self.assertTrue('token' in r)
+        self.assertTrue(Token.objects.filter(user=self.user, key=r['token']).exists())
 
     def test_without_password(self):
         response = self.client.post(self.url, {'email': email})
@@ -208,16 +208,15 @@ class BookmarkListTest(APITestCase):
     def test_success(self):
         self.client.force_authenticate(user=self.users[0])
         response = self.client.get('/bookmarks')
-        res = response.data['results']
-        self.assertEqual(response.status_code, status.HTTP_200_OK, res)
-        for restaurant_respone in res:
-            self.assertTrue(
-                Restaurant.objects.filter(id=restaurant_respone['id'], bookmark__user=self.users[0]).exists())
-            owner_comment_count = restaurant_respone['owner_comment_count']
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        for r in response.data['results']:
+            self.assertTrue(Restaurant.objects.filter(id=r['id'], bookmark__user=self.users[0]).exists())
+            owner_comment_count = r['owner_comment_count']
             self.assertTrue(owner_comment_count != 0)
 
     def test_api_success(self):
+        """todo 빈리스트 테스트용 - 삭제 예정"""
         response = self.client.get('/bookmarks/test')
-        res = response.data['results']
-        self.assertEqual(response.status_code, status.HTTP_200_OK, res)
-        self.assertEqual(len(res), 0)
+        r = response.data['results']
+        self.assertEqual(response.status_code, status.HTTP_200_OK, r)
+        self.assertEqual(len(r), 0)
