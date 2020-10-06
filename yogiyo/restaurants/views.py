@@ -150,7 +150,7 @@ class TagViewSet(mixins.ListModelMixin, GenericViewSet):
     """tag - search (자동완성)"""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = []
+    permission_classes = [AllowAny]
     pagination_class = None
 
     def get_queryset(self):
