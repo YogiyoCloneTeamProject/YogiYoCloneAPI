@@ -74,6 +74,19 @@ class RestaurantListSerializer(serializers.ModelSerializer):
         model = Restaurant
         fields = ('id', 'name', 'average_rating', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time',
                   'review_count', 'representative_menus', 'owner_comment_count')
+        examples = {
+            'id': '2',
+            'name': '성수동 맛집 넘버 원',
+            'average_rating': '3.9',
+            'delivery_discount': '2000',
+            'delivery_charge': '3000',
+            'delivery_time': '30',
+            'review_count': '10',
+            'representative_menus': '김치찌개',
+            'owner_comment_count': '20',
+            'bookmark_count': '20',
+            'min_order_price': '25000'
+        }
 
 
 class BookmarkRestaurantSerializer(RestaurantListSerializer):

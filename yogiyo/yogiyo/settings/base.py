@@ -174,3 +174,7 @@ REST_FRAMEWORK = {
 }
 
 CRAWLING = False
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'core.inspectors.MyAutoSchema',
+}
