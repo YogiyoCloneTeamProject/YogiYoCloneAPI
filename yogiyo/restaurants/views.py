@@ -38,7 +38,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
     serializer_class = RestaurantListSerializer
     filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
     filterset_class = RestaurantFilter
-    ordering_fields = ['average_rating', 'delivery_charge', 'min_order_price', 'review_count', 'delivery_time',
+    ordering_fields = ['average_rating', 'delivery_charge', 'min_order_price', 'delivery_time', 'review_count',
                        'owner_comment_count']
     ordering = ('id',)
     permission_classes = [AllowAny]
@@ -61,7 +61,7 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         return qs
 
     def filter_by_search(self, qs):
-        search = self.request.query_params.get('search', None)
+        search = self.request.query_params.get('search')
         if search:
             qs = Restaurant.objects.filter(Q(name__icontains=search) |
                                            Q(menu_group__menu__name__icontains=search) |
@@ -155,7 +155,7 @@ class TagViewSet(mixins.ListModelMixin, GenericViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        tag_search = self.request.query_params.get('name', None)
+        tag_search = self.request.query_params.get('name')
         if tag_search:
             queryset = queryset.filter(name__icontains=tag_search)
         elif tag_search == '' or tag_search is None:
