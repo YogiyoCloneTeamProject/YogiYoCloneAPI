@@ -86,7 +86,6 @@ class UserAuthorizePhoneNumTestCase(APITestCase):
         self.assertEqual(self.user.email, r['email'])
         self.assertEqual(self.user.profile.nickname, r['nickname'])
 
-    # todo 아무나 authorize_phone_num 할수없게 인증이 필요
     # def test_fail_401(self):
     #     response = self.client.patch(self.url, data=self.data)
     #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)
@@ -213,10 +212,3 @@ class BookmarkListTest(APITestCase):
             self.assertTrue(Restaurant.objects.filter(id=r['id'], bookmark__user=self.users[0]).exists())
             owner_comment_count = r['owner_comment_count']
             self.assertTrue(owner_comment_count != 0)
-
-    def test_api_success(self):
-        """todo 빈리스트 테스트용 - 삭제 예정"""
-        response = self.client.get('/bookmarks/test')
-        r = response.data['results']
-        self.assertEqual(response.status_code, status.HTTP_200_OK, r)
-        self.assertEqual(len(r), 0)
