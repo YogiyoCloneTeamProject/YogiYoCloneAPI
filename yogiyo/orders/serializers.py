@@ -3,7 +3,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from orders.models import Order, OrderOption, OrderOptionGroup, OrderMenu
-from restaurants.models import Menu
 from users.models import User
 
 
@@ -48,17 +47,14 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class OrderListSerializer(serializers.ModelSerializer):
     """주문 내역 리스트"""
+    # todo status 주문 상태
     order_menu = OrderMenuNameField()
-    # status = serializers.SerializerMethodField()
     restaurant_name = serializers.CharField(source='restaurant.name')
     restaurant_image = serializers.ImageField(source='restaurant.image')
 
     class Meta:
         model = Order
         fields = ('id', 'order_menu', 'restaurant_name', 'restaurant_image', 'status', 'order_time', 'review_written')
-
-    # def get_status(self, obj):  # todo status 주문 상태
-    #     return '배달 상태 구현 예정...'
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
