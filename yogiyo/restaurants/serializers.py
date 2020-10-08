@@ -72,8 +72,8 @@ class RestaurantListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Restaurant
-        fields = ('id', 'name', 'average_rating', 'image', 'delivery_discount', 'delivery_charge', 'delivery_time',
-                  'review_count', 'representative_menus', 'owner_comment_count')
+        fields = ('id', 'name', 'average_rating', 'image', 'back_image', 'delivery_discount', 'delivery_charge',
+                  'delivery_time', 'review_count', 'representative_menus', 'owner_comment_count')
         examples = {
             'id': '2',
             'name': '성수동 맛집 넘버 원',

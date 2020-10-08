@@ -43,7 +43,22 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'order_menu', 'address', 'delivery_requests', 'payment_method')
+        fields = ('id', 'order_menu', 'address', 'delivery_requests', 'payment_method', 'order_time')
+
+
+class OrderListSerializer(serializers.ModelSerializer):
+    """주문 내역 리스트"""
+    order_menu = OrderMenuNameField()
+    # status = serializers.SerializerMethodField()
+    restaurant_name = serializers.CharField(source='restaurant.name')
+    restaurant_image = serializers.ImageField(source='restaurant.image')
+
+    class Meta:
+        model = Order
+        fields = ('id', 'order_menu', 'restaurant_name', 'restaurant_image', 'status', 'order_time', 'review_written')
+
+    # def get_status(self, obj):  # todo status 주문 상태
+    #     return '배달 상태 구현 예정...'
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
@@ -143,19 +158,3 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
         check_price += order_option['price']
         return check_price
-
-
-class OrderListSerializer(serializers.ModelSerializer):
-    # todo status 주문 상태
-    """주문 내역 리스트"""
-    order_menu = OrderMenuNameField()
-    status = serializers.SerializerMethodField()
-    restaurant_name = serializers.CharField(source='restaurant.name')
-    restaurant_image = serializers.ImageField(source='restaurant.image')
-
-    class Meta:
-        model = Order
-        fields = ('id', 'order_menu', 'restaurant_name', 'restaurant_image', 'status', 'order_time', 'review_written')
-
-    def get_status(self, obj):
-        return '배달 상태 구현 예정...'
