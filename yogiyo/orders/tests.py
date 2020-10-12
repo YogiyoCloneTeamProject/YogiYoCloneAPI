@@ -222,7 +222,7 @@ class OrderCreateTestCase(APITestCase):
             "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
-        # self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

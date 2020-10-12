@@ -23,6 +23,12 @@ class IsOwner(permissions.IsAuthenticated):
         return obj.owner == request.user
 
 
+class IsOwnerOrReadOnly(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return obj.owner == request.user
+
+
 class IsSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
         """super_user permission"""

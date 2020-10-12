@@ -12,6 +12,7 @@ from reviews.models import OwnerComment
 class ReviewTestCase(APITestCase, TempraryImageMixin):
     def setUp(self) -> None:
         self.user = baker.make('users.User')
+        self.admin = baker.make('users.User', is_superuser=True)
         self.restaurant = baker.make('restaurants.Restaurant', review_count=10, average_amount=4, average_delivery=4,
                                      average_taste=4, average_rating=4)
         self.order = baker.make('orders.Order', owner=self.user, restaurant=self.restaurant)
@@ -27,11 +28,11 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
 
     def test_review_create(self):
         self.data = {
-            "caption": "jmt!!",
-            "taste": 3,
-            "delivery": 4,
-            "amount": 2,
-            "img": []
+            'caption': 'jmt!!',
+            'taste': 3,
+            'delivery': 4,
+            'amount': 2,
+            'img': [],
         }
         self.client.force_authenticate(user=self.user)
 
@@ -53,11 +54,11 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         image_test = [self.temporary_image(), self.temporary_image()]
 
         self.data = {
-            "caption": "jmt!!",
-            "taste": 3,
-            "delivery": 4,
-            "amount": 2,
-            "img": image_test
+            'caption': 'jmt!!',
+            'taste': 3,
+            'delivery': 4,
+            'amount': 2,
+            'img': image_test
         }
         self.client.force_authenticate(user=self.user)
 
@@ -70,11 +71,11 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
     def test_review_duplicate(self):
         """order : review -> one to one relationship """
         self.data = {
-            "caption": "jmt!!",
-            "taste": 3,
-            "delivery": 4,
-            "amount": 2,
-            "img": [],
+            'caption': 'jmt!!',
+            'taste': 3,
+            'delivery': 4,
+            'amount': 2,
+            'img': [],
         }
         self.client.force_authenticate(user=self.user)
 
@@ -85,10 +86,9 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_review_destroy(self):
-        review = baker.make('reviews.Review', order=self.order)
-
+        review = baker.make('reviews.Review', order=self.order, owner=self.user)
+        self.client.force_authenticate(user=self.user)
         response = self.client.delete(f'/reviews/{review.id}')
-
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_review_list(self):
@@ -112,11 +112,11 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
     def test_review_star_restaurant(self):
         """리뷰에서 준 별점들이 해당 레스토랑에 값 반영 """
         self.data = {
-            "caption": "jmt!!",
-            "taste": 3,
-            "delivery": 4,
-            "amount": 2,
-            "img": []
+            'caption': 'jmt!!',
+            'taste': 3,
+            'delivery': 4,
+            'amount': 2,
+            'img': []
         }
 
         self.client.force_authenticate(user=self.user)
@@ -142,10 +142,9 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         restaurant = baker.make('restaurants.Restaurant', owner_comment_count=11)
         review = baker.make('reviews.Review', restaurant=restaurant)
 
-        data = {"comments": "감사합니다 ^^"}
+        data = {'comments': '감사합니다 ^^'}
 
-        superuser = baker.make('users.User', is_superuser=True)  # superuser permission
-        self.client.force_authenticate(user=superuser)
+        self.client.force_authenticate(user=self.admin)
 
         response = self.client.post(f'/reviews/{review.id}/comments', data=data)
 
@@ -158,8 +157,9 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
 
     def test_owner_comment_update(self):
         review_comment = baker.make('reviews.OwnerComment', comments='감사합니다!')
-        data = {"comments": "죄송합니다 ^^"}
+        data = {'comments': '죄송합니다 ^^'}
 
+        self.client.force_authenticate(user=self.admin)
         response = self.client.patch(f'/comments/{review_comment.id}', data=data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -172,7 +172,7 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
     def test_owner_comment_delete(self):
         review_comment = baker.make('reviews.OwnerComment', comments='감사합니다!')
 
-        self.client.force_authenticate(user=self.user)
+        self.client.force_authenticate(user=self.admin)
 
         response = self.client.delete(f'/comments/{review_comment.id}')
 
