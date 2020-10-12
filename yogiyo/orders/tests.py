@@ -9,7 +9,7 @@ class OrderCreateTestCase(APITestCase):
     """주문 생성"""
 
     def setUp(self) -> None:
-        self.restaurant = baker.make('restaurants.Restaurant', min_order_price=5000, delivery_discount=2000,
+        self.restaurant = baker.make('restaurants.Restaurant', min_order_price=9000, delivery_discount=2000,
                                      delivery_charge=1000)
         menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant, name='햄버거')
         self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거', price=9000)
@@ -75,7 +75,7 @@ class OrderCreateTestCase(APITestCase):
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
             "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
-                0].price + 1000
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
@@ -124,11 +124,12 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price + 1000
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['order_menu'][0]['menu'][0], 'Invalid pk "5" - object does not exist.')
 
     def test_order_create_menu_name(self):
         """req : menu.name -> wrong"""
@@ -172,11 +173,13 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], 'menu.name != model menu.name')
 
     def test_order_create_menu_price(self):
         """req : menu.price -> wrong"""
@@ -220,11 +223,13 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], 'menu.price != model menu.price')
 
     def test_order_create_order_option_group_name(self):
         """req : order_option_group.name -> wrong"""
@@ -253,7 +258,7 @@ class OrderCreateTestCase(APITestCase):
                             ]
                         },
                         {
-                            "name": "맛있는 그룹!",  # here!
+                            "name": "맛잇는 옵션!",  # here! self.option_groups[1].name
                             "mandatory": True,
                             "order_option": [
                                 {
@@ -268,11 +273,13 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], 'This option group is not included in this menu')
 
     def test_order_create_order_option_group_mandatory(self):
         """req : order_option_group.mandatory -> wrong"""
@@ -316,11 +323,14 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0],
+                         'order_option_group.mandatory != model option_group.mandatory')
 
     def test_order_create_order_option_group_mandatory_option_len(self):
         """req : order_option_group.mandatory true -> len(option) != 1"""
@@ -368,11 +378,13 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], 'mandatory true -> must len(order option list) == 1')
 
     def test_order_create_order_option_name(self):
         """req : order_option name  -> wrong"""
@@ -416,11 +428,13 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], 'This option is not included in this option group')
 
     def test_order_create_order_option_price(self):
         """req : order_option price  -> wrong"""
@@ -464,11 +478,13 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], 'order option.price != model option.price')
 
     def test_order_create_order_min_order_price(self):
         """req : total price < restaurant min price"""
@@ -517,6 +533,7 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], 'total price < restaurant min price')
 
     def test_order_create_order_total_price(self):
         """req : total price -> wrong"""
@@ -565,6 +582,7 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0], 'total price != check_price')
 
 
 class OrderListTestCase(APITestCase):
