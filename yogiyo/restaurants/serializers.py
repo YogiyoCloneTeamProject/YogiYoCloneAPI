@@ -26,7 +26,6 @@ class OptionGroupSerializer(serializers.ModelSerializer):
 
 
 class MenuDetailSerializer(serializers.ModelSerializer):
-    # todo 리뷰 보기(리뷰 갯수) 추가
     option_group = OptionGroupSerializer(read_only=True, many=True)
 
     class Meta:
@@ -49,7 +48,6 @@ class MenuGroupSerializer(serializers.ModelSerializer):
 
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):
-    # todo 리뷰 보기(리뷰 갯수) 추가
     menu_group = MenuGroupSerializer(read_only=True, many=True)
     photo_menu = serializers.SerializerMethodField()
     delivery_time = DeliveryTimeField()
@@ -69,11 +67,13 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
 
 class RestaurantListSerializer(serializers.ModelSerializer):
     delivery_time = DeliveryTimeField()
+    bookmark_count = serializers.IntegerField(source='bookmark.count')
 
     class Meta:
         model = Restaurant
         fields = ('id', 'name', 'average_rating', 'image', 'back_image', 'delivery_discount', 'delivery_charge',
-                  'delivery_time', 'review_count', 'representative_menus', 'owner_comment_count')
+                  'delivery_time', 'review_count', 'representative_menus', 'owner_comment_count', 'bookmark_count',
+                  'min_order_price')
         examples = {
             'id': '2',
             'name': '성수동 맛집 넘버 원',
@@ -89,7 +89,7 @@ class RestaurantListSerializer(serializers.ModelSerializer):
         }
 
 
-class BookmarkRestaurantSerializer(RestaurantListSerializer):
+class BookmarkRestaurantSerializer(RestaurantListSerializer):  # todo 지워버릴까?
     owner_comment_count = serializers.SerializerMethodField()
 
     class Meta(RestaurantListSerializer.Meta):
@@ -101,13 +101,6 @@ class BookmarkRestaurantSerializer(RestaurantListSerializer):
 
     def get_delivery_discount(self, restaurant):
         return restaurant.delivery_discount if restaurant.delivery_discount != 0 else None
-
-
-class HomeViewSerializer(RestaurantListSerializer):
-    bookmark_count = serializers.IntegerField(source='bookmark.count')
-
-    class Meta(RestaurantListSerializer.Meta):
-        fields = RestaurantListSerializer.Meta.fields + ('bookmark_count', 'min_order_price')
 
 
 class TagSerializer(serializers.ModelSerializer):

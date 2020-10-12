@@ -34,12 +34,11 @@ class OrderCreateTestCase(APITestCase):
         delivery_discount = self.restaurant.delivery_discount
         if delivery_discount is None:
             delivery_discount = 0
-        count = 1
         data = {
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": count,
+                    "menu": 1,
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,

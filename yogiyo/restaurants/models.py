@@ -28,8 +28,8 @@ class Restaurant(models.Model):
     average_amount = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     payment_methods = ArrayField(models.CharField(max_length=255))
     delivery_time = models.PositiveIntegerField()  # 배달 예상 시간
-    delivery_discount = models.PositiveIntegerField(null=True, blank=True)  # 배달 할인
-    delivery_charge = models.PositiveIntegerField(null=True, blank=True)  # 배달비
+    delivery_discount = models.PositiveIntegerField()  # 배달 할인
+    delivery_charge = models.PositiveIntegerField()  # 배달비
     min_order_price = models.PositiveIntegerField()
     categories = ArrayField(models.CharField(max_length=20, choices=CategoryChoice.choices))
     lat = models.FloatField()

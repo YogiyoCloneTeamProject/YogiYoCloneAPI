@@ -1,9 +1,9 @@
 from rest_framework import mixins
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import GenericViewSet
 
-from core.permissions import IsSuperUser
+from core.permissions import IsSuperUser, IsOrderOwner, IsOwnerAndIsAuthenticated, IsOwner
 from orders.models import Order
 from reviews.models import Review, OwnerComment
 from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer, OwnerCommentSerializer
@@ -13,8 +13,7 @@ class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
     """review post """
     queryset = Review.objects.all()
     serializer_class = ReviewCreateSerializer
-    # permission_classes = [ReviewIsOwner]
-    permission_classes = []
+    permission_classes = [IsOrderOwner]
 
     def perform_create(self, serializer):
         if 'order_pk' in self.kwargs:
@@ -51,7 +50,7 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericView
     """review get, delete"""
     queryset = Review.objects.all()
     serializer_class = ReviewListSerializer
-    permission_classes = []
+    permission_classes = [IsOwner]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -59,14 +58,14 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericView
             if 'restaurant_pk' in self.kwargs:
                 queryset = super().get_queryset().filter(restaurant=self.kwargs.get('restaurant_pk'))
             else:
-                raise ValidationError('url should contains restaurant pk ')
+                raise ValidationError('url should contains restaurant pk')
         return queryset
 
 
 class OwnerCommentViewSet(mixins.UpdateModelMixin, mixins.DestroyModelMixin, GenericViewSet):
     queryset = OwnerComment.objects.all()
     serializer_class = OwnerCommentSerializer
-    permission_classes = []  # todo admin only
+    permission_classes = [IsSuperUser]
 
 
 class OwnerCommentCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
