@@ -155,14 +155,13 @@ class RestaurantTestCase(APITestCase):
             self.assertTrue('owner_comment_count' in restaurant_response)
 
     def test_home_view(self):
-        for i in range(1, 10):
-            response = self.client.get(f'/restaurants/home_view_{i}')
+        home_view_actions = ['home_view_average_rating', 'home_view_bookmark', 'home_view_delivery_discount',
+                             'home_view_delivery_charge', 'home_view_review', 'home_view_delivery_time']
+        for action in home_view_actions:
+            response = self.client.get(f'/restaurants/{action}')
             res = response.data['results']
             self.assertEqual(response.status_code, status.HTTP_200_OK, res)
-            if i == 4:
-                self.assertTrue(len(res) <= 9)
-            else:
-                self.assertTrue(len(res) <= 20)
+            self.assertTrue(len(res) <= 20)
             self.home_view_test(res)
 
     def test_tag_list_success(self):
