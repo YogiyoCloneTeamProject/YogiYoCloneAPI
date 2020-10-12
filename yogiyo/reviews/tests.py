@@ -14,7 +14,7 @@ class ReviewTestCase(APITestCase, TempraryImageMixin):
         self.user = baker.make('users.User')
         self.admin = baker.make('users.User', is_superuser=True)
         self.restaurant = baker.make('restaurants.Restaurant', review_count=10, average_amount=4, average_delivery=4,
-                                     average_taste=4, average_rating=4)
+                                     average_taste=4, average_rating=4, delivery_discount=2000, delivery_charge=1000)
         self.order = baker.make('orders.Order', owner=self.user, restaurant=self.restaurant)
         self.order_menu = baker.make('orders.OrderMenu', order=self.order, name='불고기버거')
         self.order_menu2 = baker.make('orders.OrderMenu', order=self.order, name='치즈버거')
