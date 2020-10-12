@@ -82,19 +82,16 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         restaurant = attrs['restaurant']
         delivery_charge = restaurant.delivery_charge if restaurant.delivery_charge is not None else 0
         discount = restaurant.delivery_discount if restaurant.delivery_discount is not None else 0
-        # todo 나중에 배달할인, 배달요금 적용하기
-        delivery_charge = 2000
-        discount = 1000
+
         if attrs['total_price'] != self.total_price + delivery_charge - discount:
             raise ValidationError('total price != check_price')
 
         return attrs
 
     def create(self, validated_data):
-        # todo for문 돌리지 말고 모델에서 name으로 get - request 할때 id 순서 상관없이
         order_menus = validated_data.pop('order_menu')
-        user = User.objects.first()  # todo 테스트용 owner 빼기
-        order = Order.objects.create(owner=user, **validated_data)
+        # user = User.objects.first()  # todo 테스트용 owner 빼기
+        order = Order.objects.create(**validated_data)
         for order_menu in order_menus:
             order_option_groups = order_menu.pop('order_option_group')
             order_menu_obj = OrderMenu.objects.create(order=order, **order_menu)
@@ -135,7 +132,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         # mandatory = true -> option 1개만!
         if order_option_group['mandatory']:
             if len(order_option_group['order_option']) != 1:
-                raise ValidationError('mandatory true -> must len(order option list) == 1  ')
+                raise ValidationError('mandatory true -> must len(order option list) == 1')
 
         """order_option"""
         for order_option in order_option_group['order_option']:
