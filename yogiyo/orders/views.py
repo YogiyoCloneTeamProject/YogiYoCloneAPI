@@ -31,3 +31,6 @@ class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
                 # todo 비로그인 주문내역 - 삭제 예정
                 qs = Order.objects.filter(~Q(address='as'))
         return qs
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
