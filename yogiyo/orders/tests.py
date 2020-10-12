@@ -223,7 +223,8 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
@@ -257,7 +258,7 @@ class OrderCreateTestCase(APITestCase):
                             ]
                         },
                         {
-                            "name": "맛있는 그룹!",  # here!
+                            "name": "맛잇는 옵션!",  # here! self.option_groups[1].name
                             "mandatory": True,
                             "order_option": [
                                 {
@@ -272,7 +273,8 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
@@ -321,7 +323,8 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
@@ -375,7 +378,8 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
@@ -424,7 +428,8 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
@@ -473,7 +478,8 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
