@@ -1,7 +1,7 @@
 from rest_framework import mixins
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import GenericViewSet
 
 from core.permissions import IsSuperUser
 from orders.models import Order
@@ -13,7 +13,7 @@ class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
     """review post """
     queryset = Review.objects.all()
     serializer_class = ReviewCreateSerializer
-    # permission_classes = [ReviewIsOwner]
+    # permission_classes = [IsOrderOwner] # todo 퍼미션
     permission_classes = []
 
     def perform_create(self, serializer):
@@ -66,7 +66,7 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericView
 class OwnerCommentViewSet(mixins.UpdateModelMixin, mixins.DestroyModelMixin, GenericViewSet):
     queryset = OwnerComment.objects.all()
     serializer_class = OwnerCommentSerializer
-    permission_classes = []  # todo admin only
+    permission_classes = [IsSuperUser]
 
 
 class OwnerCommentCreateViewSet(mixins.CreateModelMixin, GenericViewSet):

@@ -3,11 +3,11 @@ from rest_framework import permissions
 from orders.models import Order
 
 
-class ReviewCreatePermission(permissions.BasePermission):
+class IsOrderOwner(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """order의 owner == request.user """
-        return request.user == Order.objects.get(id=view.kwargs['order_pk']).owner
+        return request.user == Order.objects.get(id=view.kwargs.get('order_pk')).owner
 
 
 class IsUserSelf(permissions.IsAuthenticated):
