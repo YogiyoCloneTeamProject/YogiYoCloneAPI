@@ -17,13 +17,13 @@ class IsUserSelf(permissions.IsAuthenticated):
         return obj == request.user
 
 
-class IsOwner(permissions.IsAuthenticated):
+class IsOwner(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj.owner == request.user
 
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
+class IsOwnerAndIsAuthenticated(permissions.IsAuthenticated):
 
     def has_object_permission(self, request, view, obj):
         return obj.owner == request.user

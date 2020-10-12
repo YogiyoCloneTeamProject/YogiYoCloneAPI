@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 
-from core.permissions import IsSuperUser, IsOrderOwner, IsOwner, IsOwnerOrReadOnly
+from core.permissions import IsSuperUser, IsOrderOwner, IsOwnerAndIsAuthenticated, IsOwner
 from orders.models import Order
 from reviews.models import Review, OwnerComment
 from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer, OwnerCommentSerializer
@@ -50,7 +50,7 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericView
     """review get, delete"""
     queryset = Review.objects.all()
     serializer_class = ReviewListSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwner]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -58,7 +58,7 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericView
             if 'restaurant_pk' in self.kwargs:
                 queryset = super().get_queryset().filter(restaurant=self.kwargs.get('restaurant_pk'))
             else:
-                raise ValidationError('url should contains restaurant pk ')
+                raise ValidationError('url should contains restaurant pk')
         return queryset
 
 

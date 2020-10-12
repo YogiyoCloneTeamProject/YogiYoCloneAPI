@@ -5,21 +5,19 @@ from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet
 from taggit.models import Tag
 
 from restaurants.models import Menu, Restaurant
 from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSerializer, MenuDetailSerializer, \
-    HomeViewSerializer, TagSerializer
-
-HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6')
+    TagSerializer
 
 
 class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
     """menu detail"""
     queryset = Menu.objects.all()
     serializer_class = MenuDetailSerializer
-    permission_classes = []
+    permission_classes = [AllowAny]
 
 
 class RestaurantFilter(filters.FilterSet):
@@ -31,7 +29,7 @@ class RestaurantFilter(filters.FilterSet):
         fields = ['payment_methods', 'categories']
 
 
-class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+class RestaurantViewSet(ReadOnlyModelViewSet):
     """restaurant list, detail"""
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantListSerializer
@@ -41,22 +39,17 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
                        'owner_comment_count']
     ordering = ('id',)
     permission_classes = [AllowAny]
-    HOME_VIEWS = ('home_view_1', 'home_view_2', 'home_view_3', 'home_view_4', 'home_view_5', 'home_view_6',
-                  'home_view_7', 'home_view_8', 'home_view_9')
     HOME_VIEW_PAGE_SIZE = 20
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return RestaurantDetailSerializer
-        if self.action in self.HOME_VIEWS:
-            return HomeViewSerializer
         return super().get_serializer_class()
 
     def get_queryset(self):
         qs = super().get_queryset()
         qs = self.filter_by_distance_manual(qs)
         qs = self.filter_by_search(qs)
-
         return qs
 
     def filter_by_search(self, qs):
@@ -87,57 +80,39 @@ class RestaurantViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, Generi
         return qs
 
     @action(detail=False, methods=['GET'])
-    def home_view_1(self, request, *args, **kwargs):
+    def home_view_average_rating(self, request, *args, **kwargs):
         """나의 입맛저격 - 별점 순"""
         qs = self.get_queryset().order_by('-average_rating').filter(average_rating__gte=4)
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
-    def home_view_2(self, request, *args, **kwargs):
+    def home_view_bookmark(self, request, *args, **kwargs):
         """우리동네 찜 많은 음식점 - 찜 개수 순"""
         qs = self.get_queryset().order_by('-bookmark')
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
-    def home_view_3(self, request, *args, **kwargs):
+    def home_view_delivery_discount(self, request, *args, **kwargs):
         """오늘만 할인 - 할인이 0원이 아닌 매장"""
         qs = self.get_queryset().filter(delivery_discount__gt=0)
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
-    def home_view_4(self, request, *args, **kwargs):
-        """요즘 뜨는 우리동네 음식점 - 9개만"""
-        qs = self.get_queryset()[:9]
-        return self.home_view_results(qs)
-
-    @action(detail=False, methods=['GET'])
-    def home_view_5(self, request, *args, **kwargs):
+    def home_view_delivery_charge(self, request, *args, **kwargs):
         """배달비 무료 - 배달비 0원"""
         qs = self.get_queryset().filter(delivery_charge=0)
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
-    def home_view_6(self, request, *args, **kwargs):
+    def home_view_review(self, request, *args, **kwargs):
         """최근 7일동안 리뷰가 많아요 - 리뷰 순"""
         qs = self.get_queryset().order_by('-review')
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
-    def home_view_7(self, request, *args, **kwargs):
-        """요기요 플러스 맛집"""
-        qs = self.get_queryset()
-        return self.home_view_results(qs)
-
-    @action(detail=False, methods=['GET'])
-    def home_view_8(self, request, *args, **kwargs):
+    def home_view_delivery_time(self, request, *args, **kwargs):
         """가장 빨리 배달돼요"""
         qs = self.get_queryset().order_by('delivery_time')
-        return self.home_view_results(qs)
-
-    @action(detail=False, methods=['GET'])
-    def home_view_9(self, request, *args, **kwargs):
-        """새로 오픈했어요"""
-        qs = self.get_queryset()
         return self.home_view_results(qs)
 
     def home_view_results(self, qs):

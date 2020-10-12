@@ -1,4 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -41,12 +41,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         """request order_pk 가 리뷰 모델에 있는지 검증 """
         order_pk = self.context['view'].kwargs.get('order_pk')
-        if order_pk is None:
-            raise ValidationError('order_pk is missing')
-        try:
-            order = Order.objects.get(id=order_pk)
-        except ObjectDoesNotExist:
-            raise ValidationError('order_pk is wrong')
+        order = get_object_or_404(Order, id=order_pk)
         is_duplicate = Review.objects.filter(order=order).exists()
         if is_duplicate:
             raise ValidationError('order can have only one review')
