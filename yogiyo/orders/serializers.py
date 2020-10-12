@@ -90,7 +90,6 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         order_menus = validated_data.pop('order_menu')
-        # user = User.objects.first()  # todo 테스트용 owner 빼기
         order = Order.objects.create(**validated_data)
         for order_menu in order_menus:
             order_option_groups = order_menu.pop('order_option_group')

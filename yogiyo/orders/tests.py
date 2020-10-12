@@ -607,3 +607,10 @@ class OrderListTestCase(APITestCase):
         self.url = '/orders'
 
         self.user = baker.make('users.User')
+
+    def test_order_list(self):
+        pass
+        # response = self.client.get(self.url)
+        #
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        #
