@@ -1,5 +1,9 @@
 # YogiYoCloneAPI
 
+<p align="center">
+<img width="400" alt="7" src="https://user-images.githubusercontent.com/63357508/95486781-6ce82c00-09ce-11eb-9d6d-08bec966d3d8.jpg">
+</p>
+
 ## Description
 요기요 음식배달주문 앱 클론
 
