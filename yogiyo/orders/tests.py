@@ -85,6 +85,7 @@ class OrderCreateTestCase(APITestCase):
         data = Munch(data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         for order_menu_obj, order_menu_req in zip(response_order.order_menu, data.order_menu):
             self.assertEqual(order_menu_obj['menu'], order_menu_req['menu'])
             self.assertEqual(order_menu_obj['name'], order_menu_req['name'])
