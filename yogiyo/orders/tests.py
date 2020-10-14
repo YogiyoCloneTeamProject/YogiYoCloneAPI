@@ -614,24 +614,12 @@ class OrderListTestCase(APITestCase):
     """주문 내역 리스트"""
 
     def setUp(self) -> None:
-        # self.restaurant = baker.make('restaurants.Restaurant', min_order_price=10000)
-        # menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant, name='햄버거')
-        # self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거', price=9000)
-        # self.menu2 = baker.make('restaurants.Menu', menu_group=menu_group, name='불고기버', price=9000)
-        # self.option_groups = []
-        # self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='음료추가', mandatory=False,
-        #                                  menu=self.menu)
-        # self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='패티추가', mandatory=True,
-        #                                  menu=self.menu)
-        # self.option_groups_menu2 = baker.make('restaurants.OptionGroup', name='아무거나 추가', mandatory=True,
-        #                                       menu=self.menu2)
-        #
-        # self.options = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[0], price=1000)
-        # self.options2 = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[1], price=500)
         self.users = baker.make('users.User', _quantity=2)
+
         self.order1 = baker.make('orders.Order', owner=self.users[0])
         self.order2 = baker.make('orders.Order', owner=self.users[0])
         self.order3 = baker.make('orders.Order', owner=self.users[1])
+
         self.order_menu1 = baker.make('orders.OrderMenu', order=self.order1)
         self.order_menu2 = baker.make('orders.OrderMenu', order=self.order1)
         self.order_menu3 = baker.make('orders.OrderMenu', order=self.order2)
@@ -656,3 +644,41 @@ class OrderListTestCase(APITestCase):
             self.assertEqual(order_response.status, order_obj.status)
             self.assertEqual(order_response.review_written, order_obj.review_written)
             self.assertEqual(Order.objects.get(id=order_response.id).owner.id, self.users[0].id)
+
+    def test_order_detail(self):
+        """주문 내역 디테일"""
+        order_option_groups1 = baker.make('orders.OrderOptionGroup', order_menu=self.order_menu1, _quantity=2)
+        order_option_groups2 = baker.make('orders.OrderOptionGroup', order_menu=self.order_menu2, _quantity=2)
+
+        order_options1 = baker.make('orders.OrderOption', order_option_group=order_option_groups1[0], _quantity=2)
+        order_options2 = baker.make('orders.OrderOption', order_option_group=order_option_groups1[1], _quantity=2)
+        order_options3 = baker.make('orders.OrderOption', order_option_group=order_option_groups2[0], _quantity=2)
+        order_options4 = baker.make('orders.OrderOption', order_option_group=order_option_groups2[1], _quantity=2)
+
+        self.client.force_authenticate(user=self.users[0])
+
+        response = self.client.get(self.url + f'/{self.order1.id}')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response_order = Munch(response.data)
+
+        self.assertEqual(response_order.id, self.order1.id)
+        self.assertEqual(response_order.address, self.order1.address)
+        self.assertEqual(response_order.delivery_requests, self.order1.delivery_requests)
+        self.assertEqual(response_order.payment_method, self.order1.payment_method)
+        for order_menu_res, order_menu_obj in zip(response_order.order_menu, self.order1.order_menu.all()):
+            self.assertEqual(order_menu_res['id'], order_menu_obj.id)
+            self.assertEqual(order_menu_res['menu'], order_menu_obj.menu.id)
+            self.assertEqual(order_menu_res['name'], order_menu_obj.name)
+            self.assertEqual(order_menu_res['price'], order_menu_obj.price)
+            self.assertEqual(order_menu_res['count'], order_menu_obj.count)
+
+            for order_option_group_res, order_option_group_obj in zip(order_menu_res['order_option_group'],
+                                                                      order_menu_obj.order_option_group.all()):
+                self.assertEqual(order_option_group_res['name'], order_option_group_obj.name)
+                self.assertEqual(order_option_group_res['mandatory'], order_option_group_obj.mandatory)
+                for order_option_res, order_option_obj in zip(order_option_group_res['order_option'],
+                                                              order_option_group_obj.order_option.all()):
+                    self.assertEqual(order_option_res['name'], order_option_obj.name)
+                    self.assertEqual(order_option_res['price'], order_option_obj.price)
