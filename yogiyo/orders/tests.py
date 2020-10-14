@@ -85,16 +85,17 @@ class OrderCreateTestCase(APITestCase):
         data = Munch(data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
         for order_menu_obj, order_menu_req in zip(response_order.order_menu, data.order_menu):
             self.assertEqual(order_menu_obj['menu'], order_menu_req['menu'])
             self.assertEqual(order_menu_obj['name'], order_menu_req['name'])
             self.assertEqual(order_menu_obj['price'], order_menu_req['price'])
             self.assertEqual(order_menu_obj['count'], order_menu_req['count'])
-            for order_option_group_obj, order_option_group_req in zip(order_menu_obj['order_option_group'], order_menu_req['order_option_group']):
+            for order_option_group_obj, order_option_group_req in zip(order_menu_obj['order_option_group'],
+                                                                      order_menu_req['order_option_group']):
                 self.assertEqual(order_option_group_obj['name'], order_option_group_req['name'])
                 self.assertEqual(order_option_group_obj['mandatory'], order_option_group_req['mandatory'])
-                for order_option_obj, order_option_req in zip(order_option_group_obj['order_option'], order_option_group_req['order_option']):
+                for order_option_obj, order_option_req in zip(order_option_group_obj['order_option'],
+                                                              order_option_group_req['order_option']):
                     self.assertEqual(order_option_obj['name'], order_option_req['name'])
                     self.assertEqual(order_option_obj['price'], order_option_req['price'])
 
@@ -103,8 +104,6 @@ class OrderCreateTestCase(APITestCase):
         self.assertEqual(response_order.payment_method, data.payment_method)
         self.assertEqual(response_order.restaurant, data.restaurant)
         self.assertEqual(response_order.total_price, data.total_price)
-
-
 
     def test_order_create_menu_id(self):
         """req : menu.id -> wrong"""
@@ -154,7 +153,8 @@ class OrderCreateTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['order_menu'][0]['menu'][0], f'Invalid pk "{INVALID_ID}" - object does not exist.')
+        self.assertEqual(response.data['order_menu'][0]['menu'][0],
+                         f'Invalid pk "{INVALID_ID}" - object does not exist.')
 
     def test_order_create_menu_name(self):
         """req : menu.name -> wrong"""
@@ -609,36 +609,50 @@ class OrderCreateTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['non_field_errors'][0], 'total price != check_price')
 
-    def test_menu_count(self):
-        pass
-
 
 class OrderListTestCase(APITestCase):
     """주문 내역 리스트"""
 
     def setUp(self) -> None:
-        self.restaurant = baker.make('restaurants.Restaurant', min_order_price=10000)
-        menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant, name='햄버거')
-        self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거', price=9000)
-        self.menu2 = baker.make('restaurants.Menu', menu_group=menu_group, name='불고기버', price=9000)
-        self.option_groups = []
-        self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='음료추가', mandatory=False,
-                                         menu=self.menu)
-        self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='패티추가', mandatory=True,
-                                         menu=self.menu)
-        self.option_groups_menu2 = baker.make('restaurants.OptionGroup', name='아무거나 추가', mandatory=True,
-                                              menu=self.menu2)
+        # self.restaurant = baker.make('restaurants.Restaurant', min_order_price=10000)
+        # menu_group = baker.make('restaurants.MenuGroup', restaurant=self.restaurant, name='햄버거')
+        # self.menu = baker.make('restaurants.Menu', menu_group=menu_group, name='띠드버거', price=9000)
+        # self.menu2 = baker.make('restaurants.Menu', menu_group=menu_group, name='불고기버', price=9000)
+        # self.option_groups = []
+        # self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='음료추가', mandatory=False,
+        #                                  menu=self.menu)
+        # self.option_groups += baker.make('restaurants.OptionGroup', _quantity=1, name='패티추가', mandatory=True,
+        #                                  menu=self.menu)
+        # self.option_groups_menu2 = baker.make('restaurants.OptionGroup', name='아무거나 추가', mandatory=True,
+        #                                       menu=self.menu2)
+        #
+        # self.options = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[0], price=1000)
+        # self.options2 = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[1], price=500)
+        self.users = baker.make('users.User', _quantity=2)
+        self.order1 = baker.make('orders.Order', owner=self.users[0])
+        self.order2 = baker.make('orders.Order', owner=self.users[0])
+        self.order3 = baker.make('orders.Order', owner=self.users[1])
+        self.order_menu1 = baker.make('orders.OrderMenu', order=self.order1)
+        self.order_menu2 = baker.make('orders.OrderMenu', order=self.order1)
+        self.order_menu3 = baker.make('orders.OrderMenu', order=self.order2)
 
-        self.options = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[0], price=1000)
-        self.options2 = baker.make('restaurants.Option', _quantity=2, option_group=self.option_groups[1], price=500)
-        self.orders = baker.make('orders.Order', _quantity=2)
         self.url = '/orders'
 
-        self.user = baker.make('users.User')
-
     def test_order_list(self):
-        pass
-        # response = self.client.get(self.url)
-        #
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        #
+        """주문 내역 리스트"""
+        self.client.force_authenticate(user=self.users[0])
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        for order_response, order_obj in zip(response.data['results'],
+                                             Order.objects.filter(owner=self.users[0].id).all()):
+            order_response = Munch(order_response)
+            self.assertEqual(order_response.id, order_obj.id)
+            names = ', '.join([f'{order_menu.name} x {order_menu.count}' for order_menu in order_obj.order_menu.all()])
+            self.assertEqual(order_response.order_menu, names)
+            self.assertEqual(order_response.restaurant_name, order_obj.restaurant.name)
+            self.assertEqual(order_response.status, order_obj.status)
+            self.assertEqual(order_response.review_written, order_obj.review_written)
+            self.assertEqual(Order.objects.get(id=order_response.id).owner.id, self.users[0].id)
