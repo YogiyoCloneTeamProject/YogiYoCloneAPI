@@ -1,8 +1,11 @@
 from model_bakery import baker
+from munch import Munch
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from orders.models import Order
+
+INVALID_ID = -1
 
 
 class OrderCreateTestCase(APITestCase):
@@ -38,7 +41,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 1,
+                    "menu": self.menu.id,
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
@@ -78,8 +81,30 @@ class OrderCreateTestCase(APITestCase):
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
-        res = response.data
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, res)
+        response_order = Munch(response.data)
+        data = Munch(data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        for order_menu_obj, order_menu_req in zip(response_order.order_menu, data.order_menu):
+            self.assertEqual(order_menu_obj['menu'], order_menu_req['menu'])
+            self.assertEqual(order_menu_obj['name'], order_menu_req['name'])
+            self.assertEqual(order_menu_obj['price'], order_menu_req['price'])
+            self.assertEqual(order_menu_obj['count'], order_menu_req['count'])
+            for order_option_group_obj, order_option_group_req in zip(order_menu_obj['order_option_group'], order_menu_req['order_option_group']):
+                self.assertEqual(order_option_group_obj['name'], order_option_group_req['name'])
+                self.assertEqual(order_option_group_obj['mandatory'], order_option_group_req['mandatory'])
+                for order_option_obj, order_option_req in zip(order_option_group_obj['order_option'], order_option_group_req['order_option']):
+                    self.assertEqual(order_option_obj['name'], order_option_req['name'])
+                    self.assertEqual(order_option_obj['price'], order_option_req['price'])
+
+        self.assertEqual(response_order.address, data.address)
+        self.assertEqual(response_order.delivery_requests, data.delivery_requests)
+        self.assertEqual(response_order.payment_method, data.payment_method)
+        self.assertEqual(response_order.restaurant, data.restaurant)
+        self.assertEqual(response_order.total_price, data.total_price)
+
+
 
     def test_order_create_menu_id(self):
         """req : menu.id -> wrong"""
@@ -88,7 +113,7 @@ class OrderCreateTestCase(APITestCase):
             "restaurant": self.restaurant.id,
             "order_menu": [
                 {
-                    "menu": 5,  # here
+                    "menu": INVALID_ID,  # here
                     "name": self.menu.name,
                     "count": 1,
                     "price": self.menu.price,
@@ -123,12 +148,13 @@ class OrderCreateTestCase(APITestCase):
             "address": "중림동",
             "delivery_requests": "소스 많이 주세요",
             "payment_method": Order.PaymentMethodChoice.CASH,
-            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[0].price
+            "total_price": self.menu.price + self.options[0].price + self.options[1].price + self.options2[
+                0].price + self.restaurant.delivery_charge - self.restaurant.delivery_discount
         }
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['order_menu'][0]['menu'][0], 'Invalid pk "5" - object does not exist.')
+        self.assertEqual(response.data['order_menu'][0]['menu'][0], f'Invalid pk "{INVALID_ID}" - object does not exist.')
 
     def test_order_create_menu_name(self):
         """req : menu.name -> wrong"""
@@ -585,6 +611,7 @@ class OrderCreateTestCase(APITestCase):
 
     def test_menu_count(self):
         pass
+
 
 class OrderListTestCase(APITestCase):
     """주문 내역 리스트"""
