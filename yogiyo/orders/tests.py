@@ -583,6 +583,8 @@ class OrderCreateTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['non_field_errors'][0], 'total price != check_price')
 
+    def test_menu_count(self):
+        pass
 
 class OrderListTestCase(APITestCase):
     """주문 내역 리스트"""
@@ -606,3 +608,10 @@ class OrderListTestCase(APITestCase):
         self.url = '/orders'
 
         self.user = baker.make('users.User')
+
+    def test_order_list(self):
+        pass
+        # response = self.client.get(self.url)
+        #
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        #
