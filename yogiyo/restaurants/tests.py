@@ -107,14 +107,9 @@ class RestaurantTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         r = response.data['results']
         for restaurant in r:
-            # tag_list = [tag.name for tag in Restaurant.objects.get(id=restaurant['id'], tags__in=keyword)]
-            # is_tag_contains_keyword = [bool(keyword in tag) for tag in tag_list]
-            # is_tag_contains_keyword = [False]
             tags = Tag.objects.filter(name__icontains=keyword)
             is_tag_contains_keyword = Restaurant.objects.filter(id=restaurant['id'], tags__in=tags).exists()
-            print(is_tag_contains_keyword)
             self.assertTrue(keyword in restaurant['name'] or is_tag_contains_keyword)
-        self.fail()
 
     def test_ordering_average_rating(self):
         self.ordering_test('average_rating', True)
