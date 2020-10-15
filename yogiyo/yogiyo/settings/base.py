@@ -21,7 +21,7 @@ environ.Env.read_env(env_file=env_file)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-SECRET_KEY = '&-&4c(b@63ysb#uqj(985c=)w_h^w_a@wop!%=ucfhyw*c@6k+'
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
