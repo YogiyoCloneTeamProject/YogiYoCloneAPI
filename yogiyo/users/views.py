@@ -89,6 +89,15 @@ class BookmarkViewSet(mixins.CreateModelMixin,
 
 class BookmarkListViewSet(mixins.ListModelMixin,
                           GenericViewSet):
+    """
+    유저가 찜한 식당 조회
+
+    ---
+    토큰 필요
+    요청이 성공적으로 서버에 전달되면 200 OK를 반환
+
+
+    """
     # todo Restaurant -> Bookmark
     queryset = Restaurant.objects.all()
     serializer_class = BookmarkRestaurantSerializer

@@ -15,6 +15,12 @@ class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
         fields = ('id', 'name', 'price', 'option_group_id')
+        examples = {
+            'id': 1,
+            'name': '호박 추가',
+            'price': 1000,
+            'option_group_id': 1
+        }
 
 
 class OptionGroupSerializer(serializers.ModelSerializer):
@@ -23,6 +29,12 @@ class OptionGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = OptionGroup
         fields = ('id', 'name', 'menu_id', 'mandatory', 'option')
+        examples = {
+            'id': 1,
+            'name': '채소 추가',
+            'menu_id': 1,
+            'mandatory': True
+        }
 
 
 class MenuDetailSerializer(serializers.ModelSerializer):
@@ -31,6 +43,13 @@ class MenuDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
         fields = ('id', 'name', 'image', 'caption', 'price', 'option_group')
+        examples = {
+            'id': 1,
+            'name': '된장찌개',
+            'caption': '보글보글 맛있는 된장찌개 입니다 ^^',
+            'price': 6000,
+
+        }
 
 
 class MenuListSerializer(serializers.ModelSerializer):
@@ -76,16 +95,16 @@ class RestaurantListSerializer(serializers.ModelSerializer):
                   'min_order_price')
         examples = {
             'id': '2',
-            'name': '성수동 맛집 넘버 원',
+            'name': '최고의 찌개',
             'average_rating': '3.9',
             'delivery_discount': '2000',
             'delivery_charge': '3000',
             'delivery_time': '30',
             'review_count': '10',
-            'representative_menus': '김치찌개',
-            'owner_comment_count': '20',
+            'representative_menus': '김치찌개, 된장찌개, 부대찌개',
+            'owner_comment_count': '7',
             'bookmark_count': '20',
-            'min_order_price': '25000'
+            'min_order_price': '10000'
         }
 
 

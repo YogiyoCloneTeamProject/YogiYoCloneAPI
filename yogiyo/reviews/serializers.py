@@ -16,6 +16,11 @@ class OwnerCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = OwnerComment
         fields = ('id', 'comments', 'created', 'review_id')
+        examples = {
+            'id': 1,
+            'comments': '감사합니다! ^^',
+            'created': '2020.10.10',
+        }
 
 
 class ReviewListSerializer(serializers.ModelSerializer):
@@ -37,6 +42,15 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'taste', 'amount', 'delivery', 'restaurant', 'caption', 'menu_name', 'rating', 'owner', 'order',
                   'img', '_img',)
         read_only_fields = ('owner', 'order', 'rating', 'menu_name', 'restaurant')
+        examples = {
+            'id': 1,
+            'taste': 4,
+            'amount': 3,
+            'delivery': 5,
+            'restaurant': 2,
+            'caption': '정말 맛있었습니다!',
+            'menu_name': '된장찌개',
+        }
 
     def validate(self, attrs):
         """request order_pk 가 리뷰 모델에 있는지 검증 """
