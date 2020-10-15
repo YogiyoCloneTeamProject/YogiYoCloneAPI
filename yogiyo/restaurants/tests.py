@@ -20,6 +20,7 @@ class RestaurantTestCase(APITestCase):
                             ]
         self.restaurant = self.restaurants[0]
         self.user = baker.make('users.User')
+        self.restaurant.tags.add("chicken", "pizza", "pasta", "coke", "pizza2")
 
     def test_restaurant_list(self):
         response = self.client.get('/restaurants')
@@ -100,9 +101,18 @@ class RestaurantTestCase(APITestCase):
             self.assertTrue(category in restaurant.categories)
 
     def test_filtering_search(self):
-        response = self.client.get(f'/restaurants?search=피자')
+        keyword = 'piz'
+        response = self.client.get(f'/restaurants?search={keyword}')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         r = response.data['results']
+        for restaurant in r:
+            # tag_list = [tag.name for tag in Restaurant.objects.get(id=restaurant['id'], tags__in=keyword)]
+            # is_tag_contains_keyword = [bool(keyword in tag) for tag in tag_list]
+            # is_tag_contains_keyword = [False]
+            is_tag_contains_keyword = Restaurant.objects.filter(id=restaurant['id'], tags_name__in=[keyword]).exists()
+            print(is_tag_contains_keyword)
+            self.assertTrue(keyword in restaurant['name'] or is_tag_contains_keyword)
+        self.fail()
 
     def test_ordering_average_rating(self):
         self.ordering_test('average_rating', True)
@@ -166,7 +176,6 @@ class RestaurantTestCase(APITestCase):
 
     def test_tag_list_success(self):
         """태그 자동완성 list"""
-        self.restaurant.tags.add("chicken", "pizza", "pasta", "coke", "pizza2")
         search = "pi"
         response = self.client.get(f'/tags?name={search}')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -175,7 +184,6 @@ class RestaurantTestCase(APITestCase):
             self.assertTrue(search in r['name'])
 
     def test_tag_list_empty(self):
-        self.restaurant.tags.add("chicken", "pizza", "pasta", "coke", "pizza2")
         response = self.client.get(f'/tags?name=')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 0)
