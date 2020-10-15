@@ -5,6 +5,7 @@ from model_bakery import baker
 from munch import Munch
 from rest_framework import status
 from rest_framework.test import APITestCase
+from taggit.models import Tag
 
 from restaurants.models import Restaurant
 
@@ -109,7 +110,8 @@ class RestaurantTestCase(APITestCase):
             # tag_list = [tag.name for tag in Restaurant.objects.get(id=restaurant['id'], tags__in=keyword)]
             # is_tag_contains_keyword = [bool(keyword in tag) for tag in tag_list]
             # is_tag_contains_keyword = [False]
-            is_tag_contains_keyword = Restaurant.objects.filter(id=restaurant['id'], tags_name__in=[keyword]).exists()
+            tags = Tag.objects.filter(name__icontains=keyword)
+            is_tag_contains_keyword = Restaurant.objects.filter(id=restaurant['id'], tags__in=tags).exists()
             print(is_tag_contains_keyword)
             self.assertTrue(keyword in restaurant['name'] or is_tag_contains_keyword)
         self.fail()
