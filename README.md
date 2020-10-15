@@ -1,7 +1,7 @@
 # YogiYoCloneAPI
 
 <p align="center">
-<img width="400" alt="7" src="https://user-images.githubusercontent.com/63357508/95486781-6ce82c00-09ce-11eb-9d6d-08bec966d3d8.jpg"</p>
+<img width="400" alt="7" src="https://user-images.githubusercontent.com/63357508/95486781-6ce82c00-09ce-11eb-9d6d-08bec966d3d8.jpg"></p>
 
 
 ## Description
@@ -39,6 +39,18 @@
 - 총점, 맛, 양, 배달 등 다양한 요소에 대한 평가
 - 리뷰 생성시 이미지 첨부 기능
 - 리뷰에 사장님이 답글 생성
+
+## MVP
+<p align="center">
+<img width="200" alt="7" src="https://user-images.githubusercontent.com/63357508/95325300-f539d480-08db-11eb-8021-fd5aa8b07752.gif">
+<img width="200" alt="7" src="https://user-images.githubusercontent.com/63357508/95326151-164ef500-08dd-11eb-86e7-db04f6a12581.gif">
+</p>
+- **매장 정보와 메뉴**
+<p align="center">
+<img width="200" src="https://qussk.github.io/image/gif/yogi1.gif">
+<img width="200" src="https://qussk.github.io/image/gif/yogi3.gif">
+</p>
+- **메뉴, 옵션 선택/주문**
 
 ## Requirements
 
