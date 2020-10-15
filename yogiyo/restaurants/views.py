@@ -14,7 +14,12 @@ from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSe
 
 
 class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
-    """menu detail"""
+    """
+    menu 디테일 조회
+
+    ---
+
+    """
     queryset = Menu.objects.all()
     serializer_class = MenuDetailSerializer
     permission_classes = [AllowAny]

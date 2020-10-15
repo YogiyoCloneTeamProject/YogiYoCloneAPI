@@ -67,6 +67,33 @@ class OwnerCommentViewSet(mixins.UpdateModelMixin, mixins.DestroyModelMixin, Gen
     serializer_class = OwnerCommentSerializer
     permission_classes = [IsSuperUser]
 
+    def update(self, request, *args, **kwargs):
+        """
+        해당 api는 사용하지 않습니다
+
+
+        """
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """
+        리뷰에 사장님 댓글 수정
+
+        ---
+        토큰 필요
+
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        리뷰에 사장님 댓글 삭제
+
+        ---
+        토큰 필요
+        """
+        return super().destroy(request, *args, **kwargs)
+
 
 class OwnerCommentCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
     queryset = OwnerComment.objects.all()

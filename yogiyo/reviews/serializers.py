@@ -16,6 +16,11 @@ class OwnerCommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = OwnerComment
         fields = ('id', 'comments', 'created', 'review_id')
+        examples = {
+            'id': 1,
+            'comments': '감사합니다! ^^',
+            'created': '2020.10.10',
+        }
 
 
 class ReviewListSerializer(serializers.ModelSerializer):
