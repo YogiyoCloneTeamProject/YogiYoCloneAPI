@@ -23,21 +23,21 @@
 
 ### 음식점
 - 음식점 목록
-	-  필터링
-	-  좌표 기준 일정 범위 음식점 반환
-	-  추천 매장 목록
-- 음식점 검색
-- 메뉴, 옵션 선택 및 결제
+	- 필터링
+	- 좌표 기준 일정 범위 음식점만 반환
+	- 추천 매장 목록
 - 음식점 찜(즐겨찾기)
+- 음식점 검색
+- 검색어 자동완성
 
 ### 주문
-- 메뉴, 옵션 선택하여 주문 생성
+- 메뉴, 옵션 선택 및 주문
 - 주문 내역 목록, 상세보기
 
 ### 리뷰
-- 주문한 메뉴에 한하여 리뷰 생성
+- 자신이 주문한 메뉴만 리뷰 생성 가능
 - 총점, 맛, 양, 배달 등 다양한 요소에 대한 평가
-- 리뷰 생성시 이미지 첨부 기능
+- 리뷰 생성 시 이미지 첨부
 - 리뷰에 사장님이 답글 생성
 
 ## MVP
@@ -67,10 +67,10 @@
 - model-bakery - testcode
 - dj-inmemorystorage - testcode
 - drf-nested-routers - url form
-- boto3 - AWS S3
-- drf-yasg - API docs
 - django-filter - filter
 - django-taggit - tag
+- boto3 - AWS S3
+- drf-yasg - API docs
 
 ## Architecture
 ![architecture](https://raw.githubusercontent.com/YogiyoCloneTeamProject/YogiYoCloneAPI/develop/readme_image/yogiyo%20architecture.png)
