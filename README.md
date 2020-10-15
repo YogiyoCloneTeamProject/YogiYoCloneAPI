@@ -45,11 +45,14 @@
 <img width="200" alt="7" src="https://user-images.githubusercontent.com/63357508/95325300-f539d480-08db-11eb-8021-fd5aa8b07752.gif">
 <img width="200" alt="7" src="https://user-images.githubusercontent.com/63357508/95326151-164ef500-08dd-11eb-86e7-db04f6a12581.gif">
 </p>
+
 - **매장 정보와 메뉴**
+
 <p align="center">
 <img width="200" src="https://qussk.github.io/image/gif/yogi1.gif">
 <img width="200" src="https://qussk.github.io/image/gif/yogi3.gif">
 </p>
+
 - **메뉴, 옵션 선택/주문**
 
 ## Requirements
