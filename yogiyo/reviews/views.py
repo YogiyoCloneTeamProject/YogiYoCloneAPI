@@ -10,7 +10,13 @@ from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer, Ow
 
 
 class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
-    """review post """
+    """
+    리뷰 생성
+
+    ---
+    nested_url에 order_pk를 리뷰의 order_id로 저장
+    토큰 필요
+    """
     queryset = Review.objects.all()
     serializer_class = ReviewCreateSerializer
     permission_classes = [IsOrderOwner]
@@ -46,8 +52,13 @@ class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
             )
 
 
-class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericViewSet):
-    """review get, delete"""
+class ReviewListViewSet(mixins.ListModelMixin, GenericViewSet):
+    """
+    리뷰 조회
+
+    ---
+    nested_url에서 restaurant_id로 레스토랑이 갖고 있는 리뷰 조회
+    """
     queryset = Review.objects.all()
     serializer_class = ReviewListSerializer
     permission_classes = [IsOwner]
@@ -60,6 +71,18 @@ class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericView
             else:
                 raise ValidationError('url should contains restaurant pk')
         return queryset
+
+
+class ReviewDestroyViewSet(mixins.DestroyModelMixin, GenericViewSet):
+    """
+    리뷰 삭제
+
+    ---
+    토큰 필요
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewListSerializer
+    permission_classes = [IsOwner]
 
 
 class OwnerCommentViewSet(mixins.UpdateModelMixin, mixins.DestroyModelMixin, GenericViewSet):
