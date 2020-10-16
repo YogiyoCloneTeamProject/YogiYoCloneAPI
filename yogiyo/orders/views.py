@@ -18,7 +18,7 @@ class OrderViewSet(mixins.CreateModelMixin,
         """
         주문 생성
 
-        ---
+
         [req - model 데이터 일치 검증]
         order_menu -> 이름, 가격
         order_option_group -> 이름, mandatory, mandatory:true-> len(option_group) = 1,
@@ -32,7 +32,7 @@ class OrderViewSet(mixins.CreateModelMixin,
         """
         주문 조회
 
-        ---
+
         유저가 주문한 주문 조회
         토큰 필요
         """
@@ -42,7 +42,7 @@ class OrderViewSet(mixins.CreateModelMixin,
         """
         주문 디테일 조회
 
-        ---
+
         유저가 주문한 주문의 디테일 조회
         토큰 필요
         """
