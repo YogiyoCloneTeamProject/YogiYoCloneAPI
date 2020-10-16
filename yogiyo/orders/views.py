@@ -6,7 +6,10 @@ from orders.models import Order
 from orders.serializers import OrderSerializer, OrderListSerializer, OrderCreateSerializer
 
 
-class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+class OrderViewSet(mixins.CreateModelMixin,
+                   mixins.ListModelMixin,
+                   mixins.RetrieveModelMixin,
+                   GenericViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsOwnerAndIsAuthenticated]

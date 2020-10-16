@@ -3,7 +3,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 
-from core.permissions import IsSuperUser, IsOrderOwner, IsOwnerAndIsAuthenticated, IsOwner
+from core.permissions import IsSuperUser, IsOrderOwner, IsOwner
+from core.views import PatchModelMixin
 from orders.models import Order
 from reviews.models import Review, OwnerComment
 from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer, OwnerCommentSerializer
@@ -85,18 +86,12 @@ class ReviewDestroyViewSet(mixins.DestroyModelMixin, GenericViewSet):
     permission_classes = [IsOwner]
 
 
-class OwnerCommentViewSet(mixins.UpdateModelMixin, mixins.DestroyModelMixin, GenericViewSet):
+class OwnerCommentViewSet(mixins.DestroyModelMixin,
+                          PatchModelMixin,
+                          GenericViewSet):
     queryset = OwnerComment.objects.all()
     serializer_class = OwnerCommentSerializer
     permission_classes = [IsSuperUser]
-
-    def update(self, request, *args, **kwargs):
-        """
-        해당 api는 사용하지 않습니다
-
-
-        """
-        return super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         """

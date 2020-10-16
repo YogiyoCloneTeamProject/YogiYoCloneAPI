@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from core.permissions import IsUserSelf
+from core.views import PatchModelMixin
 from restaurants.models import Restaurant
 from restaurants.serializers import BookmarkRestaurantSerializer
 from users.models import User, Bookmark
@@ -16,7 +17,7 @@ from users.serializers import UserCreateSerializer, UserRetrieveSerializer, Logi
 
 class UserViewSet(mixins.CreateModelMixin,
                   mixins.RetrieveModelMixin,
-                  mixins.UpdateModelMixin,
+                  PatchModelMixin,
                   GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserRetrieveSerializer
@@ -39,12 +40,66 @@ class UserViewSet(mixins.CreateModelMixin,
             return UserPasswordSerializer
         if self.action == 'partial_update':
             return UserUpdateNicknameSerializer
+        if self.action == 'login':
+            return LoginSerializer
         return super().get_serializer_class()
+
+    def create(self, request, *args, **kwargs):
+        """
+        회원가입1
+
+        이메일, 닉네임, 비밀번호로 비활성 회원 생성 - 인증하여 활성화 필요
+        """
+        return super().create(request, *args, **kwargs)
+
+    @action(methods=['patch'], detail=True)
+    def authorize_phone_num(self, request, *args, **kwargs):
+        """
+        회원가입2
+
+        전화번호 인증 후 - 전화번호 추가, 유저 활성화
+        """
+        # todo 아무나 authorize_phone_num 할수없게 인증이 필요
+        # todo create 후 전화번호 인증은 안했을때 예외처리 필요
+        return super().partial_update(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        유저 디테일 조회
+
+        유저 자신의 프로필 정보 조회
+        토큰 필요
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        유저 회원 탈퇴(비활성화)
+
+        유저의 상태 비활성화
+        토큰 필요
+        """
+        instance = self.get_object()
+        instance.is_active = False
+        instance.save()
+        return Response(status=status.HTTP_200_OK)
+
+    def partial_update(self, request, *args, **kwargs):
+        """
+        유저 정보 수정
+
+        토큰 필요
+        """
+        return super().partial_update(request, *args, **kwargs)
 
     @action(methods=['post'], detail=False)
     def login(self, request, *args, **kwargs):
-        """로그인"""
-        serializer = LoginSerializer(data=request.data, context={'request': request})
+        """
+        로그인
+
+        email, password 검증 후 토큰 발행
+        """
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
@@ -52,7 +107,12 @@ class UserViewSet(mixins.CreateModelMixin,
 
     @action(methods=['delete'], detail=False)
     def logout(self, request, *args, **kwargs):
-        """로그아웃"""
+        """
+        로그아웃
+
+        토큰 삭제
+        토큰 필요
+        """
         try:
             request.user.auth_token.delete()
         except (AttributeError, ObjectDoesNotExist):
@@ -60,23 +120,13 @@ class UserViewSet(mixins.CreateModelMixin,
         return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True)
-    def authorize_phone_num(self, request, *args, **kwargs):
-        """회원가입2 전화번호 인증 후 - 전화번호 추가, 유저 활성화"""
-        # todo 아무나 authorize_phone_num 할수없게 인증이 필요
-        # todo create 후 전화번호 인증은 안했을때
-        return super().partial_update(request, *args, **kwargs)
-
-    @action(methods=['patch'], detail=True)
     def update_password(self, request, *args, **kwargs):
-        """비밀번호 변경"""
-        return super().partial_update(request, *args, **kwargs)
+        """
+        비밀번호 변경
 
-    def destroy(self, request, *args, **kwargs):
-        """회원 탈퇴(비활성화)"""
-        instance = self.get_object()
-        instance.is_active = False
-        instance.save()
-        return Response(status=status.HTTP_200_OK)
+        토큰 필요
+        """
+        return super().partial_update(request, *args, **kwargs)
 
 
 class BookmarkViewSet(mixins.CreateModelMixin,
@@ -86,17 +136,26 @@ class BookmarkViewSet(mixins.CreateModelMixin,
     serializer_class = BookmarkSerializer
     permission_classes = [AllowAny]
 
+    def create(self, request, *args, **kwargs):
+        """
+
+        """
+        return super().create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+
+        """
+        return super().destroy(request, *args, **kwargs)
+
 
 class BookmarkListViewSet(mixins.ListModelMixin,
                           GenericViewSet):
     """
     유저가 찜한 식당 조회
 
-    ---
     토큰 필요
     요청이 성공적으로 서버에 전달되면 200 OK를 반환
-
-
     """
     # todo Restaurant -> Bookmark
     queryset = Restaurant.objects.all()
