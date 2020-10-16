@@ -16,10 +16,10 @@ class OptionSerializer(serializers.ModelSerializer):
         model = Option
         fields = ('id', 'name', 'price', 'option_group_id')
         examples = {
-            'id': 1,
-            'name': '호박 추가',
-            'price': 1000,
-            'option_group_id': 1
+            "id": 5442,
+            "name": "뿌링뿌링소스 추가",
+            "price": 1500,
+            "option_group_id": 820
         }
 
 
@@ -30,10 +30,10 @@ class OptionGroupSerializer(serializers.ModelSerializer):
         model = OptionGroup
         fields = ('id', 'name', 'menu_id', 'mandatory', 'option')
         examples = {
-            'id': 1,
-            'name': '채소 추가',
-            'menu_id': 1,
-            'mandatory': True
+            "id": 820,
+            "name": "변경&추가",
+            "menu_id": 618,
+            "mandatory": False,
         }
 
 
@@ -44,11 +44,11 @@ class MenuDetailSerializer(serializers.ModelSerializer):
         model = Menu
         fields = ('id', 'name', 'image', 'caption', 'price', 'option_group')
         examples = {
-            'id': 1,
-            'name': '된장찌개',
-            'caption': '보글보글 맛있는 된장찌개 입니다 ^^',
-            'price': 6000,
-
+            "id": 618,
+            "name": "뿌링맵소킹",
+            "image": "https://yogiyo-s3.s3.ap-northeast-2.amazonaws.com/media/menu_image/ECA09CED9CB4FR_20200914_BHC_EBBF8CEBA781EBA7B5EC868CED82B9_1080x640_5zw8kTT.jpg",
+            "caption": "뿌맵뿌맵! 혀를 찌르는 청양고추 시즈닝을 더해 세상에 없던 화려한 매운 맛",
+            "price": 17000
         }
 
 
@@ -56,6 +56,14 @@ class MenuListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
         fields = ('id', 'name', 'image', 'caption', 'menu_group_id', 'price')
+        examples = {
+            "id": 618,
+            "name": "뿌링맵소킹",
+            "image": "https://yogiyo-s3.s3.ap-northeast-2.amazonaws.com/media/menu_image/ECA09CED9CB4FR_20200914_BHC_EBBF8CEBA781EBA7B5EC868CED82B9_1080x640_flBp3R5.jpg",
+            "caption": "뿌맵뿌맵! 혀를 찌르는 청양고추 시즈닝을 더해 세상에 없던 화려한 매운 맛",
+            "menu_group_id": 81,
+            "price": 17000
+        }
 
 
 class MenuGroupSerializer(serializers.ModelSerializer):
@@ -64,6 +72,9 @@ class MenuGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = MenuGroup
         fields = ('name', 'menu')
+        examples = {
+            "name": "신메뉴",
+        }
 
 
 class RestaurantDetailSerializer(serializers.ModelSerializer):
@@ -82,6 +93,51 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
                   'min_order_price', 'payment_methods', 'business_name', 'company_registration_number',
                   'origin_information', 'delivery_discount', 'delivery_charge', 'delivery_time', 'photo_menu',
                   'menu_group', 'review_count')
+        examples = {
+            "id": 10,
+            "name": "BHC-성수점",
+            "average_rating": 4.6,
+            "average_taste": 4.6,
+            "average_delivery": 4.6,
+            "average_amount": 4.7,
+            "image": "https://yogiyo-s3.s3.ap-northeast-2.amazonaws.com/media/restaurant_image/BHC_20191014_Franchise_crop_200x200_hY0tGRI_zwpjlBg.jpg",
+            "back_image": "https://yogiyo-s3.s3.ap-northeast-2.amazonaws.com/media/restaurant_back_image/20191014171511754363_c7be81a92573dbcea9bc5988012d0051_tn_yoGfukV.jpg",
+            "notification": "",
+            "opening_time": "11:00:00",
+            "closing_time": "00:30:00",
+            "tel_number": "050352576406",
+            "address": "서울 성동구 성수동1가 13-162 1층",
+            "min_order_price": 15000,
+            "payment_methods": [
+                "신용카드",
+                "현금",
+                "요기서결제"
+            ],
+            "business_name": "BHCBeerZone(비에이치씨비어존)",
+            "company_registration_number": "204-22-99067",
+            "origin_information": "*닭고기 : 국내산  \r\n*소시지(돼지고기) : 국내산",
+            "delivery_discount": 2000,
+            "delivery_charge": 2000,
+            "delivery_time": "45~55분",
+            "photo_menu": [
+                {
+                    "id": 619,
+                    "name": "뿌링맵소킹 콤보",
+                    "image": "https://yogiyo-s3.s3.ap-northeast-2.amazonaws.com/media/menu_image/ECA09CED9CB4FR_20200730_BHC_EBBF8CEBA781EBA7B5EC868CED82B9ECBDA4EBB3B4_1080x640_L71SV2q.jpg",
+                    "caption": "뿌맵뿌맵! 혀를 찌르는 청양고추 시즈닝을 더해 세상에 없던 화려한 매운 맛, 퍽퍽한 닭가슴살 없이 윙과 닭다리만 담은 콤보",
+                    "menu_group_id": 81,
+                    "price": 18000
+                },
+                {
+                    "id": 624,
+                    "name": "양념맵소킹 콤보",
+                    "image": "https://yogiyo-s3.s3.ap-northeast-2.amazonaws.com/media/menu_image/ECA09CED9CB4FR_20200730_BHC_EC9691EB8590EBA7B5EC868CED82B9ECBDA4EBB3B4_1080x640_PxDegFe.jpg",
+                    "caption": "맵소맵소! \"맵소킹\" 감탄과 함께 눈물이 찔끔 날 듯한 홍고추의 알싸한 매운 맛, 퍽퍽한 닭가슴살 없이 윙과 닭다리만 담은 콤보",
+                    "menu_group_id": 81,
+                    "price": 18000
+                }],
+            "review_count": 5
+        }
 
 
 class RestaurantListSerializer(serializers.ModelSerializer):
@@ -94,17 +150,19 @@ class RestaurantListSerializer(serializers.ModelSerializer):
                   'delivery_time', 'review_count', 'representative_menus', 'owner_comment_count', 'bookmark_count',
                   'min_order_price')
         examples = {
-            'id': '2',
-            'name': '최고의 찌개',
-            'average_rating': '3.9',
-            'delivery_discount': '2000',
-            'delivery_charge': '3000',
-            'delivery_time': '30',
-            'review_count': '10',
-            'representative_menus': '김치찌개, 된장찌개, 부대찌개',
-            'owner_comment_count': '7',
-            'bookmark_count': '20',
-            'min_order_price': '10000'
+            "id": 10,
+            "name": "BHC-성수점",
+            "average_rating": 4.6,
+            "image": "https://yogiyo-s3.s3.ap-northeast-2.amazonaws.com/media/restaurant_image/BHC_20191014_Franchise_crop_200x200_hY0tGRI_zwpjlBg.jpg",
+            "back_image": "https://yogiyo-s3.s3.ap-northeast-2.amazonaws.com/media/restaurant_back_image/20191014171511754363_c7be81a92573dbcea9bc5988012d0051_tn_yoGfukV.jpg",
+            "delivery_discount": 2000,
+            "delivery_charge": 2000,
+            "delivery_time": "45~55분",
+            "review_count": 5,
+            "representative_menus": "뿌링클, 뿌링클순살",
+            "owner_comment_count": 100,
+            "bookmark_count": 0,
+            "min_order_price": 15000
         }
 
 
@@ -126,3 +184,7 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name')
+        examples = {
+            'id': 1,
+            'name': '떡볶이'
+        }

@@ -20,6 +20,7 @@ class OwnerCommentSerializer(serializers.ModelSerializer):
             'id': 1,
             'comments': '감사합니다! ^^',
             'created': '2020.10.10',
+            'review_id': '4'
         }
 
 
@@ -31,6 +32,19 @@ class ReviewListSerializer(serializers.ModelSerializer):
         model = Review
         fields = ('id', 'owner', 'order', 'restaurant', 'caption', 'like_count', 'rating', 'taste', 'amount',
                   'delivery', 'images', 'created', 'ownercomment')
+        examples = {
+            'id': 3,
+            'owner': 1,
+            'order': 1,
+            'restaurant': 2,
+            'caption': "참 맛있다 여기!",
+            'like_count': 2,
+            'rating': 4,
+            'taste': 4,
+            'amount': 4,
+            'delivery': 4,
+            'created': 2020 - 10 - 10,
+        }
 
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
