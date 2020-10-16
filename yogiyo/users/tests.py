@@ -139,6 +139,11 @@ class UserUpdateNicknameTestCase(APITestCase):
         r = response.data
         self.assertEqual(response.status_code, status.HTTP_200_OK, r)
 
+    def test_fail_put(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(f'/users/{self.user.id}', data=self.data)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED, response.data)
+
     def test_fail_401(self):
         response = self.client.patch(f'/users/{self.user.id}', data=self.data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED, response.data)

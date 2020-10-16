@@ -17,6 +17,11 @@ class OrderOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderOption
         fields = ('id', 'name', 'price')
+        examples = {
+            'id': 1,
+            'name': '호박 추가',
+            'price': 1000
+        }
 
 
 class OrderOptionGroupSerializer(serializers.ModelSerializer):
@@ -25,6 +30,11 @@ class OrderOptionGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderOptionGroup
         fields = ('id', 'name', 'order_option', 'mandatory')
+        examples = {
+            'id': 1,
+            'name': '채소 추가',
+            'mandatory': True
+        }
 
 
 class OrderMenuSerializer(serializers.ModelSerializer):
@@ -33,15 +43,29 @@ class OrderMenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderMenu
         fields = ('id', 'menu', 'name', 'price', 'count', 'order_option_group')
+        examples = {
+            'id': 1,
+            'menu': 1,
+            'name': '된장찌개',
+            'price': 6000,
+            'count': 1,
+        }
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    """주문 조회"""
+    """주문 내역 디테일 조회"""
     order_menu = OrderMenuSerializer(many=True)
 
     class Meta:
         model = Order
         fields = ('id', 'order_menu', 'address', 'delivery_requests', 'payment_method', 'order_time')
+        examples = {
+            'id': 1,
+            'address': 'seoul',
+            'delivery_requests': '문 앞에 놓아주세요',
+            'payment_method': 'CASH',
+            'order_time': '2020-10-10'
+        }
 
 
 class OrderListSerializer(serializers.ModelSerializer):
@@ -53,6 +77,13 @@ class OrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('id', 'order_menu', 'restaurant_name', 'restaurant_image', 'status', 'order_time', 'review_written')
+        examples = {
+            'id': 1,
+            'restaurant_name': '최고의 찌개',
+            'status': 'WAITING_FOR_RECEIPT',
+            'order_time': '2020-10-10',
+            'review_written': False
+        }
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
@@ -62,6 +93,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('id', 'order_menu', 'restaurant', 'address', 'delivery_requests', 'payment_method', 'total_price')
+        examples = {
+            'id': 1,
+            'restaurant': 1,
+            'address': 'seoul',
+            'delivery_requests': '문 앞에 놓아주세요',
+            'payment_method': 'CASH',
+            'total_price': 20000
+        }
 
     def validate(self, attrs):
         """req 데이터와 model 데이터 검증 """
@@ -101,7 +140,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         return order
 
     def valid_order_menu(self, order_menu):
-        """req: 메뉴 이름, 가격 / model : 메뉴 이름, 가격 비교 """
+        """
+        req -model 비교
+        name, price
+        """
         menu = order_menu['menu']
         # req 레스토랑이 메뉴 모델에 레스토랑과 같은지
         if order_menu['name'] != menu.name:
@@ -119,6 +161,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         self.total_price += menu_price
 
     def valid_order_option_group(self, menu, order_option_group, check_price):
+        """
+        req - model 비교
+        name, mandatory, mandatory: true -> len = 1
+        """
         try:
             option_group = menu.option_group.get(name=order_option_group['name'])
         except models.ObjectDoesNotExist:
@@ -138,6 +184,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         return check_price
 
     def valid_order_option(self, option_group, order_option, check_price):
+        """
+        req - model 비교
+        name , price
+        """
         try:
             option = option_group.option.get(name=order_option['name'])
         except models.ObjectDoesNotExist:

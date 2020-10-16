@@ -3,14 +3,23 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 
-from core.permissions import IsSuperUser, IsOrderOwner, IsOwnerAndIsAuthenticated, IsOwner
+from core.permissions import IsSuperUser, IsOrderOwner, IsOwner
+from core.views import PatchModelMixin
 from orders.models import Order
 from reviews.models import Review, OwnerComment
 from reviews.serializers import ReviewListSerializer, ReviewCreateSerializer, OwnerCommentSerializer
 
 
 class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
-    """review post """
+    """
+    리뷰 생성
+
+
+    nested_url에 order_pk를 리뷰모델의 order_id에 저장
+    req - taste, amount, delivery 의 평점 평균을 rating으로 저장
+    order_pk로 오더 메뉴를 get하여 메뉴-옵션그룹-옵션을 menu_name으로 저장
+    order의 owner와 req의 owner가 같은지 검증
+    """
     queryset = Review.objects.all()
     serializer_class = ReviewCreateSerializer
     permission_classes = [IsOrderOwner]
@@ -46,29 +55,72 @@ class ReviewCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
             )
 
 
-class ReviewViewSet(mixins.ListModelMixin, mixins.DestroyModelMixin, GenericViewSet):
-    """review get, delete"""
+class ReviewListViewSet(mixins.ListModelMixin, GenericViewSet):
+    """
+    리뷰 조회
+
+
+    nested_url에서 restaurant_id로 레스토랑이 갖고 있는 리뷰 조회
+    """
     queryset = Review.objects.all()
     serializer_class = ReviewListSerializer
     permission_classes = [IsOwner]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        if self.action == 'list':
-            if 'restaurant_pk' in self.kwargs:
-                queryset = super().get_queryset().filter(restaurant=self.kwargs.get('restaurant_pk'))
-            else:
-                raise ValidationError('url should contains restaurant pk')
-        return queryset
+        if 'restaurant_pk' in self.kwargs:
+            return super().get_queryset().filter(restaurant=self.kwargs.get('restaurant_pk'))
+        else:
+            raise ValidationError('url should contains restaurant pk')
 
 
-class OwnerCommentViewSet(mixins.UpdateModelMixin, mixins.DestroyModelMixin, GenericViewSet):
+class ReviewDestroyViewSet(mixins.DestroyModelMixin, GenericViewSet):
+    """
+    리뷰 삭제
+
+
+    토큰 필요
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewListSerializer
+    permission_classes = [IsOwner]
+
+
+class OwnerCommentViewSet(mixins.DestroyModelMixin,
+                          PatchModelMixin,
+                          GenericViewSet):
     queryset = OwnerComment.objects.all()
     serializer_class = OwnerCommentSerializer
     permission_classes = [IsSuperUser]
 
+    def partial_update(self, request, *args, **kwargs):
+        """
+        사장님 댓글 수정
+
+
+        토큰 필요
+
+
+        """
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        사장님 댓글 삭제
+
+
+        토큰 필요
+        """
+        return super().destroy(request, *args, **kwargs)
+
 
 class OwnerCommentCreateViewSet(mixins.CreateModelMixin, GenericViewSet):
+    """
+    사장님 댓글 생성
+
+
+    nested_url에 review_pk를 오너코멘트모델의 review_id에 저장
+    토큰 필요
+    """
     queryset = OwnerComment.objects.all()
     serializer_class = OwnerCommentSerializer
     permission_classes = [IsSuperUser]
