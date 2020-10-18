@@ -14,7 +14,13 @@ from restaurants.serializers import RestaurantDetailSerializer, RestaurantListSe
 
 
 class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
-    """menu detail"""
+    """
+    menu 디테일 조회
+
+
+    menu id를 통해서 디테일 조회
+
+    """
     queryset = Menu.objects.all()
     serializer_class = MenuDetailSerializer
     permission_classes = [AllowAny]
@@ -30,7 +36,6 @@ class RestaurantFilter(filters.FilterSet):
 
 
 class RestaurantViewSet(ReadOnlyModelViewSet):
-    """restaurant list, detail"""
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantListSerializer
     filter_backends = (filters.DjangoFilterBackend, OrderingFilter)
@@ -40,6 +45,31 @@ class RestaurantViewSet(ReadOnlyModelViewSet):
     ordering = ('id',)
     permission_classes = [AllowAny]
     HOME_VIEW_PAGE_SIZE = 20
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        레스토랑 디테일 조회
+
+
+        레스토랑 pk로 레스토랑 디테일 조회
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """
+        레스토랑 리스트 조회
+
+
+        현재 위치로부터 일정 거리의 있는 레스토랑만 조회
+
+        [parameter]
+        payment_methods : CASH, CREDIT_CARD, YOGIYO_PAY
+        categories : 1인분 주문, 프랜차이즈, 치킨, 피자/양식, 중국집,
+                     한식, 일식/돈까스, 족발/보쌈, 야식, 분식, 카페/디저트, 편의점/마트
+        ordering : average_rating, delivery_charge, min_order_price, delivery_time, review_count,
+                   owner_comment_count
+        """
+        return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -81,37 +111,65 @@ class RestaurantViewSet(ReadOnlyModelViewSet):
 
     @action(detail=False, methods=['GET'])
     def home_view_average_rating(self, request, *args, **kwargs):
-        """나의 입맛저격 - 별점 순"""
+        """
+        나의 입맛저격
+
+        별점순으로 정렬
+        """
         qs = self.get_queryset().order_by('-average_rating').filter(average_rating__gte=4)
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
     def home_view_bookmark(self, request, *args, **kwargs):
-        """우리동네 찜 많은 음식점 - 찜 개수 순"""
+        """
+        우리동네 찜 많은 음식점
+
+        찜 개수 순으로 정렬
+
+        """
         qs = self.get_queryset().order_by('-bookmark')
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
     def home_view_delivery_discount(self, request, *args, **kwargs):
-        """오늘만 할인 - 할인이 0원이 아닌 매장"""
+        """
+        오늘만 할인
+
+
+        할인이 0원이 아닌 매장"""
         qs = self.get_queryset().filter(delivery_discount__gt=0)
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
     def home_view_delivery_charge(self, request, *args, **kwargs):
-        """배달비 무료 - 배달비 0원"""
+        """
+        배달비 무료
+
+
+        배달비 0원
+        """
         qs = self.get_queryset().filter(delivery_charge=0)
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
     def home_view_review(self, request, *args, **kwargs):
-        """최근 7일동안 리뷰가 많아요 - 리뷰 순"""
-        qs = self.get_queryset().order_by('-review')
+        """
+        최근 7일동안 리뷰가 많아요
+
+
+        리뷰 개수 순으로 정렬
+        """
+        qs = self.get_queryset().order_by('-review_count')
         return self.home_view_results(qs)
 
     @action(detail=False, methods=['GET'])
     def home_view_delivery_time(self, request, *args, **kwargs):
-        """가장 빨리 배달돼요"""
+        """
+        가장 빨리 배달돼요
+
+
+        배달 시간순으로 정렬
+        """
         qs = self.get_queryset().order_by('delivery_time')
         return self.home_view_results(qs)
 
@@ -121,7 +179,13 @@ class RestaurantViewSet(ReadOnlyModelViewSet):
 
 
 class TagViewSet(mixins.ListModelMixin, GenericViewSet):
-    """tag - search (자동완성)"""
+    """
+    검색 자동완성 조회
+
+
+    레스토랑의 태그 검색
+
+    """
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = [AllowAny]
