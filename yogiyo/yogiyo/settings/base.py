@@ -30,6 +30,7 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'phonenumber_field',
     'taggit',
+    'debug_toolbar',
 
     # my app
     'core',
