@@ -135,7 +135,6 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
     class Meta:
-        # todo api docs에서 로그인이 UserRetrieveSerializer를 바라봄?
         examples = {
             "token": "09f236368ed266b5ccaf58e88b0618d573032f16",
             "user_id": 1

@@ -166,7 +166,7 @@ class RestaurantListSerializer(serializers.ModelSerializer):
         }
 
 
-class BookmarkRestaurantSerializer(RestaurantListSerializer):  # todo 지워버릴까?
+class BookmarkRestaurantSerializer(RestaurantListSerializer):
     owner_comment_count = serializers.SerializerMethodField()
 
     class Meta(RestaurantListSerializer.Meta):
