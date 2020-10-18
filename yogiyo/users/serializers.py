@@ -111,3 +111,16 @@ class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookmark
         fields = ('id', 'user', 'restaurant')
+        examples = {
+            "id": 3,
+            "name": "1인찜닭삼계탕전문&단물곤물-건대점",
+            "average_rating": 4.8,
+            "image": "https://yogiyo-s3.s3.ap-northeast-2.amazonaws.com/media/restaurant_image/%EC%B0%9C%EB%8B%AD10_20131128_FoodAD_crop_200x200_7byHP1N_RDEE6t4.jpg",
+            "back_image": "https://yogiyo-s3.s3.ap-northeast-2.amazonaws.com/media/restaurant_back_image/20190624143217474693_8e592b8516e9b16906e2425bcf9a28d0_tn_YSZBpFE.jpg",
+            "delivery_discount": 0,
+            "delivery_charge": 2500,
+            "delivery_time": "50~60분",
+            "review_count": 5,
+            "representative_menus": "（혼밥강추!）1人 삼계탕, （혼밥강추!）1.5人 순살찜닭 반마리",
+            "owner_comment_count": 1
+        }
