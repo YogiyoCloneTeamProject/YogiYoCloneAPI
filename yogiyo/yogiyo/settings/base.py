@@ -191,17 +191,19 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.profiling.ProfilingPanel',
 ]
 
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
 CACHEOPS_REDIS = "redis://127.0.0.1:6379/1"
-CACHEOPS = {'*.*': {'ops': ('all'), 'timeout': 10}}  # 모든 쿼리셋 캐시
+CACHEOPS = {'*.*': {'ops': 'get', 'timeout': 10}}  # 모든 쿼리셋 캐시
 # CACHEOPS_DEFAULTS = {'timeout': 10}
 # CACHEOPS = {
 #     'taggit.Tag': {'ops': 'all'},
-#     'posts.Post': {'ops': 'all'},
-#     'posts.Photo': {'ops': 'all'},
-#     'comments.Comment': {'ops': 'all'},
-#     'comments.ReComment': {'ops': 'all'},
-#     'likes.PostLike': {'ops': 'all'},
-#     'relationsships.Follow': {'ops': 'all'},
-#     'story.Story': {'ops': 'all'},
-#     'story.StoryCheck': {'ops': 'all'},
+#     'restaurants.Restaurant': {'ops': 'all'},
 # }
