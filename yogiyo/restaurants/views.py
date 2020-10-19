@@ -19,9 +19,8 @@ class MenuViewSet(mixins.RetrieveModelMixin, GenericViewSet):
 
 
     menu id를 통해서 디테일 조회
-
     """
-    queryset = Menu.objects.all()
+    queryset = Menu.objects.all().prefetch_related('option_group__option')
     serializer_class = MenuDetailSerializer
     permission_classes = [AllowAny]
 
@@ -80,7 +79,10 @@ class RestaurantViewSet(ReadOnlyModelViewSet):
         qs = super().get_queryset()
         qs = self.filter_by_distance_manual(qs)
         qs = self.filter_by_search(qs)
-        return qs
+        if self.action == 'list':
+            return qs.prefetch_related('bookmark')
+        if self.action == 'retrieve':
+            return qs.prefetch_related('menu_group__menu')
 
     def filter_by_search(self, qs):
         search = self.request.query_params.get('search')
@@ -114,6 +116,7 @@ class RestaurantViewSet(ReadOnlyModelViewSet):
         """
         나의 입맛저격
 
+
         별점순으로 정렬
         """
         qs = self.get_queryset().order_by('-average_rating').filter(average_rating__gte=4)
@@ -124,8 +127,8 @@ class RestaurantViewSet(ReadOnlyModelViewSet):
         """
         우리동네 찜 많은 음식점
 
-        찜 개수 순으로 정렬
 
+        찜 개수 순으로 정렬
         """
         qs = self.get_queryset().order_by('-bookmark')
         return self.home_view_results(qs)
@@ -184,7 +187,6 @@ class TagViewSet(mixins.ListModelMixin, GenericViewSet):
 
 
     레스토랑의 태그 검색
-
     """
     queryset = Tag.objects.all()
     serializer_class = TagSerializer

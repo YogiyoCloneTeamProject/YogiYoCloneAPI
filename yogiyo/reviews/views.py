@@ -62,7 +62,7 @@ class ReviewListViewSet(mixins.ListModelMixin, GenericViewSet):
 
     nested_url에서 restaurant_id로 레스토랑이 갖고 있는 리뷰 조회
     """
-    queryset = Review.objects.all()
+    queryset = Review.objects.all().select_related('ownercomment').prefetch_related('img')
     serializer_class = ReviewListSerializer
     permission_classes = [IsOwner]
 
@@ -98,8 +98,6 @@ class OwnerCommentViewSet(mixins.DestroyModelMixin,
 
 
         토큰 필요
-
-
         """
         return super().partial_update(request, *args, **kwargs)
 

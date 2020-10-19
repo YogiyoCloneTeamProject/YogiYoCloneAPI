@@ -2,9 +2,9 @@ from rest_framework.routers import SimpleRouter
 from rest_framework_nested import routers
 
 from orders.views import OrderViewSet
-from restaurants.views import RestaurantViewSet, MenuViewSet, TagViewSet
-from reviews.views import ReviewCreateViewSet, OwnerCommentCreateViewSet, ReviewListViewSet, ReviewDestroyViewSet
 from restaurants.views import RestaurantViewSet, MenuViewSet
+from restaurants.views import TagViewSet
+from reviews.views import OwnerCommentCreateViewSet, ReviewListViewSet, ReviewDestroyViewSet
 from reviews.views import ReviewCreateViewSet, OwnerCommentViewSet
 from users.views import UserViewSet, BookmarkListViewSet, BookmarkViewSet
 
@@ -15,7 +15,7 @@ router.register(r'orders', OrderViewSet)
 router.register(r'users', UserViewSet)
 router.register(r'reviews', ReviewDestroyViewSet)
 router.register(r'bookmarks', BookmarkListViewSet)
-# router.register(r'bookmarks', BookmarkViewSet)
+router.register(r'bookmarks', BookmarkViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'comments', OwnerCommentViewSet)
 

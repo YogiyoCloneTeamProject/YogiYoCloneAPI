@@ -48,6 +48,7 @@ class UserViewSet(mixins.CreateModelMixin,
         """
         회원가입1
 
+
         이메일, 닉네임, 비밀번호로 비활성 회원 생성 - 인증하여 활성화 필요
         """
         return super().create(request, *args, **kwargs)
@@ -57,15 +58,17 @@ class UserViewSet(mixins.CreateModelMixin,
         """
         회원가입2
 
+
         전화번호 인증 후 - 전화번호 추가, 유저 활성화
         """
-        # todo 아무나 authorize_phone_num 할수없게 인증이 필요
+        # todo 아무나 authorize_phone_num 할수없게 인증이 필요 - 토큰? 세션?
         # todo create 후 전화번호 인증은 안했을때 예외처리 필요
         return super().partial_update(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         """
         유저 디테일 조회
+
 
         유저 자신의 프로필 정보 조회
         토큰 필요
@@ -75,6 +78,7 @@ class UserViewSet(mixins.CreateModelMixin,
     def destroy(self, request, *args, **kwargs):
         """
         유저 회원 탈퇴(비활성화)
+
 
         유저의 상태 비활성화
         토큰 필요
@@ -88,6 +92,7 @@ class UserViewSet(mixins.CreateModelMixin,
         """
         유저 정보 수정
 
+
         토큰 필요
         """
         return super().partial_update(request, *args, **kwargs)
@@ -96,6 +101,7 @@ class UserViewSet(mixins.CreateModelMixin,
     def login(self, request, *args, **kwargs):
         """
         로그인
+
 
         email, password 검증 후 토큰 발행
         """
@@ -109,6 +115,7 @@ class UserViewSet(mixins.CreateModelMixin,
     def logout(self, request, *args, **kwargs):
         """
         로그아웃
+
 
         토큰 삭제
         토큰 필요
@@ -124,6 +131,7 @@ class UserViewSet(mixins.CreateModelMixin,
         """
         비밀번호 변경
 
+
         토큰 필요
         """
         return super().partial_update(request, *args, **kwargs)
@@ -138,13 +146,19 @@ class BookmarkViewSet(mixins.CreateModelMixin,
 
     def create(self, request, *args, **kwargs):
         """
+        찜 추가
 
+
+        사용자의 찜 목록에 추가
         """
         return super().create(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         """
+        찜 삭제
 
+
+        사용자의 찜 목록에서 찜을 삭제
         """
         return super().destroy(request, *args, **kwargs)
 
@@ -154,11 +168,12 @@ class BookmarkListViewSet(mixins.ListModelMixin,
     """
     유저가 찜한 식당 조회
 
+
     토큰 필요
     요청이 성공적으로 서버에 전달되면 200 OK를 반환
     """
-    # todo Restaurant -> Bookmark
-    queryset = Restaurant.objects.all()
+    # todo Restaurant -> Bookmark - bookmark_id 줘야함
+    queryset = Restaurant.objects.all().prefetch_related('bookmark')
     serializer_class = BookmarkRestaurantSerializer
     permission_classes = [AllowAny]
 
