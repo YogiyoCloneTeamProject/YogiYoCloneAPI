@@ -1,7 +1,9 @@
 import logging
+import os
+
 from logdna import LogDNAHandler
 
-key = 'd1efdbf0a0f73d0e2f5d91439dbcfe39'
+key = os.environ['LOGDNA_KEY']
 
 log = logging.getLogger('logdna')
 log.setLevel(logging.INFO)
@@ -18,6 +20,3 @@ options['index_meta'] = True
 test = LogDNAHandler(key, options)
 
 log.addHandler(test)
-
-log.warning("Warning message", {'app': 'bloop'})
-log.info("Info message")
