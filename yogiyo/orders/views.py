@@ -59,7 +59,7 @@ class OrderViewSet(mixins.CreateModelMixin,
 
     def get_queryset(self):
         qs = super().get_queryset()
-        return qs.filter(owner=self.request.user)
+        return qs.filter(owner=self.request.user).select_related('restaurant').prefetch_related('order_menu')
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
