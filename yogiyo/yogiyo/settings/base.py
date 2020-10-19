@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'taggit',
     'debug_toolbar',
+    'cacheops',
 
     # my app
     'core',
@@ -135,25 +136,18 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
-
+# Static, Media setting
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static/'
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'static')
-# ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'images')
-MEDIA_URL = '/images/'
 
 AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
 AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 AWS_STORAGE_BUCKET_NAME = os.environ['AWS_S3_BUCKET_NAME']
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.ap-northeast-2.amazonaws.com'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 AWS_DEFAULT_ACL = 'public-read'
-
-AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -168,6 +162,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
 }
+AUTH_USER_MODEL = 'users.User'
 
 CRAWLING = False
 
@@ -195,3 +190,20 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
     'debug_toolbar.panels.profiling.ProfilingPanel',
 ]
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+CACHEOPS_REDIS = "redis://127.0.0.1:6379/1"
+CACHEOPS = {'*.*': {'ops': 'get', 'timeout': 10}}  # 모든 쿼리셋 캐시
+# CACHEOPS_DEFAULTS = {'timeout': 10}
+# CACHEOPS = {
+#     'taggit.Tag': {'ops': 'all'},
+#     'restaurants.Restaurant': {'ops': 'all'},
+# }
