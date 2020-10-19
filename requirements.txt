@@ -29,6 +29,7 @@ inflection==0.5.1
 itypes==1.2.0
 Jinja2==2.11.2
 jmespath==0.10.0
+logdna==1.5.3
 MarkupSafe==1.1.1
 model-bakery==1.1.1
 munch==2.5.0

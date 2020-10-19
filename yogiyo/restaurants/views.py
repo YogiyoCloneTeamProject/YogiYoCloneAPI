@@ -68,6 +68,7 @@ class RestaurantViewSet(ReadOnlyModelViewSet):
         ordering : average_rating, delivery_charge, min_order_price, delivery_time, review_count,
                    owner_comment_count
         """
+        1/0
         return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
