@@ -162,7 +162,7 @@ class BookmarkListViewSet(mixins.ListModelMixin,
     요청이 성공적으로 서버에 전달되면 200 OK를 반환
     """
     # todo Restaurant -> Bookmark - bookmark_id 줘야함
-    queryset = Restaurant.objects.all()
+    queryset = Restaurant.objects.all().prefetch_related('bookmark')
     serializer_class = BookmarkRestaurantSerializer
     permission_classes = [AllowAny]
 
