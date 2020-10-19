@@ -1,14 +1,17 @@
 from rest_framework import serializers
 from taggit.models import Tag
 
+from orders.models import Order
 from restaurants.models import Option, OptionGroup, Menu, MenuGroup, Restaurant
 
 
-class DeliveryTimeField(serializers.Field):
-    """delivery_time: 10 -> 10~20분"""
-
-    def to_representation(self, value):
-        return f'{value}~{value + 10}분'
+def extra_time(delivery_time, restaurant_id):
+    """
+    order에 레스토랑의 RECEIPT_COMPLETE인 상태 x (기본 조리 시간/2)
+    """
+    receipt_complete_count = Order.objects.filter(restaurant_id=restaurant_id, status='접수 완료').count() // 3
+    delivery_time += receipt_complete_count * (delivery_time // 2)
+    return f'{delivery_time}~{delivery_time + 10}분'
 
 
 class OptionSerializer(serializers.ModelSerializer):
@@ -80,7 +83,10 @@ class MenuGroupSerializer(serializers.ModelSerializer):
 class RestaurantDetailSerializer(serializers.ModelSerializer):
     menu_group = MenuGroupSerializer(read_only=True, many=True)
     photo_menu = serializers.SerializerMethodField()
-    delivery_time = DeliveryTimeField()
+    delivery_time = serializers.SerializerMethodField()
+
+    def get_delivery_time(self, obj):
+        return extra_time(obj.delivery_time, obj.id)
 
     def get_photo_menu(self, obj):
         m = MenuListSerializer(instance=Menu.objects.filter(menu_group__restaurant=obj, is_photomenu=True), many=True)
@@ -141,8 +147,11 @@ class RestaurantDetailSerializer(serializers.ModelSerializer):
 
 
 class RestaurantListSerializer(serializers.ModelSerializer):
-    delivery_time = DeliveryTimeField()
+    delivery_time = serializers.SerializerMethodField()
     bookmark_count = serializers.IntegerField(source='bookmark.count')
+
+    def get_delivery_time(self, obj):
+        return extra_time(obj.delivery_time, obj.id)
 
     class Meta:
         model = Restaurant
