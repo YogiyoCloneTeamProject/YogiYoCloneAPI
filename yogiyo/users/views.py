@@ -48,6 +48,7 @@ class UserViewSet(mixins.CreateModelMixin,
         """
         회원가입1
 
+
         이메일, 닉네임, 비밀번호로 비활성 회원 생성 - 인증하여 활성화 필요
         """
         return super().create(request, *args, **kwargs)
@@ -56,6 +57,7 @@ class UserViewSet(mixins.CreateModelMixin,
     def authorize_phone_num(self, request, *args, **kwargs):
         """
         회원가입2
+
 
         전화번호 인증 후 - 전화번호 추가, 유저 활성화
         """
@@ -67,6 +69,7 @@ class UserViewSet(mixins.CreateModelMixin,
         """
         유저 디테일 조회
 
+
         유저 자신의 프로필 정보 조회
         토큰 필요
         """
@@ -75,6 +78,7 @@ class UserViewSet(mixins.CreateModelMixin,
     def destroy(self, request, *args, **kwargs):
         """
         유저 회원 탈퇴(비활성화)
+
 
         유저의 상태 비활성화
         토큰 필요
@@ -88,6 +92,7 @@ class UserViewSet(mixins.CreateModelMixin,
         """
         유저 정보 수정
 
+
         토큰 필요
         """
         return super().partial_update(request, *args, **kwargs)
@@ -96,6 +101,7 @@ class UserViewSet(mixins.CreateModelMixin,
     def login(self, request, *args, **kwargs):
         """
         로그인
+
 
         email, password 검증 후 토큰 발행
         """
@@ -110,6 +116,7 @@ class UserViewSet(mixins.CreateModelMixin,
         """
         로그아웃
 
+
         토큰 삭제
         토큰 필요
         """
@@ -123,6 +130,7 @@ class UserViewSet(mixins.CreateModelMixin,
     def update_password(self, request, *args, **kwargs):
         """
         비밀번호 변경
+
 
         토큰 필요
         """
@@ -140,6 +148,7 @@ class BookmarkViewSet(mixins.CreateModelMixin,
         """
         찜 추가
 
+
         사용자의 찜 목록에 추가
         """
         return super().create(request, *args, **kwargs)
@@ -147,6 +156,7 @@ class BookmarkViewSet(mixins.CreateModelMixin,
     def destroy(self, request, *args, **kwargs):
         """
         찜 삭제
+
 
         사용자의 찜 목록에서 찜을 삭제
         """
@@ -157,6 +167,7 @@ class BookmarkListViewSet(mixins.ListModelMixin,
                           GenericViewSet):
     """
     유저가 찜한 식당 조회
+
 
     토큰 필요
     요청이 성공적으로 서버에 전달되면 200 OK를 반환
