@@ -7,6 +7,10 @@
 ## Description
 음식 배달 서비스 요기요 앱 클론 프로젝트로서 Django, DRF를 활용한 REST API개발 역량을 키우고 iOS팀과 협업하여 커뮤니케이션 능력을 다지는 것을 목표로 했습니다.
 
+## Demo 영상
+[Youtube](https://www.youtube.com/watch?v=8oCdAOqnyfQ&t=119s)
+
+
 ## Contributors
 - 김주원 [GitHub](https://github.com/Joyykim)
 - 최사라 [GitHub](https://github.com/withHappy)
