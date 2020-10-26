@@ -3,7 +3,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from orders.models import Order, OrderOption, OrderOptionGroup, OrderMenu
-from users.models import User
 
 
 class OrderMenuNameField(serializers.Field):
@@ -18,6 +17,11 @@ class OrderOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderOption
         fields = ('id', 'name', 'price')
+        examples = {
+            'id': 1,
+            'name': '호박 추가',
+            'price': 1000
+        }
 
 
 class OrderOptionGroupSerializer(serializers.ModelSerializer):
@@ -26,6 +30,11 @@ class OrderOptionGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderOptionGroup
         fields = ('id', 'name', 'order_option', 'mandatory')
+        examples = {
+            'id': 1,
+            'name': '채소 추가',
+            'mandatory': True
+        }
 
 
 class OrderMenuSerializer(serializers.ModelSerializer):
@@ -34,20 +43,33 @@ class OrderMenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderMenu
         fields = ('id', 'menu', 'name', 'price', 'count', 'order_option_group')
+        examples = {
+            'id': 1,
+            'menu': 1,
+            'name': '된장찌개',
+            'price': 6000,
+            'count': 1,
+        }
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    """주문 조회"""
+    """주문 내역 디테일 조회"""
     order_menu = OrderMenuSerializer(many=True)
 
     class Meta:
         model = Order
         fields = ('id', 'order_menu', 'address', 'delivery_requests', 'payment_method', 'order_time')
+        examples = {
+            'id': 1,
+            'address': 'seoul',
+            'delivery_requests': '문 앞에 놓아주세요',
+            'payment_method': 'CASH',
+            'order_time': '2020-10-10'
+        }
 
 
 class OrderListSerializer(serializers.ModelSerializer):
     """주문 내역 리스트"""
-    # todo status 주문 상태
     order_menu = OrderMenuNameField()
     restaurant_name = serializers.CharField(source='restaurant.name')
     restaurant_image = serializers.ImageField(source='restaurant.image')
@@ -55,6 +77,13 @@ class OrderListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('id', 'order_menu', 'restaurant_name', 'restaurant_image', 'status', 'order_time', 'review_written')
+        examples = {
+            'id': 1,
+            'restaurant_name': '최고의 찌개',
+            'status': 'WAITING_FOR_RECEIPT',
+            'order_time': '2020-10-10',
+            'review_written': False
+        }
 
 
 class OrderCreateSerializer(serializers.ModelSerializer):
@@ -64,6 +93,14 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ('id', 'order_menu', 'restaurant', 'address', 'delivery_requests', 'payment_method', 'total_price')
+        examples = {
+            'id': 1,
+            'restaurant': 1,
+            'address': 'seoul',
+            'delivery_requests': '문 앞에 놓아주세요',
+            'payment_method': 'CASH',
+            'total_price': 20000
+        }
 
     def validate(self, attrs):
         """req 데이터와 model 데이터 검증 """
@@ -82,19 +119,15 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         restaurant = attrs['restaurant']
         delivery_charge = restaurant.delivery_charge if restaurant.delivery_charge is not None else 0
         discount = restaurant.delivery_discount if restaurant.delivery_discount is not None else 0
-        # todo 나중에 배달할인, 배달요금 적용하기
-        delivery_charge = 2000
-        discount = 1000
+
         if attrs['total_price'] != self.total_price + delivery_charge - discount:
             raise ValidationError('total price != check_price')
 
         return attrs
 
     def create(self, validated_data):
-        # todo for문 돌리지 말고 모델에서 name으로 get - request 할때 id 순서 상관없이
         order_menus = validated_data.pop('order_menu')
-        user = User.objects.first()  # todo 테스트용 owner 빼기
-        order = Order.objects.create(owner=user, **validated_data)
+        order = Order.objects.create(**validated_data)
         for order_menu in order_menus:
             order_option_groups = order_menu.pop('order_option_group')
             order_menu_obj = OrderMenu.objects.create(order=order, **order_menu)
@@ -107,7 +140,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         return order
 
     def valid_order_menu(self, order_menu):
-        """req: 메뉴 이름, 가격 / model : 메뉴 이름, 가격 비교 """
+        """
+        req -model 비교
+        name, price
+        """
         menu = order_menu['menu']
         # req 레스토랑이 메뉴 모델에 레스토랑과 같은지
         if order_menu['name'] != menu.name:
@@ -125,6 +161,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         self.total_price += menu_price
 
     def valid_order_option_group(self, menu, order_option_group, check_price):
+        """
+        req - model 비교
+        name, mandatory, mandatory: true -> len = 1
+        """
         try:
             option_group = menu.option_group.get(name=order_option_group['name'])
         except models.ObjectDoesNotExist:
@@ -135,7 +175,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         # mandatory = true -> option 1개만!
         if order_option_group['mandatory']:
             if len(order_option_group['order_option']) != 1:
-                raise ValidationError('mandatory true -> must len(order option list) == 1  ')
+                raise ValidationError('mandatory true -> must len(order option list) == 1')
 
         """order_option"""
         for order_option in order_option_group['order_option']:
@@ -144,6 +184,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         return check_price
 
     def valid_order_option(self, option_group, order_option, check_price):
+        """
+        req - model 비교
+        name , price
+        """
         try:
             option = option_group.option.get(name=order_option['name'])
         except models.ObjectDoesNotExist:

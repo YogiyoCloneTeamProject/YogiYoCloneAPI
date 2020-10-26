@@ -5,6 +5,7 @@ from model_bakery import baker
 from munch import Munch
 from rest_framework import status
 from rest_framework.test import APITestCase
+from taggit.models import Tag
 
 from restaurants.models import Restaurant
 
@@ -20,6 +21,7 @@ class RestaurantTestCase(APITestCase):
                             ]
         self.restaurant = self.restaurants[0]
         self.user = baker.make('users.User')
+        self.restaurant.tags.add("chicken", "pizza", "pasta", "coke", "pizza2")
 
     def test_restaurant_list(self):
         response = self.client.get('/restaurants')
@@ -100,9 +102,14 @@ class RestaurantTestCase(APITestCase):
             self.assertTrue(category in restaurant.categories)
 
     def test_filtering_search(self):
-        response = self.client.get(f'/restaurants?search=피자')
+        keyword = 'piz'
+        response = self.client.get(f'/restaurants?search={keyword}')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         r = response.data['results']
+        for restaurant in r:
+            tags = Tag.objects.filter(name__icontains=keyword)
+            is_tag_contains_keyword = Restaurant.objects.filter(id=restaurant['id'], tags__in=tags).exists()
+            self.assertTrue(keyword in restaurant['name'] or is_tag_contains_keyword)
 
     def test_ordering_average_rating(self):
         self.ordering_test('average_rating', True)
@@ -155,19 +162,17 @@ class RestaurantTestCase(APITestCase):
             self.assertTrue('owner_comment_count' in restaurant_response)
 
     def test_home_view(self):
-        for i in range(1, 10):
-            response = self.client.get(f'/restaurants/home_view_{i}')
+        home_view_actions = ['home_view_average_rating', 'home_view_bookmark', 'home_view_delivery_discount',
+                             'home_view_delivery_charge', 'home_view_review', 'home_view_delivery_time']
+        for action in home_view_actions:
+            response = self.client.get(f'/restaurants/{action}')
             res = response.data['results']
             self.assertEqual(response.status_code, status.HTTP_200_OK, res)
-            if i == 4:
-                self.assertTrue(len(res) <= 9)
-            else:
-                self.assertTrue(len(res) <= 20)
+            self.assertTrue(len(res) <= 20)
             self.home_view_test(res)
 
     def test_tag_list_success(self):
         """태그 자동완성 list"""
-        self.restaurant.tags.add("chicken", "pizza", "pasta", "coke", "pizza2")
         search = "pi"
         response = self.client.get(f'/tags?name={search}')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
@@ -176,7 +181,6 @@ class RestaurantTestCase(APITestCase):
             self.assertTrue(search in r['name'])
 
     def test_tag_list_empty(self):
-        self.restaurant.tags.add("chicken", "pizza", "pasta", "coke", "pizza2")
         response = self.client.get(f'/tags?name=')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data), 0)

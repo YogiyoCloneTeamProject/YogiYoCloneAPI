@@ -1,17 +1,52 @@
-from django.db.models import Q
 from rest_framework import mixins
-from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
-from core.permissions import IsOwner
+from core.permissions import IsOwnerAndIsAuthenticated
 from orders.models import Order
 from orders.serializers import OrderSerializer, OrderListSerializer, OrderCreateSerializer
 
 
-class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+class OrderViewSet(mixins.CreateModelMixin,
+                   mixins.ListModelMixin,
+                   mixins.RetrieveModelMixin,
+                   GenericViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [AllowAny]  # todo 퍼미션 추가 [IsOwner]
+    permission_classes = [IsOwnerAndIsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        """
+        주문 생성
+
+
+        [req - model 데이터 일치 검증]
+        order_menu -> 이름, 가격
+        order_option_group -> 이름, mandatory, mandatory:true-> len(option_group) = 1,
+        order_option -> 이름, 가격
+
+        토큰 필요
+        """
+        return super().create(request, *args, **kwargs)
+
+    def list(self, request, *args, **kwargs):
+        """
+        주문 조회
+
+
+        유저가 주문한 주문 조회
+        토큰 필요
+        """
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        주문 디테일 조회
+
+
+        유저가 주문한 주문의 디테일 조회
+        토큰 필요
+        """
+        return super().retrieve(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -24,10 +59,7 @@ class OrderViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retrie
 
     def get_queryset(self):
         qs = super().get_queryset()
-        if self.action == 'list':
-            if self.request.user.is_authenticated:
-                qs = qs.filter(owner=self.request.user)
-            else:
-                # todo 비로그인 주문내역 - 삭제 예정
-                qs = Order.objects.filter(~Q(address='as'))
-        return qs
+        return qs.filter(owner=self.request.user).select_related('restaurant').prefetch_related('order_menu')
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
