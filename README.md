@@ -93,3 +93,8 @@
 - Slack - 커뮤니케이션
 - Github Projects - 이슈 관리
 - Drow.io - ERD 작성
+
+## refactoring
+- 테스트코드 추가 (검증로직)
+- 검증 로직 메소드 분리
+- 퍼미션 추가 
